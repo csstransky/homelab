@@ -1,0 +1,24 @@
+# Secrets
+.env
+.env.*
+!.env.example
+secrets/
+*.key
+*.pem
+*.crt
+
+# Runtime / generated data
+data/
+logs/
+backups/
+*.log
+
+# Docker
+docker-data/
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
