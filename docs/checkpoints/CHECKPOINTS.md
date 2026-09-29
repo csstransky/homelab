@@ -106,10 +106,10 @@ Steps:
    Confirm the NVIDIA module still loads after any kernel update (`nvidia-smi`).
 2. Install base admin tools: `curl wget git vim htop btop unzip ca-certificates gnupg lsb-release smartmontools`.
 3. Confirm `ssh.service` enabled; test `ssh ghost@192.168.1.59` from the Windows machine.
-4. **User action:** create a Ubiquiti DHCP reservation for MOTHERLODE's MAC on `eno1`.
+4. **User action:** create a Ubiquiti DHCP reservation for MOTHERLODE's `eno1` MAC `18:60:24:ad:92:ac`.
    Record the chosen address here and in `docs/architecture/network.md`.
 5. Decide sudo policy for the build (password prompts vs. a NOPASSWD drop-in for `ghost`).
-6. Record hardware inventory (`lscpu`, `lspci -nn`, `dmidecode` summary) in `docs/hardware/`.
+6. ~~Record hardware inventory~~ — done 2026-09-28: `docs/hardware/MOTHERLODE.md` (add `dmidecode` detail when root is available).
 
 Done when:
 - `apt full-upgrade` reports nothing to do; system rebooted; `nvidia-smi` works.
