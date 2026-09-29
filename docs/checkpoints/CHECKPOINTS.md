@@ -56,6 +56,7 @@ Three planning documents exist. Later documents override earlier ones where they
 | Samba | **not installed**; `nas` group does not exist; `ghost` not in `nas` |
 | Docker | **not installed**; `ghost` not in `docker` |
 | Tailscale | **not installed** |
+| Sleep | disabled 2026-09-29: sleep/suspend/hibernate targets masked, XFCE idle sleep off (`docs/services/always-on.md`) |
 | apt sources | main, contrib, non-free, non-free-firmware enabled (contrib needed for ZFS) |
 | sudo | `ghost` NOPASSWD via `/etc/sudoers.d/ghost-nopasswd` (2026-09-28; user chose to keep it) |
 
