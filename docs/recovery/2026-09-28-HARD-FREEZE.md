@@ -28,6 +28,32 @@ at the empty commit object. The reflog and the Claude session transcript both en
 run of null bytes. This is the classic ext4 pattern after a crash: metadata (file size)
 had been journaled but the data blocks never hit disk.
 
+## Update after further investigation (same night)
+
+- The crash happened while `apt install zfs-dkms zfsutils-linux` was compiling the ZFS
+  kernel module: `/var/lib/dpkg/updates/` was timestamped 23:19 and `zfs-dkms` was left
+  half-configured (`dpkg --configure -a` finished it at 23:45, and that second build ran
+  clean with CPU package temp peaking at 55 °C). The journal's last entry (23:18:42) is
+  earlier than the freeze; the last ~30 s of journal, `dpkg.log` and the Claude
+  transcript were all lost to unflushed ext4 writes (null bytes in each).
+- So the freeze hit under the heaviest sustained all-core load the machine had seen
+  since the reinstall. That points at load-sensitive hardware: RAM, CPU memory
+  controller, board VRM, or PSU.
+- No machine-check (MCE), no PCIe AER, no thermal throttle counters, no GPU Xid in any
+  boot since the 2026-09-27 reinstall. The HP board exposes no voltage sensors to Linux,
+  so PSU rails cannot be read in software.
+- Drive health (not the freeze cause, but found on the way): the OS SSD
+  (`Crucial_CT250MX200SSD1`) reports 221 unexpected power losses in 565 cycles and only
+  25 % rated life remaining; the Seagate 2 TB logged unreadable-sector (UNC) errors
+  about 40 power-on hours ago; the Toshiba 1 TB still has 24 pending sectors.
+- Journal history only covers 7 boots since the reinstall; this is the first recorded
+  crash in that window. The earlier POST/sleep problems predate the reinstall and
+  the board swap and are not in any log.
+- `kernel.hardlockup_panic=1` and `kernel.softlockup_panic=1` are now set via
+  `/etc/sysctl.d/90-lockup-panic.conf`; EFI pstore is active. Delete the file and run
+  `sudo sysctl --system` to revert.
+- Installed `memtest86+` (GRUB entry "Memory test"), `memtester`, `stress-ng`.
+
 ## Root cause
 
 **Unknown hardware freeze, nothing logged.** Software causes that normally leave a trace
