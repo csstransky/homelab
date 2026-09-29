@@ -62,7 +62,7 @@ The goal is **reproducibility, not documentation for documentation's sake.**
     ├── hardware/
     ├── services/
     ├── recovery/
-    └── checkpoints/
+    └── checkpoints/          # docs/checkpoints/CHECKPOINTS.md — the ordered build plan
 ```
 
 ---
@@ -85,10 +85,13 @@ The machine has previously experienced intermittent hardware/boot/sleep instabil
 
 ## Storage
 
-The primary storage layer is ZFS mounted at:
+Storage is three ZFS pools plus one ext4 filesystem (architecture fixed 2026-09-27):
 
 ```text
-/tank
+/tank1tb     ZFS mirror   primary important data (Documents, Photos, Music, Backups, Nextcloud, Apps)
+/tank500gb   ZFS mirror   backup / replication target
+/media       ZFS single   disposable media (Movies, TV, Music)
+/other       ext4         miscellaneous
 ```
 
 Persistent disk references should use:

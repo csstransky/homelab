@@ -23,6 +23,9 @@ This repository is intended to be both:
 
 **Read this file before making changes.**
 
+The ordered build plan and current status live in `docs/checkpoints/CHECKPOINTS.md`.
+Work one checkpoint at a time and update its status there.
+
 ---
 
 ## Host
@@ -37,7 +40,7 @@ This repository is intended to be both:
 | GPU             | NVIDIA GeForce GTX 1050 Ti 4 GB |
 | Primary user    | `ghost`                         |
 | Boot/storage OS | SSD                             |
-| Data storage    | ZFS `/tank`                     |
+| Data storage    | ZFS `/tank1tb`, `/tank500gb`, `/media`; ext4 `/other` |
 
 ---
 
