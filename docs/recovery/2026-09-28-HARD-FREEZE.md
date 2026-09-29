@@ -109,3 +109,62 @@ re-committed. `network.md` was rewritten from the facts already in those two fil
    without a full SMART long test first (Checkpoint 3).
 5. smartd's mail hook fails because `/usr/bin/mail` is absent; install `bsd-mailx` or
    point `smartd.conf` at a different notifier during Checkpoint 3.
+
+## Freeze signature (from the user)
+
+Fans and LEDs stay on, screen frozen, keyboard dead (Caps Lock does not toggle), power
+button ignored until held 5+ s. That is a CPU/RAM/board lockup, not a PSU drop
+(a PSU fault turns the machine off or restarts it).
+
+## Overnight burn-in (started 2026-09-28 23:55)
+
+`scripts/diagnostics/burnin.sh` runs as `burnin.service` (`systemd-run`) and cycles:
+memtester 9 GB → stress-ng vm verify 30 m → cpu verify 20 m → matrix 10 m →
+cache/stream 10 m → compile-like mix 20 m → all-heavy 30 m, forever.
+Log: `/home/ghost/burnin-logs/burnin-<date>.log`, fsync'd per line, 30 s samples of
+CPU/GPU temps, load and free RAM. Per-phase output in the `.phases/` directory.
+
+Stop: `sudo systemctl stop burnin`. Status: `systemctl status burnin`.
+
+Reading the result the next morning:
+
+- Machine frozen: the last `START` line without a matching `END` is the phase that
+  killed it; the last `SAMPLE` gives the time and temps. Photograph the screen before
+  power-cycling (a lockup now panics, so there may be a stack trace). After reboot check
+  `sudo ls /sys/fs/pstore/` and `sudo cat /sys/fs/pstore/dmesg-*`.
+- Machine alive, all phases `rc=0`, no `PROBLEM`: hours of full load did not trigger
+  it. Next: memtest86+ overnight (below). If that is also clean, the remaining suspects
+  are the board and firmware, and the freeze is not load-driven.
+- Any phase `PROBLEM`/nonzero `rc` with the machine still up: memory or CPU is
+  corrupting data silently. That is worse than a freeze; treat as failed RAM/IMC.
+
+## memtest86+ (the definitive RAM/memory-controller test)
+
+Reboot, and in the GRUB menu (shown for 5 s) pick **Memory test (memtest86+x64.efi)**.
+Leave it for at least 4 full passes (all night). Errors are shown in red with the
+physical address; a frozen memtest86+ screen is itself a result (CPU/board).
+
+## Finding the exact bad stick
+
+memtest86+ reports a physical address, but with four single-rank DIMMs in dual channel
+the Skylake memory controller interleaves channels every few hundred bytes, so an
+address does not map cleanly to one slot. Elimination is the reliable way:
+
+1. Power off, unplug. One stick alone in **DIMM1**, run memtest86+ 2+ passes.
+2. Repeat for each of the four sticks in the same slot. A stick that errors while the
+   others pass in that slot is bad.
+3. If every stick errors in DIMM1, put a known-good stick in DIMM2/3/4 in turn. If it
+   errors everywhere, the CPU's memory controller or the board is at fault; if only one
+   slot errors, the board is.
+4. If everything passes alone but the full set fails together, try pairs in DIMM1+DIMM3
+   (channel A) and DIMM2+DIMM4 (channel B).
+
+DIMM slot numbering is printed on the Z240 board next to the slots.
+
+## Kernel-side check with physical addresses (optional, morning after)
+
+Debian's kernel has `CONFIG_MEMTEST`. Booting once with `memtest=8` on the kernel
+command line (press `e` in GRUB, append to the `linux` line) runs 8 patterns over all
+RAM before boot and logs bad ranges as `Bad RAM detected` with physical addresses in
+`dmesg`; the kernel then avoids those pages. It is slower to boot but gives a
+second opinion on memtest86+.
