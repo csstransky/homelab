@@ -44,7 +44,7 @@ Three planning documents exist. Later documents override earlier ones where they
 | Item | State |
 |---|---|
 | OS | Debian 13 (trixie), kernel 6.12.107+deb13-amd64, hostname `MOTHERLODE` |
-| LAN | `eno1` 192.168.1.59/24 via DHCP (was .124 on 09-14, .64 historically). **No reservation yet.** |
+| LAN | `eno1` 192.168.1.59/24, UniFi fixed-IP reservation set 2026-09-28 (was .124 on 09-14, .64 historically) |
 | Secure Boot | disabled |
 | GPU | GTX 1050 Ti, driver 550.163.01, `nvidia-kernel-dkms` — working |
 | Ollama | installed and running (`ollama.service`) |
@@ -57,7 +57,7 @@ Three planning documents exist. Later documents override earlier ones where they
 | Docker | **not installed**; `ghost` not in `docker` |
 | Tailscale | **not installed** |
 | apt sources | main, contrib, non-free, non-free-firmware enabled (contrib needed for ZFS) |
-| sudo | `ghost` in `sudo` group, password required |
+| sudo | `ghost` NOPASSWD via `/etc/sudoers.d/ghost-nopasswd` (2026-09-28; user chose to keep it) |
 
 Current drive letters (they WILL change between boots; by-id is authoritative):
 
@@ -77,7 +77,7 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 | # | Checkpoint | Status | Closed | Docs |
 |---|---|---|---|---|
 | 0 | Source-of-truth reconciliation + this file | ✅ done | 2026-09-28 | this file |
-| 1 | Debian foundation | ⬜ | | `docs/hardware/`, `docs/services/ssh.md` |
+| 1 | Debian foundation | ✅ done (Windows SSH test pending) | 2026-09-28 | `docs/hardware/MOTHERLODE.md`, `docs/architecture/network.md` |
 | 2 | ZFS: install + import existing pools + `/other` | ⬜ | | `zfs/README.md` |
 | 3 | Storage protection: SMART, scrubs, snapshots, replication | ⬜ | | `zfs/SNAPSHOTS.md`, `scripts/maintenance/` |
 | 4 | Samba (Windows LAN access) | ⬜ | | `samba/` |
@@ -112,10 +112,16 @@ Steps:
 6. ~~Record hardware inventory~~ — done 2026-09-28: `docs/hardware/MOTHERLODE.md` (add `dmidecode` detail when root is available).
 
 Done when:
-- `apt full-upgrade` reports nothing to do; system rebooted; `nvidia-smi` works.
-- SSH login from another machine succeeds.
-- MOTHERLODE keeps the same LAN address across a DHCP renew / reboot.
-- `docs/hardware/MOTHERLODE.md` committed.
+- [x] `apt full-upgrade` reports nothing to do; `nvidia-smi` works. (No kernel change on 2026-09-28, so no reboot was required.)
+- [ ] SSH login from the Windows machine succeeds (user to confirm: `ssh ghost@192.168.1.59`).
+- [x] UniFi fixed-IP reservation 192.168.1.59 on `18:60:24:ad:92:ac`; will be confirmed across the Checkpoint 2 reboot.
+- [x] `docs/hardware/MOTHERLODE.md` committed.
+
+Notes 2026-09-28: duplicate installer source `/etc/apt/sources.list.d/contrib.list` disabled
+(main `sources.list` already has contrib/non-free/non-free-firmware). Base tools installed
+including `smartmontools` (`smartctl` is in `/usr/sbin`, use `sudo`).
+The machine hard-froze during the commit of this checkpoint; see
+`docs/recovery/2026-09-28-HARD-FREEZE.md`. Run memtest86+ before trusting the box overnight.
 
 ## Checkpoint 2 — ZFS: install and import the existing pools
 

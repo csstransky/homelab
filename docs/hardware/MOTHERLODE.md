@@ -1,16 +1,16 @@
 # MOTHERLODE — Hardware Inventory
 
-**Recorded:** 2026-09-28 (unprivileged inspection; `dmidecode`/SMART details to be added in Checkpoint 1 and 3)
+**Recorded:** 2026-09-28. All six drives report SMART overall health PASSED on this date; detailed attributes are refreshed in Checkpoint 3.
 
 ## System
 
 | Item | Value |
 |---|---|
-| Model | HP Z240 Tower Workstation |
-| Board | HP 802F (replacement board installed during the 2026-09 rebuild) |
+| Model | HP Z240 Tower Workstation, serial 2UA8301V83 |
+| Board | HP 802F, serial PESRHAACYAQ5Q6 (replacement board installed during the 2026-09 rebuild) |
 | BIOS | N51 Ver. 01.70, 2018-06-19 |
 | CPU | Intel Core i7-6700 @ 3.40 GHz, 4 cores / 8 threads, VT-x, 8 MiB L3 |
-| RAM | 16 GiB |
+| RAM | 16 GiB: 4 × 4 GB DDR4-2133, non-ECC, DIMM1–DIMM4 |
 | GPU | NVIDIA GeForce GTX 1050 Ti 4 GB (GP107, `10de:1c82`), proprietary driver 550.163.01 |
 | Secure Boot | disabled (required for ZFS module) |
 | PSU | replaced during the 2026-09 rebuild |
@@ -19,7 +19,7 @@
 
 | Interface | MAC | Address (2026-09-28) |
 |---|---|---|
-| `eno1` — Intel I219-LM (`8086:15b7`) | `18:60:24:ad:92:ac` | 192.168.1.59/24 via DHCP, gateway 192.168.1.1 |
+| `eno1` — Intel I219-LM (`8086:15b7`) | `18:60:24:ad:92:ac` | 192.168.1.59/24, **UniFi fixed-IP reservation** (set 2026-09-28), gateway 192.168.1.1 |
 
 Use the MAC above for the Ubiquiti DHCP reservation (Checkpoint 1).
 
