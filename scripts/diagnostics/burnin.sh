@@ -42,7 +42,8 @@ run_phase() {
   "$@" > "$out" 2>&1
   local rc=$?
   local bad
-  bad=$(grep -aiE 'fail|error|bad|mismatch' "$out" | grep -viE 'successful|no error|0 fail' | head -3 | tr '\n' ' ')
+  # stress-ng always prints "failed: 0"; only a nonzero count is a problem.
+  bad=$(grep -aiE 'fail|error|bad|mismatch' "$out" | grep -viE 'successful|no error|0 fail|failed: 0$' | head -3 | tr '\n' ' ')
   log "END   $name rc=$rc ${bad:+PROBLEM: $bad}"
   return $rc
 }
