@@ -30,7 +30,7 @@ Use the MAC above for the Ubiquiti DHCP reservation (Checkpoint 1).
 |---|---|
 | Intel 100 Series SATA (`8086:2822`) | **Reports as "RAID mode" in the BIOS.** Linux drives it with `ahci`. Leave as-is unless it causes problems; changing SATA mode can affect boot. |
 | ASMedia ASM1064 4-port SATA card (`1b21:1064`) | PCIe 8 GT/s x1. Adds the ports needed for five HDDs. |
-| ASUS DRW-24B1ST optical drive | `/dev/sr0`, DVD±RW, no Blu-ray. Mounts at `/mnt/cdrom`; used to rip DVDs (`docs/services/dvd-ripping.md`) |
+| ASUS DRW-24B1ST optical drive | `/dev/sr0`, DVD±RW, no Blu-ray. Mounts at `/mnt/cdrom` for data discs. Movies are ripped on the Windows PC's Blu-ray drive instead (`docs/services/movie-ripping.md`) |
 | Generic USB card reader | `/dev/sdg`–`/dev/sdj`, 0 B, ignore |
 
 ## Drives
