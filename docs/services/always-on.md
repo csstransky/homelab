@@ -8,7 +8,7 @@
 |---|---|---|
 | systemd | `sleep.target`, `suspend.target`, `hibernate.target`, `hybrid-sleep.target` masked (linked to `/dev/null`). Nothing can suspend the machine, not even `systemctl suspend`. | `/etc/systemd/system/*.target` symlinks |
 | logind | Suspend/hibernate keys, lid switch and idle action all `ignore` | `/etc/systemd/logind.conf.d/nas-always-on.conf` |
-| XFCE power manager | Inactivity sleep set to never (value `0`) on AC and battery; lid handling off. Display DPMS blanking is left on; a dark monitor is fine. | xfconf channel `xfce4-power-manager` |
+| XFCE power manager | Inactivity sleep set to never (value `0`) on AC and battery; lid handling off. Screen blanking and monitor power-off (DPMS) off since 2026-10-04 (see below). | xfconf channel `xfce4-power-manager` |
 
 Verify:
 
@@ -49,6 +49,34 @@ no new `Failed to suspend` line after 30+ idle minutes.
 **Prevention:** the systemd masks are the real guarantee and they held. Desktop-level settings
 are a convenience layer; check the source of the installed version rather than an old
 convention.
+
+## 2026-10-04: "it sleeps after 15 minutes" (screen, not the machine)
+
+**Symptom:** the desktop looked asleep after ~15 idle minutes and needed the password to come back.
+
+**Evidence:** no suspend in the journal after 20:10, and phone SSH/SMB over Tailscale kept working
+through it. `xset q`: screensaver timeout 600 s, DPMS standby 600 s, off 900 s.
+`light-locker` was running, which locks the session when the screensaver starts.
+
+**Root cause:** the X screensaver blanked at 10 min and DPMS powered the monitor off at 15 min, then
+light-locker locked the session. The machine itself stayed up (the suspend targets are masked).
+
+**Fix:**
+
+```bash
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-enabled -n -t bool -s false
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/blank-on-ac -n -t int -s 0
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-on-ac-sleep -n -t uint -s 0
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-on-ac-off -n -t uint -s 0
+xset s off; xset s noblank; xset -dpms     # running session, immediately
+```
+
+**Verification:** `xset q` shows `timeout: 0` and `DPMS is Disabled`. The xfconf values persist
+across logins, and the power manager reapplies them when the session starts.
+
+**Note:** with blanking off, light-locker never triggers, so the screen does not lock by itself.
+Lock by hand with `light-locker-command -l` (or the XFCE menu) if needed. The monitor now stays
+on; turn it off with its own button.
 
 ## Still to do in BIOS (F10 at POST)
 
