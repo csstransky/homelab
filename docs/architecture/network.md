@@ -37,7 +37,8 @@ Nothing is exposed to the internet. No port forwards on the UDM.
 ## Remote access (planned, Checkpoint 6)
 
 Tailscale with MagicDNS is the only intended path in from outside the LAN.
-Previous MagicDNS name was `motherlode.tailb6c0f2.ts.net`; record the current one when Tailscale is reinstalled.
+MagicDNS name `motherlode.tailb6c0f2.ts.net`, tailnet address `100.111.72.91` (unchanged after the
+2026-10-04 reinstall). Tailscale SSH on, no subnet routes, no Funnel. Details: `docs/services/tailscale.md`.
 No DuckDNS, no dynamic-DNS cron, no public ports.
 
 ## DNS (planned, Checkpoint 12)

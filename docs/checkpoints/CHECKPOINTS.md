@@ -83,7 +83,7 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 | 3 | Storage protection: SMART, scrubs, snapshots, replication | 🟨 running and tested; first scheduled SMART test 2026-10-11 | | `zfs/BACKUPS.md`, `zfs/backups-explained.html` |
 | 4 | Samba (Windows LAN access) | ✅ done | 2026-10-04 | `samba/README.md`, `samba/samba-explained.html` |
 | 5 | Docker foundation | ✅ done (each app adds its own folder) | 2026-10-04 | `docs/services/docker.md`, `compose/README.md` |
-| 6 | Tailscale (remote access) | ⬜ | | `docs/services/tailscale.md` |
+| 6 | Tailscale (remote access) | ✅ done (disable key expiry in console) | 2026-10-04 | `docs/services/tailscale.md` |
 | 7 | Jellyfin (movies on the LG TV) | ⬜ | | `compose/jellyfin/` |
 | 8 | Nextcloud AIO on `/tank1tb/Nextcloud` | ⬜ | | `nextcloud/` |
 | 9 | Music: NAS library → Music Assistant / Sonos, YouTube audio | ⬜ | | `docs/services/music.md` |
@@ -270,6 +270,10 @@ Steps:
 Done when:
 - Remote SSH over Tailscale works from outside the LAN.
 - MagicDNS hostname recorded; nothing exposed to the public internet.
+
+Result (2026-10-04): `motherlode.tailb6c0f2.ts.net` / `100.111.72.91`, Tailscale SSH on. From the
+phone on 5G: SSH (Termius) and SMB (CX File Explorer: browse Photos, upload to Other) both worked.
+No subnet routes. Key expiry still to be disabled in the admin console.
 
 ## Checkpoint 7 — Jellyfin (movies on the LG TV)
 
