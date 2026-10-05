@@ -278,3 +278,12 @@ If it freezes again:
 slow I/O (a dying disk retrying, a heavy scrub). The Toshiba 1 TB still has pending sectors.
 Remove that line, or raise `kernel.hung_task_timeout_secs`, before pools are imported and in
 real use.
+
+## 2026-10-04 (later): GPU removed
+
+To get the display on the iGPU, the GTX 1050 Ti was physically removed. With the card in,
+the Z240 kept the HD 530 off the PCI bus. After that boot, `lspci` shows the HD 530
+(`8086:1912`) on `i915` and no NVIDIA device, and Ollama runs CPU-only. The card is still
+**untested**. It returns compute-only (no display, `multi-user.target`) once the box is a
+strict NAS, after the test procedure in `docs/hardware/GPU.md`. Any freeze from now on
+happened without the NVIDIA card in the machine, which itself narrows the cause.

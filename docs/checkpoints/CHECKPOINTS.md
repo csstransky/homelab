@@ -46,7 +46,7 @@ Three planning documents exist. Later documents override earlier ones where they
 | OS | Debian 13 (trixie), kernel 6.12.107+deb13-amd64, hostname `MOTHERLODE` |
 | LAN | `eno1` 192.168.1.59/24, UniFi fixed-IP reservation set 2026-09-28 (was .124 on 09-14, .64 historically) |
 | Secure Boot | disabled |
-| GPU | GTX 1050 Ti, driver 550.163.01, `nvidia-kernel-dkms` — working |
+| GPU | GTX 1050 Ti, driver 550.163.01, `nvidia-kernel-dkms` — working. **2026-10-04: card removed, hardware untested; display on Intel HD 530, Ollama CPU-only** (`docs/hardware/GPU.md`) |
 | Ollama | installed and running (`ollama.service`) |
 | SSH | `ssh.service` running |
 | Time | America/New_York, NTP synchronized |
