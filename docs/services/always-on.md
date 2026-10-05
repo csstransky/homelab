@@ -71,8 +71,12 @@ xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-on-ac-off -n -t
 xset s off; xset s noblank; xset -dpms     # running session, immediately
 ```
 
-**Verification:** `xset q` shows `timeout: 0` and `DPMS is Disabled`. The xfconf values persist
-across logins, and the power manager reapplies them when the session starts.
+**Verification:** `xset q` shows `timeout: 0` and `DPMS is Disabled`.
+
+**Correction (after the 23:02 reboot):** DPMS stayed off, but the X screensaver timeout came back as
+600 s; the power manager does not reset it. Fixed with an XFCE autostart entry,
+`~/.config/autostart/no-screen-blank.desktop`, which runs `xset s off; xset s noblank; xset -dpms`
+5 s after login.
 
 **Note:** with blanking off, light-locker never triggers, so the screen does not lock by itself.
 Lock by hand with `light-locker-command -l` (or the XFCE menu) if needed. The monitor now stays
