@@ -1,0 +1,412 @@
+<meta charset="utf-8">
+<title>MOTHERLODE Samba Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; the cable diagram is the hero, then shares, gates, discovery, commands. */
+:root {
+  --bg: #f3f5f7;
+  --panel: #ffffff;
+  --ink: #18212b;
+  --muted: #5b6876;
+  --line: #d5dce3;
+  --win: #2563c9;        /* Windows side */
+  --nas: #0f7c6b;        /* MOTHERLODE side */
+  --disk: #8a5a12;       /* storage */
+  --deny: #b4232c;
+  --win-soft: #e4ecfa;
+  --nas-soft: #dff1ed;
+  --disk-soft: #f6ecd9;
+  --deny-soft: #f8e1e2;
+  --code-bg: #eaeef2;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11161c; --panel: #19212a; --ink: #e6ebf0; --muted: #98a6b4; --line: #2c3743;
+  --win: #7aa7f0; --nas: #4cc2ad; --disk: #e0b161; --deny: #f07b82;
+  --win-soft: #1c2b44; --nas-soft: #15302c; --disk-soft: #33291a; --deny-soft: #3a1d21; --code-bg: #0d1217;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11161c; --panel: #19212a; --ink: #e6ebf0; --muted: #98a6b4; --line: #2c3743;
+  --win: #7aa7f0; --nas: #4cc2ad; --disk: #e0b161; --deny: #f07b82;
+  --win-soft: #1c2b44; --nas-soft: #15302c; --disk-soft: #33291a; --deny-soft: #3a1d21; --code-bg: #0d1217;
+  color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.55; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 800; font-stretch: 80%; letter-spacing: -0.01em; }
+h2 { font-size: 1.7rem; font-weight: 700; font-stretch: 85%; }
+h3 { font-size: 1.1rem; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+section { display: grid; gap: 18px; min-width: 0; }
+.lede { font-size: 1.2rem; color: var(--muted); }
+.lede strong { color: var(--ink); }
+
+/* hero diagram */
+.diagram { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; padding: 12px; }
+.diagram svg { display: block; min-width: 820px; width: 100%; height: auto; }
+svg text { font-family: var(--f-body); fill: var(--ink); }
+svg .t-mono { font-family: var(--f-mono); font-size: 12px; }
+svg .t-small { font-size: 12px; fill: var(--muted); }
+svg .t-head { font-family: var(--f-display); font-weight: 700; font-size: 17px; }
+svg .t-win { fill: var(--win); } svg .t-nas { fill: var(--nas); } svg .t-disk { fill: var(--disk); } svg .t-deny { fill: var(--deny); }
+svg .b-win { fill: var(--win-soft); stroke: var(--win); stroke-width: 1.5; }
+svg .b-nas { fill: var(--nas-soft); stroke: var(--nas); stroke-width: 1.5; }
+svg .b-nas-out { fill: none; stroke: var(--nas); stroke-width: 2; stroke-dasharray: 6 5; }
+svg .b-disk { fill: var(--disk-soft); stroke: var(--disk); stroke-width: 1.5; }
+svg .b-deny { fill: var(--deny-soft); stroke: var(--deny); stroke-width: 1.5; stroke-dasharray: 4 3; }
+svg .b-panel { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+svg .cable { stroke: var(--ink); stroke-width: 3; fill: none; }
+svg .wire { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+svg .wire-deny { stroke: var(--deny); stroke-width: 1.4; fill: none; stroke-dasharray: 3 3; }
+svg .dot { fill: var(--ink); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 0.92rem; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; border: 1.5px solid; }
+.lg-win::before { background: var(--win-soft); border-color: var(--win) !important; }
+.lg-nas::before { background: var(--nas-soft); border-color: var(--nas) !important; }
+.lg-disk::before { background: var(--disk-soft); border-color: var(--disk) !important; }
+.lg-deny::before { background: var(--deny-soft); border-color: var(--deny) !important; }
+
+/* shares table */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.95rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--f-mono); font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+.drive { font-family: var(--f-display); font-weight: 800; font-size: 1.3rem; color: var(--win); }
+.chip { display: inline-block; font-family: var(--f-mono); font-size: 0.76rem; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+.chip.safe { background: var(--nas-soft); color: var(--nas); }
+.chip.risk { background: var(--disk-soft); color: var(--disk); }
+.chip.no { background: var(--deny-soft); color: var(--deny); }
+
+/* gates */
+.gates { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.gate { background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--nas); border-radius: 8px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.gate .n { font-family: var(--f-mono); font-size: 0.78rem; color: var(--nas); letter-spacing: 0.06em; text-transform: uppercase; }
+.gate p { font-size: 0.97rem; }
+.gate .fail { font-size: 0.88rem; color: var(--deny); font-family: var(--f-mono); }
+
+/* discovery */
+.disc { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.svc { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.svc .port { font-family: var(--f-mono); font-size: 0.82rem; color: var(--muted); }
+
+/* config annotation */
+.conf { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); }
+.conf-row { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); border-bottom: 1px solid var(--line); }
+.conf-row:last-child { border-bottom: 0; }
+.conf-row code { background: var(--code-bg); padding: 9px 14px; display: block; white-space: pre-wrap; word-break: break-word; font-size: 0.84rem; }
+.conf-row .why { padding: 9px 14px; font-size: 0.95rem; }
+.conf-row.sect code { color: var(--nas); font-weight: 600; }
+@media (max-width: 620px) { .conf-row { grid-template-columns: minmax(0, 1fr); } }
+
+/* commands */
+.phase { display: grid; gap: 10px; }
+.phase h3 { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.phase h3 .eyebrow { font-weight: 400; }
+.cmds { display: grid; gap: 8px; }
+.cmd { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.cmd pre { margin: 0; background: var(--code-bg); padding: 10px 14px; font-family: var(--f-mono); font-size: 0.82rem; white-space: pre-wrap; word-break: break-word; }
+.cmd .why { padding: 10px 14px; font-size: 0.95rem; }
+.cmd.you { border-color: var(--win); }
+.cmd.you pre { box-shadow: inset 4px 0 0 var(--win); }
+@media (max-width: 700px) { .cmd { grid-template-columns: minmax(0, 1fr); } }
+
+/* zephyr */
+.zephyr { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; font-size: 0.95rem; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; font-family: var(--f-mono); font-size: 0.86rem; word-break: break-word; }
+.note { font-family: var(--f-mono); font-size: 0.86rem; background: var(--code-bg); border-radius: 6px; padding: 10px 12px; white-space: pre-wrap; }
+
+.gloss { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px 28px; }
+.gloss div { display: grid; gap: 2px; }
+.gloss b { font-family: var(--f-display); font-weight: 700; }
+.gloss span { color: var(--muted); font-size: 0.95rem; }
+footer { color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+
+<div class="wrap">
+
+<header style="display:grid;gap:14px">
+  <div class="eyebrow">MOTHERLODE · Checkpoint 4 · set up 2026-10-04</div>
+  <h1>How Samba turns ZFS folders into Windows drives</h1>
+  <p class="lede"><strong>Samba</strong> is a program on MOTHERLODE that speaks Windows' file-sharing language (SMB). Windows asks for <code>\\MOTHERLODE\Documents</code>; Samba checks who you are, looks up which Linux folder that name means, and reads or writes the file there. To Windows it looks like an ordinary drive.</p>
+</header>
+
+<section aria-labelledby="h-path">
+  <div class="eyebrow">The path of one file</div>
+  <h2 id="h-path">You drag a file onto N: on ZEPHYR. This is what happens.</h2>
+  <div class="diagram" role="img" aria-label="Diagram: Windows PC ZEPHYR with drives N, P, M, V, O connects over the home network on port 445 to smbd on MOTHERLODE. smbd checks the password and that the user is ghost, looks up the share in smb.conf, and writes to the matching folder on the tank1tb mirror, the media disk, or the other ext4 partition. Nextcloud is not shared.">
+    <svg viewBox="0 0 960 430" xmlns="http://www.w3.org/2000/svg">
+      <!-- Windows PC -->
+      <rect class="b-win" x="14" y="40" width="190" height="330" rx="10"/>
+      <text class="t-head t-win" x="30" y="70">ZEPHYR</text>
+      <text class="t-small" x="30" y="88">Windows PC · 192.168.1.64</text>
+      <text class="t-small" x="30" y="104">File Explorer</text>
+      <g>
+        <rect class="b-panel" x="30" y="120" width="158" height="34" rx="6"/><text x="42" y="142" class="t-mono t-win" font-weight="600">N:</text><text x="72" y="142">Documents</text>
+        <rect class="b-panel" x="30" y="162" width="158" height="34" rx="6"/><text x="42" y="184" class="t-mono t-win" font-weight="600">P:</text><text x="72" y="184">Photos</text>
+        <rect class="b-panel" x="30" y="204" width="158" height="34" rx="6"/><text x="42" y="226" class="t-mono t-win" font-weight="600">M:</text><text x="72" y="226">Music</text>
+        <rect class="b-panel" x="30" y="246" width="158" height="34" rx="6"/><text x="42" y="268" class="t-mono t-win" font-weight="600">V:</text><text x="72" y="268">Media</text>
+        <rect class="b-panel" x="30" y="288" width="158" height="34" rx="6"/><text x="42" y="310" class="t-mono t-win" font-weight="600">O:</text><text x="72" y="310">Other</text>
+      </g>
+      <text class="t-small" x="30" y="352">password saved in</text>
+      <text class="t-small" x="30" y="366">Credential Manager</text>
+
+      <!-- cable -->
+      <path class="cable" d="M204 205 H 300"/>
+      <circle class="dot" cx="204" cy="205" r="4"/><circle class="dot" cx="300" cy="205" r="4"/>
+      <text class="t-small" x="214" y="190">home LAN</text>
+      <text class="t-mono" x="214" y="226">SMB 3.1.1</text>
+      <text class="t-mono" x="214" y="242">port 445</text>
+
+      <!-- MOTHERLODE -->
+      <rect class="b-nas-out" x="300" y="14" width="646" height="402" rx="12"/>
+      <text class="t-head t-nas" x="318" y="40">MOTHERLODE</text>
+      <text class="t-small" x="430" y="40">Debian 13 · 192.168.1.59</text>
+
+      <!-- smbd -->
+      <rect class="b-nas" x="318" y="62" width="168" height="290" rx="8"/>
+      <text class="t-head" x="332" y="88">smbd</text>
+      <text class="t-small" x="332" y="106">the Samba server</text>
+      <rect class="b-panel" x="330" y="120" width="144" height="56" rx="6"/>
+      <text x="342" y="142" font-weight="600">1 · Password?</text>
+      <text class="t-small" x="342" y="162">Samba's own list</text>
+      <rect class="b-panel" x="330" y="186" width="144" height="56" rx="6"/>
+      <text x="342" y="208" font-weight="600">2 · Allowed user?</text>
+      <text class="t-small" x="342" y="228">only <tspan class="t-mono">ghost</tspan></text>
+      <rect class="b-panel" x="330" y="252" width="144" height="56" rx="6"/>
+      <text x="342" y="274" font-weight="600">3 · Which share?</text>
+      <text class="t-small" x="342" y="294">looks it up →</text>
+      <text class="t-small t-deny" x="332" y="340">guest / wrong pw: refused</text>
+      <path class="wire" d="M300 205 H 318"/>
+
+      <!-- smb.conf -->
+      <rect class="b-panel" x="508" y="62" width="200" height="290" rx="8"/>
+      <text class="t-head" x="522" y="88">smb.conf</text>
+      <text class="t-small" x="522" y="106">share name → Linux folder</text>
+      <text class="t-mono" x="522" y="138">[Documents]</text>
+      <text class="t-mono" x="522" y="178">[Photos]</text>
+      <text class="t-mono" x="522" y="218">[Music]</text>
+      <text class="t-mono" x="522" y="268">[Media]</text>
+      <text class="t-mono" x="522" y="318">[Other]</text>
+      <path class="wire" d="M474 280 H 508"/>
+
+      <!-- disks -->
+      <rect class="b-disk" x="730" y="62" width="200" height="150" rx="8"/>
+      <text class="t-head t-disk" x="744" y="86">tank1tb</text>
+      <text class="t-small" x="814" y="86">ZFS mirror, 2 disks</text>
+      <text class="t-mono" x="744" y="138">/tank1tb/Documents</text>
+      <text class="t-mono" x="744" y="178">/tank1tb/Photos</text>
+      <text class="t-mono" x="744" y="200">/tank1tb/Music</text>
+
+      <rect class="b-disk" x="730" y="232" width="200" height="56" rx="8"/>
+      <text class="t-head t-disk" x="744" y="254">media</text>
+      <text class="t-small" x="800" y="254">ZFS, 1 disk</text>
+      <text class="t-mono" x="744" y="276">/media</text>
+
+      <rect class="b-disk" x="730" y="298" width="200" height="56" rx="8"/>
+      <text class="t-head t-disk" x="744" y="320">other</text>
+      <text class="t-small" x="800" y="320">ext4 partition</text>
+      <text class="t-mono" x="744" y="342">/other</text>
+
+      <path class="wire" d="M632 134 H 740"/>
+      <path class="wire" d="M600 174 H 740"/>
+      <path class="wire" d="M590 214 C 680 214, 680 196, 740 196"/>
+      <path class="wire" d="M590 264 C 680 264, 680 272, 740 272"/>
+      <path class="wire" d="M590 314 C 680 314, 680 338, 740 338"/>
+
+      <!-- not shared -->
+      <rect class="b-deny" x="508" y="366" width="422" height="38" rx="6"/>
+      <text class="t-deny" x="522" y="390" font-weight="600">/tank1tb/Nextcloud</text>
+      <text class="t-small" x="660" y="390">deliberately not shared; Nextcloud owns it</text>
+
+      <text class="t-small" x="318" y="384">file lands as</text>
+      <text class="t-mono" x="318" y="402">ghost:nas  rw-rw-r--</text>
+    </svg>
+  </div>
+  <div class="legend"><span class="lg-win">Windows side</span><span class="lg-nas">Samba on MOTHERLODE</span><span class="lg-disk">where the bytes live</span><span class="lg-deny">kept out of Samba</span></div>
+</section>
+
+<section aria-labelledby="h-shares">
+  <div class="eyebrow">The five shares</div>
+  <h2 id="h-shares">One share per big category</h2>
+  <p>Inside a share you make as many folders as you want; that needs no Samba change. A new <em>share</em> is only for a new major category.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Drive</th><th>Windows path</th><th>Linux folder</th><th>Disk</th><th>If a disk dies</th></tr></thead>
+      <tbody>
+        <tr><td class="drive">N:</td><td><code>\\MOTHERLODE\Documents</code></td><td><code>/tank1tb/Documents</code></td><td>tank1tb mirror</td><td><span class="chip safe">survives one disk</span></td></tr>
+        <tr><td class="drive">P:</td><td><code>\\MOTHERLODE\Photos</code></td><td><code>/tank1tb/Photos</code></td><td>tank1tb mirror</td><td><span class="chip safe">survives one disk</span></td></tr>
+        <tr><td class="drive">M:</td><td><code>\\MOTHERLODE\Music</code></td><td><code>/tank1tb/Music</code></td><td>tank1tb mirror</td><td><span class="chip safe">survives one disk</span></td></tr>
+        <tr><td class="drive">V:</td><td><code>\\MOTHERLODE\Media</code></td><td><code>/media</code> (Movies, TV, Music)</td><td>Seagate 2 TB alone</td><td><span class="chip risk">lost, re-rip</span></td></tr>
+        <tr><td class="drive">O:</td><td><code>\\MOTHERLODE\Other</code></td><td><code>/other</code></td><td>WD 640 GB partition</td><td><span class="chip risk">lost</span></td></tr>
+        <tr><td class="drive" style="color:var(--deny)">—</td><td colspan="2"><code>/tank1tb/Nextcloud</code></td><td>tank1tb mirror</td><td><span class="chip no">not a share</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="color:var(--muted);font-size:.95rem">A mirror protects against a dead disk, not against deleting a file by mistake. Snapshots (Checkpoint 3) cover that, and they are not set up yet.</p>
+</section>
+
+<section aria-labelledby="h-gates">
+  <div class="eyebrow">Who gets in</div>
+  <h2 id="h-gates">Three locks, checked in order</h2>
+  <div class="gates">
+    <div class="gate"><div class="n">Lock 1 · Samba password</div><h3>Are you really ghost?</h3><p>Samba keeps its <em>own</em> password list, separate from your Linux login. You set it with <code>smbpasswd</code>. Windows saves it once in Credential Manager.</p><div class="fail">fails → NT_STATUS_LOGON_FAILURE</div></div>
+    <div class="gate"><div class="n">Lock 2 · smb.conf rules</div><h3>Is this user allowed here?</h3><p><code>valid users = ghost</code> on every share, <code>guest ok = no</code>, <code>map to guest = Never</code>. No anonymous access, and SMB1 (old, insecure) is switched off.</p><div class="fail">fails → NT_STATUS_ACCESS_DENIED</div></div>
+    <div class="gate"><div class="n">Lock 3 · Linux permissions</div><h3>May ghost write this folder?</h3><p>Share folders are <code>root:nas</code> mode <code>2775</code>. ghost is in group <code>nas</code>, so it can write. The <code>2</code> (setgid) makes every new file inherit group <code>nas</code>.</p><div class="fail">fails → Access denied in Explorer</div></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-conf">
+  <div class="eyebrow">/etc/samba/smb.conf, line by line</div>
+  <h2 id="h-conf">The settings file</h2>
+  <p>Copied word for word from the September design. One share shown; the other four are identical apart from name and path. The repo copy is <code>samba/smb.conf</code>.</p>
+  <div class="conf">
+    <div class="conf-row sect"><code>[global]</code><div class="why">Settings for the whole server.</div></div>
+    <div class="conf-row"><code>workgroup = WORKGROUP</code><div class="why">Old Windows grouping name. Mostly cosmetic with SMB2+; your PC uses <code>DIAMOND_DOGS</code> and that is fine.</div></div>
+    <div class="conf-row"><code>server role = standalone server</code><div class="why">A plain file server, not a Windows domain controller.</div></div>
+    <div class="conf-row"><code>security = user
+map to guest = Never</code><div class="why">Every connection must log in with a real user and password. Bad logins are refused, never turned into a guest.</div></div>
+    <div class="conf-row"><code>server min protocol = SMB2</code><div class="why">Refuse SMB1, the version WannaCry used. Windows 10/11 speak SMB3 anyway.</div></div>
+    <div class="conf-row"><code>unix password sync = yes</code><div class="why">Only applies to password changes made <em>from Windows</em>. Your <code>sudo smbpasswd</code> did not touch the Linux password (checked).</div></div>
+    <div class="conf-row"><code>load printers = no
+disable spoolss = yes</code><div class="why">No printer sharing.</div></div>
+    <div class="conf-row sect"><code>[Documents]</code><div class="why">The name Windows sees: <code>\\MOTHERLODE\Documents</code>.</div></div>
+    <div class="conf-row"><code>path = /tank1tb/Documents</code><div class="why">The Linux folder behind it.</div></div>
+    <div class="conf-row"><code>read only = no
+guest ok = no
+valid users = ghost</code><div class="why">Writable, no guests, only ghost.</div></div>
+    <div class="conf-row"><code>force group = nas</code><div class="why">Files are written with group <code>nas</code>, so a second user or Music Assistant can be added to <code>nas</code> later.</div></div>
+    <div class="conf-row"><code>create mask = 0664
+directory mask = 2775</code><div class="why">New files <code>rw-rw-r--</code>, new folders <code>rwxrwsr-x</code>. The group can edit, others can only read.</div></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-disc">
+  <div class="eyebrow">How Windows finds MOTHERLODE</div>
+  <h2 id="h-disc">Three programs on MOTHERLODE</h2>
+  <div class="disc">
+    <div class="svc"><h3>smbd</h3><div class="port">TCP 445 (and 139)</div><p>Does the actual file sharing. Everything above is smbd.</p></div>
+    <div class="svc"><h3>wsdd2</h3><div class="port">UDP 3702 · 5355</div><p>Announces MOTHERLODE so it shows under <em>Network</em> in Explorer, and answers "who is MOTHERLODE?" (LLMNR). Added this time; Windows 10/11 no longer use the old method.</p></div>
+    <div class="svc"><h3>nmbd</h3><div class="port">UDP 137 · 138</div><p>Old NetBIOS name service. Also answers name lookups, and is how MOTHERLODE asked your PC its name. Kept as in the old setup.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-cmds">
+  <div class="eyebrow">Every command, in order</div>
+  <h2 id="h-cmds">What was run</h2>
+  <p>Blue-edged commands are the ones you typed. <code>sudo</code> means "run as administrator".</p>
+
+  <div class="phase">
+    <h3>Look first <span class="eyebrow">nothing changed</span></h3>
+    <div class="cmds">
+      <div class="cmd"><pre>sed -n '829,1326p' ~/Downloads/"MOTHERLODE NAS — Complete Rebuild Progress Report &amp; AI Handoff.md"</pre><div class="why">Read sections 22–36 of the September report: the Samba design to recreate.</div></div>
+      <div class="cmd"><pre>apt-cache policy samba smbclient wsdd wsdd2</pre><div class="why">Which versions Debian offers. Found Samba 4.22.11 (same as September) and <code>wsdd2</code>.</div></div>
+      <div class="cmd"><pre>apt-get install -s --no-install-recommends samba smbclient wsdd2</pre><div class="why">Dry run (<code>-s</code>): list what would install. Without the flag apt also wanted ~30 Active Directory packages a home NAS does not need.</div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <h3>Set up</h3>
+    <div class="cmds">
+      <div class="cmd"><pre>sudo groupadd -g 1001 nas</pre><div class="why">Create group <code>nas</code> with ID 1001. The folders on the ZFS disks were already stamped with 1001 from the old install, so they matched instantly.</div></div>
+      <div class="cmd"><pre>sudo usermod -aG nas ghost</pre><div class="why">Add ghost to <code>nas</code> (<code>-a</code> = append, keep the other groups).</div></div>
+      <div class="cmd"><pre>sudo apt-get install -y --no-install-recommends samba smbclient attr wsdd2</pre><div class="why">Install the server (<code>samba</code>), a test client (<code>smbclient</code>), file-attribute tools (<code>attr</code>) and Windows discovery (<code>wsdd2</code>). Services start automatically.</div></div>
+      <div class="cmd"><pre>stat -c '%U:%G %a %n' /tank1tb/Documents /media /other …</pre><div class="why">Check owner, group and mode of each share folder. All already <code>root:nas 2775</code>; nothing to fix.</div></div>
+      <div class="cmd"><pre>sudo cp -a /etc/samba/smb.conf /etc/samba/smb.conf.debian-default</pre><div class="why">Back up Debian's default config before replacing it.</div></div>
+      <div class="cmd"><pre>sudo tee /etc/samba/smb.conf &lt;&lt;'EOF'
+[global] … [Documents] … [Other]
+EOF</pre><div class="why">Write the new config (the file explained above).</div></div>
+      <div class="cmd"><pre>sudo testparm -s</pre><div class="why">Samba's spell-checker for <code>smb.conf</code>. Result: loaded OK, <code>ROLE_STANDALONE</code>.</div></div>
+      <div class="cmd"><pre>sudo systemctl restart smbd nmbd</pre><div class="why">Restart the servers so they read the new config.</div></div>
+      <div class="cmd"><pre>sudo ss -tlnp | grep -E ':(139|445) '</pre><div class="why">Confirm smbd is listening on the network ports.</div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <h3>Password <span class="eyebrow">you</span></h3>
+    <div class="cmds">
+      <div class="cmd you"><pre>sudo smbpasswd -a ghost</pre><div class="why">Add ghost to Samba's password list (<code>-a</code> = add). First try was blank.</div></div>
+      <div class="cmd you"><pre>sudo smbpasswd ghost</pre><div class="why">Change it to a real password.</div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <h3>Prove it works</h3>
+    <div class="cmds">
+      <div class="cmd"><pre>sudo passwd -S ghost</pre><div class="why">Show when the Linux password last changed: 2026-09-28. So the Samba password did not leak into your login.</div></div>
+      <div class="cmd"><pre>smbclient //localhost/Documents -U 'ghost%' \
+  -c "put smbtest.txt; mkdir smbtestdir; get smbtest.txt smbtest.back"</pre><div class="why">Act like Windows: upload a file, make a folder, download it again. Run on all five shares.</div></div>
+      <div class="cmd"><pre>cmp smbtest.txt smbtest.back</pre><div class="why">Byte-compare the round trip. Identical on every share.</div></div>
+      <div class="cmd"><pre>stat -c '%U:%G %a %n' /tank1tb/Documents/smbtest*</pre><div class="why">Check the result: files <code>ghost:nas 664</code>, folders <code>ghost:nas 2775</code>.</div></div>
+      <div class="cmd"><pre>smbclient //localhost/Documents -N -c ls
+smbclient //localhost/Documents -U 'someone%' -c ls</pre><div class="why">Try anonymous (<code>-N</code>) and a made-up user. Both refused.</div></div>
+      <div class="cmd"><pre>smbclient //192.168.1.59/Documents -U 'ghost%' -c ls</pre><div class="why">Same test over the real network address instead of localhost.</div></div>
+      <div class="cmd"><pre>sudo rm -f …/smbtest.txt; sudo rmdir …/smbtestdir</pre><div class="why">Delete the test files from all five shares.</div></div>
+      <div class="cmd"><pre>smbclient //localhost/Documents -U 'ghost%' -c ls</pre><div class="why">After your new password: a blank password is now refused (<code>LOGON_FAILURE</code>).</div></div>
+      <div class="cmd"><pre>sudo pdbedit -L</pre><div class="why">List Samba's users: just <code>ghost</code>.</div></div>
+      <div class="cmd"><pre>sudo ss -ulnp</pre><div class="why">Confirm the discovery programs are listening (137/138 nmbd, 3702/5355 wsdd2).</div></div>
+      <div class="cmd"><pre>sudo smbstatus</pre><div class="why">Who is connected right now. Showed your PC with all five shares open.</div></div>
+      <div class="cmd"><pre>nmblookup -A 192.168.1.64</pre><div class="why">Ask that PC its Windows name: <code>ZEPHYR</code>.</div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <h3>Write it down</h3>
+    <div class="cmds">
+      <div class="cmd"><pre>cp /etc/samba/smb.conf ~/homelab/samba/smb.conf
+git add -A &amp;&amp; git commit -m "…"</pre><div class="why">Copy the config into the repo (no passwords in it) and commit with the docs.</div></div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-zephyr">
+  <div class="eyebrow">What MOTHERLODE sees of your PC</div>
+  <h2 id="h-zephyr">Hello, ZEPHYR</h2>
+  <div class="zephyr">
+    <div class="card">
+      <h3>The connection</h3>
+      <dl class="kv">
+        <dt>Name</dt><dd>ZEPHYR (Zephyr.localdomain)</dd>
+        <dt>Address</dt><dd>192.168.1.64</dd>
+        <dt>Workgroup</dt><dd>DIAMOND_DOGS</dd>
+        <dt>Protocol</dt><dd>SMB3_11, signed (AES-128-CMAC)</dd>
+        <dt>Shares open</dt><dd>all five</dd>
+        <dt>Its own shares</dt><dd>exist, but closed to anonymous lookups</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <h3>The surprise in Documents</h3>
+      <div class="note">hello.txt.txt   ghost:nas 664
+Hello Claude, can you see me now!!!</div>
+      <div class="note">test2.txt   ghost:nas 664
+What up dude!</div>
+      <p style="font-size:.92rem;color:var(--muted)">Yes. Both landed with the right owner and group. The double <code>.txt.txt</code> is Windows hiding file extensions: Explorer added one to the name you typed.</p>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-gloss">
+  <div class="eyebrow">Words</div>
+  <h2 id="h-gloss">Glossary</h2>
+  <div class="gloss">
+    <div><b>SMB</b><span>Windows' file-sharing protocol. Samba is the Linux program that speaks it.</span></div>
+    <div><b>Share</b><span>A folder Samba publishes under a name, like <code>Documents</code>.</span></div>
+    <div><b>smb.conf</b><span>Samba's settings file: <code>/etc/samba/smb.conf</code>.</span></div>
+    <div><b>Group (nas)</b><span>A set of Linux users that share permissions on the NAS folders.</span></div>
+    <div><b>2775 / setgid</b><span>Folder mode: owner and group can write; new items inherit the folder's group.</span></div>
+    <div><b>Mirror</b><span>Two disks holding the same data; one can die without loss.</span></div>
+  </div>
+</section>
+
+<footer>Source: <code>samba/README.md</code>, <code>samba/smb.conf</code>, <code>docs/checkpoints/CHECKPOINTS.md</code> in the homelab repo. Remote access over Tailscale is Checkpoint 6.</footer>
+</div>

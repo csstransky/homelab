@@ -3,6 +3,9 @@
 **Set up:** 2026-10-04 (Checkpoint 4), recreating the design from the 2026-09-27 Rebuild
 Report, sections 22–36. Config: `samba/smb.conf` (identical to `/etc/samba/smb.conf`).
 
+Visual walk-through (diagram, shares, permissions, every setup command): open
+`samba/samba-explained.html` in a browser.
+
 ## Shares
 
 | Share | Path | Storage |
@@ -122,6 +125,12 @@ sudo testparm -s && sudo systemctl reload smbd
 and copy the new `/etc/samba/smb.conf` into `samba/smb.conf`.
 
 ## Checks
+
+```bash
+sudo smbstatus                         # who is connected, which shares, protocol
+nmblookup -A <ip>                      # Windows name of a client
+```
+
 
 ```bash
 sudo testparm -s                       # config loads, ROLE_STANDALONE

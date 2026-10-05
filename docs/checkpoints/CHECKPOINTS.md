@@ -81,7 +81,7 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 | 1 | Debian foundation | ✅ done (Windows SSH test pending) | 2026-09-28 | `docs/hardware/MOTHERLODE.md`, `docs/architecture/network.md` |
 | 2 | ZFS: install + import existing pools + `/other` | 🟨 imported, reboot check pending | | `zfs/README.md` |
 | 3 | Storage protection: SMART, scrubs, snapshots, replication | ⬜ deferred by user until after Samba; still due before real data | | `zfs/SNAPSHOTS.md`, `scripts/maintenance/` |
-| 4 | Samba (Windows LAN access) | 🟨 server verified, Windows test pending | | `samba/` |
+| 4 | Samba (Windows LAN access) | ✅ done | 2026-10-04 | `samba/` |
 | 5 | Docker foundation | ⬜ | | `docs/services/docker.md` |
 | 6 | Tailscale (remote access) | ⬜ | | `docs/services/tailscale.md` |
 | 7 | Jellyfin (movies on the LG TV) | ⬜ | | `compose/jellyfin/` |
@@ -201,7 +201,7 @@ Steps:
 7. Commit `samba/smb.conf` (no secrets) and `samba/README.md`.
 
 Done when:
-- [ ] Windows machine reads and writes all five shares by hostname or IP.
+- [x] Windows machine reads and writes all five shares by hostname or IP.
 - [x] Written files show `ghost:nas` with group inheritance.
 - [x] Config committed.
 
@@ -217,7 +217,10 @@ Notes 2026-10-04:
   password was not touched by `unix password sync` (`passwd -S`: last change 2026-09-28).
 - smbclient write test, on localhost and `192.168.1.59`: put/get/mkdir on all five shares, data read back
   identical, files `ghost:nas 0664`, dirs `ghost:nas 2775`. Test files removed.
-- Pending: Windows 10 and 11 machines map all five shares (`samba/README.md`, "Windows 10 / 11").
+- Windows verified 2026-10-04: ZEPHYR (192.168.1.64) mapped all five shares (`smbstatus`: SMB3_11, signed)
+  and wrote `hello.txt.txt` and `test2.txt` to Documents, both landing as `ghost:nas 664`. Server-side
+  smbclient covered writes on the other four shares. The second Windows machine uses the same steps.
+- Visual explainer: `samba/samba-explained.html`.
 
 ## Checkpoint 5 — Docker foundation
 

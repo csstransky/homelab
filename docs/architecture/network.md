@@ -16,12 +16,21 @@
 History: the address was .64 originally and .124 on 2026-09-14 before the reservation existed.
 The reservation is confirmed once the address survives the Checkpoint 2 reboot.
 
-## Listening services (2026-09-28)
+## LAN clients
+
+| Name | Address | Notes |
+|---|---|---|
+| ZEPHYR (Windows) | 192.168.1.64 (DHCP, `Zephyr.localdomain`) | MAC `d8:cb:8a:3e:df:6b`, workgroup `DIAMOND_DOGS`. Maps all five Samba shares. 192.168.1.64 was MOTHERLODE's historical address; it now belongs to ZEPHYR. |
+
+## Listening services (2026-09-28, Samba added 2026-10-04)
 
 | Port | Service | Bound to |
 |---|---|---|
 | 22/tcp | OpenSSH (`ssh.service`, enabled) | all interfaces |
 | 11434/tcp | Ollama | 127.0.0.1 only |
+| 139, 445/tcp | Samba `smbd` (2026-10-04) | all interfaces |
+| 137, 138/udp | Samba `nmbd` NetBIOS names | all interfaces |
+| 3702, 5355/udp | `wsdd2` WS-Discovery + LLMNR | all interfaces |
 
 Nothing is exposed to the internet. No port forwards on the UDM.
 
