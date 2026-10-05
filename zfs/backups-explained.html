@@ -1,0 +1,528 @@
+<meta charset="utf-8">
+<title>MOTHERLODE Backup Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; the cable diagram is the hero, then shares, gates, discovery, commands. */
+:root {
+  --bg: #f3f5f7;
+  --panel: #ffffff;
+  --ink: #18212b;
+  --muted: #5b6876;
+  --line: #d5dce3;
+  --win: #2563c9;        /* Windows side */
+  --nas: #0f7c6b;        /* MOTHERLODE side */
+  --disk: #8a5a12;       /* storage */
+  --deny: #b4232c;
+  --win-soft: #e4ecfa;
+  --nas-soft: #dff1ed;
+  --disk-soft: #f6ecd9;
+  --deny-soft: #f8e1e2;
+  --code-bg: #eaeef2;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11161c; --panel: #19212a; --ink: #e6ebf0; --muted: #98a6b4; --line: #2c3743;
+  --win: #7aa7f0; --nas: #4cc2ad; --disk: #e0b161; --deny: #f07b82;
+  --win-soft: #1c2b44; --nas-soft: #15302c; --disk-soft: #33291a; --deny-soft: #3a1d21; --code-bg: #0d1217;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11161c; --panel: #19212a; --ink: #e6ebf0; --muted: #98a6b4; --line: #2c3743;
+  --win: #7aa7f0; --nas: #4cc2ad; --disk: #e0b161; --deny: #f07b82;
+  --win-soft: #1c2b44; --nas-soft: #15302c; --disk-soft: #33291a; --deny-soft: #3a1d21; --code-bg: #0d1217;
+  color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.55; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 800; font-stretch: 80%; letter-spacing: -0.01em; }
+h2 { font-size: 1.7rem; font-weight: 700; font-stretch: 85%; }
+h3 { font-size: 1.1rem; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+section { display: grid; gap: 18px; min-width: 0; }
+.lede { font-size: 1.2rem; color: var(--muted); }
+.lede strong { color: var(--ink); }
+
+/* hero diagram */
+.diagram { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; padding: 12px; }
+.diagram svg { display: block; min-width: 820px; width: 100%; height: auto; }
+svg text { font-family: var(--f-body); fill: var(--ink); }
+svg .t-mono { font-family: var(--f-mono); font-size: 12px; }
+svg .t-small { font-size: 12px; fill: var(--muted); }
+svg .t-head { font-family: var(--f-display); font-weight: 700; font-size: 17px; }
+svg .t-label { font-size: 14px; font-weight: 600; }
+svg .t-win { fill: var(--win); } svg .t-nas { fill: var(--nas); } svg .t-disk { fill: var(--disk); } svg .t-deny { fill: var(--deny); }
+svg .b-win { fill: var(--win-soft); stroke: var(--win); stroke-width: 1.5; }
+svg .b-nas { fill: var(--nas-soft); stroke: var(--nas); stroke-width: 1.5; }
+svg .b-nas-out { fill: none; stroke: var(--nas); stroke-width: 2; stroke-dasharray: 6 5; }
+svg .b-disk { fill: var(--disk-soft); stroke: var(--disk); stroke-width: 1.5; }
+svg .b-deny { fill: var(--deny-soft); stroke: var(--deny); stroke-width: 1.5; stroke-dasharray: 4 3; }
+svg .b-panel { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+svg .cable { stroke: var(--ink); stroke-width: 3; fill: none; }
+svg .wire { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+svg .wire-deny { stroke: var(--deny); stroke-width: 1.4; fill: none; stroke-dasharray: 3 3; }
+svg .dot { fill: var(--ink); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 0.92rem; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; border: 1.5px solid; }
+.lg-win::before { background: var(--win-soft); border-color: var(--win) !important; }
+.lg-nas::before { background: var(--nas-soft); border-color: var(--nas) !important; }
+.lg-disk::before { background: var(--disk-soft); border-color: var(--disk) !important; }
+.lg-deny::before { background: var(--deny-soft); border-color: var(--deny) !important; }
+
+/* shares table */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.95rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--f-mono); font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+.drive { font-family: var(--f-display); font-weight: 800; font-size: 1.3rem; color: var(--win); }
+.chip { display: inline-block; font-family: var(--f-mono); font-size: 0.76rem; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+.chip.safe { background: var(--nas-soft); color: var(--nas); }
+.chip.risk { background: var(--disk-soft); color: var(--disk); }
+.chip.no { background: var(--deny-soft); color: var(--deny); }
+
+/* gates */
+.gates { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.gate { background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--nas); border-radius: 8px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.gate .n { font-family: var(--f-mono); font-size: 0.78rem; color: var(--nas); letter-spacing: 0.06em; text-transform: uppercase; }
+.gate p { font-size: 0.97rem; }
+.gate .fail { font-size: 0.88rem; color: var(--deny); font-family: var(--f-mono); }
+
+/* discovery */
+.disc { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.svc { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.svc .port { font-family: var(--f-mono); font-size: 0.82rem; color: var(--muted); }
+
+/* config annotation */
+.conf { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); }
+.conf-row { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); border-bottom: 1px solid var(--line); }
+.conf-row:last-child { border-bottom: 0; }
+.conf-row code { background: var(--code-bg); padding: 9px 14px; display: block; white-space: pre-wrap; word-break: break-word; font-size: 0.84rem; }
+.conf-row .why { padding: 9px 14px; font-size: 0.95rem; }
+.conf-row.sect code { color: var(--nas); font-weight: 600; }
+@media (max-width: 620px) { .conf-row { grid-template-columns: minmax(0, 1fr); } }
+
+/* commands */
+.phase { display: grid; gap: 10px; }
+.phase h3 { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.phase h3 .eyebrow { font-weight: 400; }
+.cmds { display: grid; gap: 8px; }
+.cmd { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.cmd pre { margin: 0; background: var(--code-bg); padding: 10px 14px; font-family: var(--f-mono); font-size: 0.82rem; white-space: pre-wrap; word-break: break-word; }
+.cmd .why { padding: 10px 14px; font-size: 0.95rem; }
+.cmd.you { border-color: var(--win); }
+.cmd.you pre { box-shadow: inset 4px 0 0 var(--win); }
+@media (max-width: 700px) { .cmd { grid-template-columns: minmax(0, 1fr); } }
+
+/* zephyr */
+.zephyr { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; font-size: 0.95rem; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; font-family: var(--f-mono); font-size: 0.86rem; word-break: break-word; }
+.note { font-family: var(--f-mono); font-size: 0.86rem; background: var(--code-bg); border-radius: 6px; padding: 10px 12px; white-space: pre-wrap; }
+
+.gloss { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px 28px; }
+.gloss div { display: grid; gap: 2px; }
+.gloss b { font-family: var(--f-display); font-weight: 700; }
+.gloss span { color: var(--muted); font-size: 0.95rem; }
+footer { color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--line); padding-top: 16px; }
+
+svg .b-os { fill: var(--code-bg); stroke: var(--muted); stroke-width: 1.2; }
+svg .b-warn { fill: var(--deny-soft); stroke: var(--deny); stroke-width: 2; }
+svg .b-mirror { fill: var(--nas-soft); stroke: var(--nas); stroke-width: 1.5; }
+svg .wire-strong { stroke: var(--nas); stroke-width: 2; fill: none; }
+svg .wire-disk { stroke: var(--disk); stroke-width: 2; fill: none; }
+svg .wire-os { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasharray: 4 3; }
+.diagram.tall svg { min-width: 860px; }
+.flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; counter-reset: step; }
+.flow .stepbox { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.flow .stepbox .n { font-family: var(--f-mono); font-size: .76rem; color: var(--nas); letter-spacing: .06em; text-transform: uppercase; }
+.flow .stepbox p { font-size: .94rem; }
+.layers { display: grid; gap: 8px; }
+.layer { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) max-content; gap: 14px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+.layer b { font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; }
+.layer p { font-size: .95rem; color: var(--muted); }
+@media (max-width: 680px) { .layer { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
+.chip.todo { background: var(--code-bg); color: var(--muted); }
+.hostid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+
+.matrix td.y { color: var(--nas); font-weight: 700; text-align: center; }
+.matrix td.n { color: var(--deny); text-align: center; }
+.matrix td.p { color: var(--disk); text-align: center; }
+.matrix th.c { text-align: center; }
+svg .tick-h { fill: var(--win); } svg .tick-d { fill: var(--nas); } svg .tick-w { fill: var(--disk); } svg .tick-m { fill: var(--deny); }
+svg .axis { stroke: var(--line); stroke-width: 1.5; }
+svg .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
+.sched { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.sched .item { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; display: grid; gap: 4px; min-width: 0; }
+.sched .when { font-family: var(--f-mono); font-size: .85rem; color: var(--nas); }
+.sched .what { font-weight: 600; }
+.sched .item p { font-size: .92rem; color: var(--muted); }
+.sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.sources a { color: var(--win); }
+.src { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; display: grid; gap: 4px; font-size: .94rem; min-width: 0; }
+.src b { font-family: var(--f-display); }
+</style>
+
+<div class="wrap">
+
+<header style="display:grid;gap:14px">
+  <div class="eyebrow">MOTHERLODE · Checkpoint 3 · built and tested 2026-10-04</div>
+  <h1>Five layers between your files and losing them</h1>
+  <p class="lede">The mirror keeps working when <strong>a disk</strong> dies. It does nothing when <strong>you</strong> delete a file, because the delete lands on both disks at once. So there are more layers: <strong>snapshots</strong> to undo mistakes, a <strong>nightly copy</strong> to a second pool, <strong>health checks</strong> to catch dying disks, and later an <strong>off-site copy</strong> for fire or theft.</p>
+</header>
+
+<section aria-labelledby="h-matrix">
+  <div class="eyebrow">What each layer saves you from</div>
+  <h2 id="h-matrix">Pick the disaster, read across</h2>
+  <div class="tbl">
+    <table class="matrix">
+      <thead><tr><th>What goes wrong</th><th class="c">Mirror</th><th class="c">Snapshots</th><th class="c">Nightly copy</th><th class="c">Off-site</th></tr></thead>
+      <tbody>
+        <tr><td>One disk in tank1tb dies</td><td class="y">✓</td><td class="n">—</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>You delete or overwrite a file from Windows</td><td class="n">✗</td><td class="y">✓</td><td class="p">✓ up to last night</td><td class="y">✓</td></tr>
+        <tr><td>Ransomware on ZEPHYR encrypts the N: drive</td><td class="n">✗</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>Both tank1tb disks die, or the pool is destroyed</td><td class="n">✗</td><td class="n">✗</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>Fire, theft, flood, a surge that kills every disk</td><td class="n">✗</td><td class="n">✗</td><td class="n">✗</td><td class="y">✓</td></tr>
+        <tr><td>Someone gets root on MOTHERLODE</td><td class="n">✗</td><td class="n">✗</td><td class="n">✗</td><td class="p">✓ if offline / immutable</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="layers">
+    <div class="layer"><b>Mirror</b><p>Two disks, same data.</p><span class="chip safe">running</span></div>
+    <div class="layer"><b>Snapshots (sanoid)</b><p>Frozen, read-only views of each dataset, taken on a schedule.</p><span class="chip safe">running · tested</span></div>
+    <div class="layer"><b>Nightly copy (syncoid)</b><p>tank1tb → tank500gb at 03:00, only what changed.</p><span class="chip safe">running · tested</span></div>
+    <div class="layer"><b>Scrubs + SMART tests</b><p>Monthly full read of every pool; weekly and monthly disk self-tests.</p><span class="chip safe">scheduled</span></div>
+    <div class="layer"><b>Off-site, encrypted</b><p>A copy outside the house. The only layer that makes this a real 3-2-1 backup.</p><span class="chip todo">Checkpoint 11</span></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-ret">
+  <div class="eyebrow">How far back you can go · Documents, Photos, Nextcloud, Apps</div>
+  <h2 id="h-ret">Lots of recent snapshots, fewer old ones</h2>
+  <p>Each mark is one snapshot kept. Every row has its own time scale. Newer snapshots are close together, so you can undo this afternoon to the hour. Older ones thin out, so you can still go back a year. This is the classic grandfather-father-son rotation. The oldest of each kind is pruned when a new one is taken.</p>
+  <div class="diagram" role="img" aria-label="Retention timeline: 24 hourly snapshots over the last day, 30 daily over the last month, 8 weekly over the last two months, 12 monthly over the last year.">
+    <svg viewBox="0 0 960 340" xmlns="http://www.w3.org/2000/svg">
+<text class="t-head" x="16" y="54">Hourly</text><text class="t-small" x="16" y="72">24 kept</text>
+<line class="axis" x1="190" y1="50" x2="930" y2="50"/>
+<rect class="tick-h" x="216.8" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="247.7" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="278.5" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="309.3" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="340.2" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="371.0" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="401.8" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="432.7" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="463.5" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="494.3" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="525.2" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="556.0" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="586.8" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="617.7" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="648.5" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="679.3" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="710.2" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="741.0" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="771.8" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="802.7" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="833.5" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="864.3" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="895.2" y="39" width="8" height="22" rx="3"/>
+<rect class="tick-h" x="926.0" y="39" width="8" height="22" rx="3"/>
+<text class="t-small" x="190" y="80">24 hours ago</text>
+<text class="t-small" x="560" y="80" text-anchor="middle">12 h</text>
+<text class="t-small" x="930" y="80" text-anchor="end">now</text>
+<text class="t-head" x="16" y="132">Daily</text><text class="t-small" x="16" y="150">30 kept</text>
+<line class="axis" x1="190" y1="128" x2="930" y2="128"/>
+<rect class="tick-d" x="210.7" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="235.3" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="260.0" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="284.7" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="309.3" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="334.0" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="358.7" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="383.3" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="408.0" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="432.7" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="457.3" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="482.0" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="506.7" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="531.3" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="556.0" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="580.7" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="605.3" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="630.0" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="654.7" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="679.3" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="704.0" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="728.7" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="753.3" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="778.0" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="802.7" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="827.3" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="852.0" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="876.7" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="901.3" y="117" width="8" height="22" rx="3"/>
+<rect class="tick-d" x="926.0" y="117" width="8" height="22" rx="3"/>
+<text class="t-small" x="190" y="158">30 days ago</text>
+<text class="t-small" x="560" y="158" text-anchor="middle">15 days</text>
+<text class="t-small" x="930" y="158" text-anchor="end">now</text>
+<text class="t-head" x="16" y="210">Weekly</text><text class="t-small" x="16" y="228">8 kept</text>
+<line class="axis" x1="190" y1="206" x2="930" y2="206"/>
+<rect class="tick-w" x="278.5" y="195" width="8" height="22" rx="3"/>
+<rect class="tick-w" x="371.0" y="195" width="8" height="22" rx="3"/>
+<rect class="tick-w" x="463.5" y="195" width="8" height="22" rx="3"/>
+<rect class="tick-w" x="556.0" y="195" width="8" height="22" rx="3"/>
+<rect class="tick-w" x="648.5" y="195" width="8" height="22" rx="3"/>
+<rect class="tick-w" x="741.0" y="195" width="8" height="22" rx="3"/>
+<rect class="tick-w" x="833.5" y="195" width="8" height="22" rx="3"/>
+<rect class="tick-w" x="926.0" y="195" width="8" height="22" rx="3"/>
+<text class="t-small" x="190" y="236">8 weeks ago</text>
+<text class="t-small" x="560" y="236" text-anchor="middle">4 weeks</text>
+<text class="t-small" x="930" y="236" text-anchor="end">now</text>
+<text class="t-head" x="16" y="288">Monthly</text><text class="t-small" x="16" y="306">12 kept</text>
+<line class="axis" x1="190" y1="284" x2="930" y2="284"/>
+<rect class="tick-m" x="247.7" y="273" width="8" height="22" rx="3"/>
+<rect class="tick-m" x="309.3" y="273" width="8" height="22" rx="3"/>
+<rect class="tick-m" x="371.0" y="273" width="8" height="22" rx="3"/>
+<rect class="tick-m" x="432.7" y="273" width="8" height="22" rx="3"/>
+<rect class="tick-m" x="494.3" y="273" width="8" height="22" rx="3"/>
+<rect class="tick-m" x="556.0" y="273" width="8" height="22" rx="3"/>
+<rect class="tick-m" x="617.7" y="273" width="8" height="22" rx="3"/>
+<rect class="tick-m" x="679.3" y="273" width="8" height="22" rx="3"/>
+<rect class="tick-m" x="741.0" y="273" width="8" height="22" rx="3"/>
+<rect class="tick-m" x="802.7" y="273" width="8" height="22" rx="3"/>
+<rect class="tick-m" x="864.3" y="273" width="8" height="22" rx="3"/>
+<rect class="tick-m" x="926.0" y="273" width="8" height="22" rx="3"/>
+<text class="t-small" x="190" y="314">12 months ago</text>
+<text class="t-small" x="560" y="314" text-anchor="middle">6 months</text>
+<text class="t-small" x="930" y="314" text-anchor="end">now</text>
+    </svg>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Dataset</th><th>Hourly</th><th>Daily</th><th>Weekly</th><th>Monthly</th><th>Reaches back</th></tr></thead>
+      <tbody>
+        <tr><td><b>Documents · Photos · Nextcloud · Apps</b></td><td class="mono">24</td><td class="mono">30</td><td class="mono">8</td><td class="mono">12</td><td>1 year</td></tr>
+        <tr><td><b>Music</b> (changes rarely)</td><td class="mono">0</td><td class="mono">30</td><td class="mono">4</td><td class="mono">6</td><td>6 months</td></tr>
+        <tr><td><b>Backups</b> (already backups)</td><td class="mono">0</td><td class="mono">14</td><td class="mono">4</td><td class="mono">3</td><td>3 months</td></tr>
+        <tr><td><b>media</b> pool (Movies, TV)</td><td colspan="4"><span class="chip no">none</span> disposable; snapshots would hold on to deleted movies</td><td>—</td></tr>
+        <tr><td><b>/other</b></td><td colspan="4"><span class="chip no">none</span> ext4 cannot snapshot</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="hostid">
+    <div class="card"><h3>What a snapshot costs</h3><p>Nothing when taken. It only keeps blocks that change <em>afterwards</em>. Photos and documents are mostly added to, rarely edited, so snapshots stay tiny. Today's 22 snapshots use 128 KB.</p></div>
+    <div class="card"><h3>The catch: deleted space comes back late</h3><p>Delete 50 GB of photos and the space returns only when the last snapshot holding them expires, up to 12 months later. To free it sooner, delete those snapshots by hand.</p></div>
+    <div class="card"><h3>Why not keep everything forever?</h3><p>Unlimited snapshots grow without bound and make the list unusable. CISA asks for at least 7 days of rollback. A year covers "I noticed months later".</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-copy">
+  <div class="eyebrow">Every night at 03:00</div>
+  <h2 id="h-copy">The nightly copy to tank500gb</h2>
+  <div class="diagram" role="img" aria-label="Diagram: sanoid takes snapshots on tank1tb. At 03:00 syncoid sends only the snapshots since last night to tank500gb, where the copies are read-only and sanoid only prunes.">
+    <svg viewBox="0 0 960 300" xmlns="http://www.w3.org/2000/svg">
+      <rect class="b-mirror" x="14" y="20" width="300" height="260" rx="10"/>
+      <text x="30" y="48"><tspan class="t-head t-nas">tank1tb</tspan><tspan class="t-small" dx="10">the live data</tspan></text>
+      <text class="t-mono" x="30" y="84">Documents</text><text class="t-mono" x="30" y="108">Photos</text><text class="t-mono" x="30" y="132">Music</text><text class="t-mono" x="30" y="156">Apps</text><text class="t-mono" x="30" y="180">Nextcloud</text>
+      <text class="t-small" x="30" y="204">Backups stays here only</text>
+      <rect class="b-panel" x="160" y="70" width="140" height="116" rx="8"/>
+      <text class="t-label" x="172" y="94">sanoid</text>
+      <text class="t-small" x="172" y="114">every 15 min</text>
+      <text class="t-small" x="172" y="132">takes snapshots</text>
+      <text class="t-small" x="172" y="150">and prunes old ones</text>
+      <text class="t-small" x="172" y="168">+ bookmark of last sent</text>
+      <text class="t-small" x="30" y="252">ZFS mirror · WD 1 TB + Toshiba 1 TB</text>
+
+      <path class="cable" d="M314 150 H 640"/>
+      <path class="cable" d="M626 140 L 640 150 L 626 160"/>
+      <rect class="b-panel" x="372" y="62" width="214" height="62" rx="8"/>
+      <text class="t-label" x="386" y="86">03:00 · syncoid</text>
+      <text class="t-small" x="386" y="106">syncoid-tank500gb.timer</text>
+      <text class="t-small" x="350" y="178">sends only the snapshots taken since</text>
+      <text class="t-small" x="350" y="196">last night: changed blocks, not whole files</text>
+      <text class="t-mono" x="350" y="222">tonight: ~33 KB, about 2 seconds</text>
+
+      <rect class="b-mirror" x="646" y="20" width="300" height="260" rx="10"/>
+      <text x="662" y="48"><tspan class="t-head t-nas">tank500gb</tspan><tspan class="t-small" dx="10">the copy</tspan></text>
+      <text class="t-mono" x="662" y="84">/tank500gb/Documents</text><text class="t-mono" x="662" y="108">/tank500gb/Photos</text><text class="t-mono" x="662" y="132">/tank500gb/Music</text><text class="t-mono" x="662" y="156">/tank500gb/Apps</text><text class="t-mono" x="662" y="180">/tank500gb/Nextcloud</text>
+      <text class="t-small t-deny" x="662" y="206">read-only: "Read-only file system"</text>
+      <text class="t-small" x="662" y="226">same snapshot history as the source;</text>
+      <text class="t-small" x="662" y="242">sanoid prunes here but never snapshots</text>
+      <text class="t-small" x="662" y="266">ZFS mirror · WD 640 GB + Seagate 500 GB</text>
+    </svg>
+  </div>
+  <div class="conf">
+    <div class="conf-row sect"><code>syncoid --no-sync-snap --create-bookmark tank1tb/Documents tank500gb/Documents</code><div class="why">The whole job, once per dataset, in <code>/usr/local/sbin/syncoid-tank500gb</code>.</div></div>
+    <div class="conf-row"><code>--no-sync-snap</code><div class="why">Send only sanoid's snapshots, no extra ones of its own. The copy ends up with the same hourly/daily/weekly/monthly history.</div></div>
+    <div class="conf-row"><code>--create-bookmark</code><div class="why">Leave a tiny marker on the source. Even if sanoid has pruned the snapshot sent last night, tomorrow's copy can still be incremental.</div></div>
+    <div class="conf-row"><code>readonly=on</code><div class="why">Set on every copy, so nothing edits tank500gb by accident. You can still browse and copy out.</div></div>
+    <div class="conf-row"><code>OnCalendar=03:00 · Persistent=true</code><div class="why">If MOTHERLODE was off at 03:00, the copy runs right after it boots.</div></div>
+  </div>
+  <p style="color:var(--muted);font-size:.95rem">Space: tank500gb holds about 450 GB, tank1tb about 899 GB. When the five copied datasets near 400 GB together, we drop one from the list.</p>
+</section>
+
+<section aria-labelledby="h-off">
+  <div class="eyebrow">You asked for an off switch</div>
+  <h2 id="h-off">Turn it off, on, or run it now</h2>
+  <div class="cmds">
+    <div class="cmd"><pre>sudo systemctl disable --now syncoid-tank500gb.timer</pre><div class="why"><b>Stop</b> the nightly copy. Copies already on tank500gb stay.</div></div>
+    <div class="cmd"><pre>sudo systemctl enable --now syncoid-tank500gb.timer</pre><div class="why"><b>Resume</b> it.</div></div>
+    <div class="cmd"><pre>sudo systemctl start syncoid-tank500gb.service</pre><div class="why"><b>Copy right now</b>, outside the schedule.</div></div>
+    <div class="cmd"><pre>sudo systemctl disable --now sanoid.timer</pre><div class="why">Stop <b>snapshots</b> (both taking and pruning).</div></div>
+    <div class="cmd"><pre>sudoedit /etc/sanoid/sanoid.conf</pre><div class="why">Change how many snapshots are kept. Picked up within 15 minutes.</div></div>
+    <div class="cmd"><pre>systemctl list-timers sanoid.timer syncoid-tank500gb.timer 'zfs-scrub*'</pre><div class="why">See every schedule, last run and next run.</div></div>
+    <div class="cmd"><pre>sudo journalctl -u syncoid-tank500gb</pre><div class="why">Read what the copy did each night.</div></div>
+  </div>
+  <div class="hostid">
+    <div class="card"><h3>Why timers, not cron</h3><p>systemd timers are the standard on current Debian, and Debian's sanoid package already ships one. A timer runs a missed job after boot, never starts a second copy while one is still running, logs to the journal, and every schedule shows in one command.</p></div>
+    <div class="card"><h3>The cron file you might spot</h3><p><code>/etc/cron.d/sanoid</code> comes with the package. It only runs on machines without systemd, so it never fires here.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-sched">
+  <div class="eyebrow">What runs when (local time, EDT)</div>
+  <h2 id="h-sched">The schedule</h2>
+  <div class="sched">
+    <div class="item"><div class="when">every 15 min</div><div class="what">sanoid checks</div><p>Takes whatever snapshot is due, prunes extras.</p></div>
+    <div class="item"><div class="when">every hour, :00</div><div class="what">hourly snapshot</div><p>Documents, Photos, Nextcloud, Apps.</p></div>
+    <div class="item"><div class="when">daily 19:59</div><div class="what">daily snapshot</div><p>23:59 UTC. Every snapshotted dataset.</p></div>
+    <div class="item"><div class="when">daily 03:00</div><div class="what">nightly copy</div><p>tank1tb → tank500gb.</p></div>
+    <div class="item"><div class="when">Mondays 19:30</div><div class="what">weekly snapshot</div><p>23:30 UTC.</p></div>
+    <div class="item"><div class="when">Sundays 02:00</div><div class="what">SMART short test</div><p>All six drives, about 2 minutes each. First one 2026-10-11.</p></div>
+    <div class="item"><div class="when">1st, ~00:00–01:00</div><div class="what">scrub, all 3 pools</div><p>Reads and verifies every block. Next 2026-11-01.</p></div>
+    <div class="item"><div class="when">last day of month, 20:00</div><div class="what">monthly snapshot</div><p>00:00 UTC on the 1st.</p></div>
+    <div class="item"><div class="when">15th, 04:00</div><div class="what">SMART long test</div><p>Full surface read inside each drive. Kept away from the scrubs.</p></div>
+  </div>
+  <p style="color:var(--muted);font-size:.95rem">Snapshot names are in UTC, so they read 4 hours ahead in summer and 5 in winter: <code>autosnap_2026-10-05_02:00:11_hourly</code> was taken at 22:00 EDT on Oct 4.</p>
+</section>
+
+<section aria-labelledby="h-restore">
+  <div class="eyebrow">Getting a file back</div>
+  <h2 id="h-restore">Restoring, and the test that proved it</h2>
+  <div class="flow">
+    <div class="stepbox"><div class="n">21:44 · write</div><p>Test file <code>restore-test.txt</code> created in Documents.</p></div>
+    <div class="stepbox"><div class="n">22:00 · snapshot</div><p>The timer took <code>…02:00:11_hourly</code> on its own.</p></div>
+    <div class="stepbox"><div class="n">delete</div><p><code>rm</code> the file. Gone from <code>/tank1tb/Documents</code>.</p></div>
+    <div class="stepbox"><div class="n">restore</div><p>Copied back from <code>.zfs/snapshot/…</code>. Same contents, owner <code>ghost:nas</code> and time.</p></div>
+    <div class="stepbox"><div class="n">copy check</div><p>Second nightly run sent ~33 KB. The file is readable on tank500gb.</p></div>
+  </div>
+  <div class="conf">
+    <div class="conf-row sect"><code>ls /tank1tb/Documents/.zfs/snapshot/</code><div class="why">Every snapshot is a read-only folder. Pick one by its time (UTC).</div></div>
+    <div class="conf-row"><code>cp -a …/.zfs/snapshot/&lt;snap&gt;/file /tank1tb/Documents/</code><div class="why">Copy one file or folder back. Nothing else changes.</div></div>
+    <div class="conf-row"><code>/tank500gb/Documents/</code><div class="why">If tank1tb is gone: the latest copy, plus its own <code>.zfs/snapshot/</code> history.</div></div>
+    <div class="conf-row"><code>zfs rollback -r tank1tb/Documents@&lt;snap&gt;</code><div class="why">Last resort: the whole dataset back in time. <b>Destroys everything newer.</b></div></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-nc">
+  <div class="eyebrow">Decision for Checkpoint 8</div>
+  <h2 id="h-nc">One Photos folder, not two</h2>
+  <div class="diagram" role="img" aria-label="Diagram: Windows P: drive and the phone's Nextcloud app both reach the single folder /tank1tb/Photos. Nextcloud attaches it via External Storage. /tank1tb/Nextcloud holds only Nextcloud's own data.">
+    <svg viewBox="0 0 960 230" xmlns="http://www.w3.org/2000/svg">
+      <rect class="b-win" x="14" y="24" width="210" height="64" rx="8"/>
+      <text class="t-label t-win" x="28" y="50">ZEPHYR · P: drive</text>
+      <text class="t-small" x="28" y="70">Samba</text>
+      <rect class="b-win" x="14" y="130" width="210" height="64" rx="8"/>
+      <text class="t-label t-win" x="28" y="156">Phone · Nextcloud app</text>
+      <text class="t-small" x="28" y="176">auto-upload</text>
+      <rect class="b-nas" x="270" y="130" width="230" height="64" rx="8"/>
+      <text class="t-label" x="284" y="156">Nextcloud</text>
+      <text class="t-small" x="284" y="176">External Storage app, "Local"</text>
+      <rect class="b-disk" x="560" y="60" width="380" height="80" rx="10"/>
+      <text class="t-head t-disk" x="578" y="92">/tank1tb/Photos</text>
+      <text class="t-small" x="578" y="116">the only photo folder · snapshotted · copied nightly</text>
+      <path class="wire-strong" d="M224 56 C 400 56, 420 90, 560 90"/>
+      <path class="wire" d="M224 162 H 270"/>
+      <path class="wire-strong" d="M500 162 C 530 162, 530 115, 560 115"/>
+      <rect class="b-deny" x="560" y="164" width="380" height="44" rx="8"/>
+      <text x="576" y="191"><tspan class="t-mono t-deny" font-weight="600">/tank1tb/Nextcloud</tspan><tspan class="t-small" dx="10">Nextcloud's own data only</tspan></text>
+    </svg>
+  </div>
+  <p style="color:var(--muted);font-size:.95rem">Same idea for Documents. To build in Checkpoint 8: <code>NEXTCLOUD_MOUNT=/tank1tb</code> so the containers can see the folders, and default ACLs giving both group <code>nas</code> and Nextcloud's user (uid 33) write access, so phone uploads stay editable from Windows. No backup change needed.</p>
+</section>
+
+<section aria-labelledby="h-tosh">
+  <div class="eyebrow">Found during testing</div>
+  <h2 id="h-tosh">The Toshiba can't finish a surface test</h2>
+  <div class="hostid">
+    <div class="card"><h3>What happened</h3><p>The long SMART test stopped within minutes: <code>Completed: read failure</code> at LBA 1904285592, 908 GiB into the 931.5 GiB disk, inside the ZFS partition. It is the same sector that has failed every test since hour 22,058. 24 sectors are waiting to be remapped, 0 remapped so far.</p></div>
+    <div class="card"><h3>Is data at risk?</h3><p>Not today. Nothing is stored there yet, the WD holds a full mirror copy, and tank500gb has a third copy every night. But it is the weakest disk in the pool that matters most.</p></div>
+    <div class="card"><h3>What to do</h3><p><b>Recommended: replace it</b> with any new ≥1 TB disk. One <code>zpool replace</code>, and the pool stays online while it copies from the WD. Writing over the bad sectors to force a remap is possible, but it is a disk-level write and needs your explicit go-ahead.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-cmds">
+  <div class="eyebrow">Every command, in order</div>
+  <h2 id="h-cmds">What was run for Checkpoint 3</h2>
+  <div class="phase">
+    <h3>Snapshots</h3>
+    <div class="cmds">
+      <div class="cmd"><pre>sudo apt-get install sanoid</pre><div class="why">Installs sanoid and syncoid 2.2.0 from Debian. Enables <code>sanoid.timer</code> (every 15 min).</div></div>
+      <div class="cmd"><pre>cat /etc/cron.d/sanoid
+grep -v '^#' /usr/share/sanoid/sanoid.defaults.conf</pre><div class="why">Check the cron file won't double-run (it only fires without systemd), and read the default times.</div></div>
+      <div class="cmd"><pre>sudo tee /etc/sanoid/sanoid.conf</pre><div class="why">Write the policy: 6 source datasets, 5 replica datasets, 5 templates.</div></div>
+      <div class="cmd"><pre>sudo sanoid --readonly --take-snapshots --verbose</pre><div class="why">Dry run: list what it <em>would</em> snapshot. Showed that templates cannot inherit from each other, so the replica numbers were written out in full.</div></div>
+      <div class="cmd"><pre>sudo systemctl start sanoid.service
+zfs list -t snapshot</pre><div class="why">First real run: 22 snapshots, one per tier on each dataset.</div></div>
+    </div>
+  </div>
+  <div class="phase">
+    <h3>Nightly copy</h3>
+    <div class="cmds">
+      <div class="cmd"><pre>sudo tee /usr/local/sbin/syncoid-tank500gb</pre><div class="why">The script: loop over 5 datasets, run syncoid, set the copy read-only, keep going if one fails.</div></div>
+      <div class="cmd"><pre>sudo tee /etc/systemd/system/syncoid-tank500gb.{service,timer}
+systemd-analyze verify …</pre><div class="why">The job (low CPU and disk priority) and its 03:00 schedule. <code>verify</code> checks the unit files for mistakes.</div></div>
+      <div class="cmd"><pre>sudo systemctl start syncoid-tank500gb.service
+zfs list -r tank500gb; zfs list -t bookmark</pre><div class="why">First run: full copy of 5 datasets, read-only, bookmarks on the source.</div></div>
+      <div class="cmd"><pre>sudo systemctl enable --now syncoid-tank500gb.timer</pre><div class="why">Arm the nightly schedule. Next run 03:00.</div></div>
+    </div>
+  </div>
+  <div class="phase">
+    <h3>Health checks</h3>
+    <div class="cmds">
+      <div class="cmd"><pre>sudo smartctl -t long /dev/disk/by-id/ata-TOSHIBA_…</pre><div class="why">Start the Toshiba's full self-test. It stopped at the bad sector (above).</div></div>
+      <div class="cmd"><pre>sudo cp -a /etc/smartd.conf /etc/smartd.conf.debian-default
+sudo sed -i '… -s (S/../../7/02|L/../15/./04) -W 4,45,55 …' /etc/smartd.conf</pre><div class="why">Back up, then add the self-test schedule and temperature warnings.</div></div>
+      <div class="cmd"><pre>sudo smartd -q onecheck
+sudo systemctl restart smartmontools</pre><div class="why">Check that smartd accepts the config, then reload it.</div></div>
+      <div class="cmd"><pre>sudo systemctl enable --now zfs-scrub-monthly@{tank1tb,tank500gb,media}.timer</pre><div class="why">Monthly scrubs, using units Debian already ships.</div></div>
+    </div>
+  </div>
+  <div class="phase">
+    <h3>Prove it</h3>
+    <div class="cmds">
+      <div class="cmd"><pre>echo … | sudo tee /tank1tb/Documents/restore-test.txt</pre><div class="why">Make something to lose.</div></div>
+      <div class="cmd"><pre>until … grep _02:00 …_hourly; do sleep 20; done</pre><div class="why">Wait for the 22:00 snapshot from the timer, not a hand-made one.</div></div>
+      <div class="cmd"><pre>sudo rm …/restore-test.txt
+sudo cp -a …/.zfs/snapshot/autosnap_…_02:00:11_hourly/restore-test.txt …</pre><div class="why">Delete it, then get it back from the snapshot.</div></div>
+      <div class="cmd"><pre>sudo systemctl start syncoid-tank500gb.service
+touch /tank500gb/Documents/x</pre><div class="why">Second copy run: incremental only. The <code>touch</code> fails, proving the copy is read-only.</div></div>
+      <div class="cmd"><pre>sudo sanoid --prune-snapshots --readonly --verbose</pre><div class="why">Pruning dry run: nothing to prune yet. It starts once more than 24 hourlies exist.</div></div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-src">
+  <div class="eyebrow">Where the numbers come from</div>
+  <h2 id="h-src">Sources</h2>
+  <p>There is no IEEE standard for backup retention. The standards and agencies set principles; the numbers come from practice.</p>
+  <div class="sources">
+    <div class="src"><b>CISA</b><span>3-2-1; offline, encrypted copies; test restores; keep at least 7 days of rollback.</span><a href="https://www.cisa.gov/audiences/small-and-medium-businesses/secure-your-business/back-up-business-data">cisa.gov</a></div>
+    <div class="src"><b>NIST SP 800-209</b><span>Storage security. Snapshots depend on their source; test backups regularly.</span><a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-209.pdf">nist.gov (PDF)</a></div>
+    <div class="src"><b>ISO/IEC 27001 A.8.13</b><span>Requires a written backup policy and restore tests. No numbers.</span></div>
+    <div class="src"><b>Grandfather-father-son</b><span>Daily, weekly, monthly tiers; many recent, fewer old.</span><a href="https://en.wikipedia.org/wiki/Backup_rotation_scheme">wikipedia.org</a></div>
+    <div class="src"><b>sanoid's own templates</b><span>Production 36h/30d/4w/3m; backup target 30h/90d/4w/12m.</span><a href="https://github.com/jimsalterjrs/sanoid/blob/master/sanoid.conf">github.com</a></div>
+    <div class="src"><b>Homelab practice</b><span>Roughly 24–36 hourly, 30 daily, 6–12 monthly; media unsnapshotted.</span><a href="https://freebsdfoundation.org/blog/zfs-automatic-snapshots-with-sanoid-on-freebsd/">FreeBSD Foundation</a><a href="https://sumguy.com/zfs-replication-syncoid-sanoid/">sumguy.com</a></div>
+  </div>
+</section>
+
+<footer>Source: <code>zfs/BACKUPS.md</code>, <code>zfs/sanoid.conf</code>, <code>systemd/syncoid-tank500gb.*</code>, <code>scripts/backup/syncoid-tank500gb.sh</code>. Companion pages: <code>zfs/zfs-explained.html</code>, <code>samba/samba-explained.html</code>.</footer>
+</div>
