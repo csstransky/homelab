@@ -82,7 +82,7 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 | 2 | ZFS: install + import existing pools + `/other` | 🟨 imported, reboot check pending | | `zfs/README.md`, `zfs/zfs-explained.html` |
 | 3 | Storage protection: SMART, scrubs, snapshots, replication | 🟨 running and tested; first scheduled SMART test 2026-10-11 | | `zfs/BACKUPS.md`, `zfs/backups-explained.html` |
 | 4 | Samba (Windows LAN access) | ✅ done | 2026-10-04 | `samba/README.md`, `samba/samba-explained.html` |
-| 5 | Docker foundation | ⬜ | | `docs/services/docker.md` |
+| 5 | Docker foundation | ✅ done (each app adds its own folder) | 2026-10-04 | `docs/services/docker.md`, `compose/README.md` |
 | 6 | Tailscale (remote access) | ⬜ | | `docs/services/tailscale.md` |
 | 7 | Jellyfin (movies on the LG TV) | ⬜ | | `compose/jellyfin/` |
 | 8 | Nextcloud AIO on `/tank1tb/Nextcloud` | ⬜ | | `nextcloud/` |
@@ -251,6 +251,10 @@ Steps:
 
 Done when:
 - `docker compose` works as `ghost`; convention documented in `docs/services/docker.md`.
+
+Result (2026-10-04): Docker 29.8.2 + Compose v5.6.0 from Docker's repo; `ghost` in the `docker`
+group (no new power: already has NOPASSWD sudo); `local` log driver with rotation; compose test
+bind-mounting `/tank1tb/Apps` passed. No `nvidia-container-toolkit`.
 
 ## Checkpoint 6 — Tailscale (remote access)
 

@@ -45,7 +45,8 @@ The goal is **reproducibility, not documentation for documentation's sake.**
 │   ├── ollama/
 │   └── models/
 │
-├── compose/                  # Docker Compose projects
+├── compose/                  # One folder per Docker app (recipe in compose/README.md)
+├── docker/                   # daemon.json (Docker engine config)
 ├── nextcloud/                # Nextcloud configuration
 ├── samba/                    # Samba config, README, samba-explained.html (visual guide)
 ├── zfs/                      # ZFS README, BACKUPS.md, sanoid.conf, visual guides
