@@ -1,5 +1,8 @@
 # 2026-09-28 — Hard freeze during Checkpoint 1 commit
 
+> **2026-10-04:** a ZFS kernel panic with two single-bit corruptions points at RAM. See
+> `2026-10-04-ZFS-PANIC.md`. memtest86+ is now the top priority.
+
 ## Symptoms
 
 - At roughly 23:19 EDT on 2026-09-28 MOTHERLODE froze completely while a Claude Code

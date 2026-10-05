@@ -137,7 +137,10 @@ A mirror with one member missing imports `DEGRADED`. That is fine for reading da
 ZFS caches reads in RAM (the ARC). On this box the ceiling is `c_max` = 14.4 GB of 16 GB
 (`/proc/spl/kstat/zfs/arcstats`). The ARC shrinks under memory pressure, but once Ollama and
 Docker run alongside, consider capping it (e.g. `options zfs zfs_arc_max=<bytes>` in
-`/etc/modprobe.d/zfs.conf`). Not changed yet.
+`/etc/modprobe.d/zfs.conf`). **Capped at 8 GiB on 2026-10-04** (`options zfs zfs_arc_max=8589934592`
+in `/etc/modprobe.d/zfs.conf`, initramfs updated) to leave room for Nextcloud and Jellyfin.
+The live shrink exposed a memory fault and the kernel panicked (`docs/recovery/2026-10-04-ZFS-PANIC.md`);
+the cap itself is not the cause.
 
 ## Verification (2026-10-04)
 
