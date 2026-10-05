@@ -50,9 +50,9 @@ Three planning documents exist. Later documents override earlier ones where they
 | Ollama | installed and running (`ollama.service`) |
 | SSH | `ssh.service` running |
 | Time | America/New_York, NTP synchronized |
-| ZFS software | **not installed** (`zfsutils-linux`, `zfs-dkms` absent) |
+| ZFS software | **not installed** (`zfsutils-linux`, `zfs-dkms` absent). 2026-10-04: 2.3.9 installed, pools imported (Checkpoint 2) |
 | ZFS on disk | pool labels present and intact: `tank1tb`, `tank500gb`, `media` |
-| `/other` | ext4 partition present (UUID `5250af8d-6988-4201-9c8c-bedd00c234b1`), **not in fstab, not mounted** |
+| `/other` | ext4 partition present (UUID `5250af8d-6988-4201-9c8c-bedd00c234b1`), **not in fstab, not mounted**. 2026-10-04: in fstab and mounted |
 | Samba | **not installed**; `nas` group does not exist; `ghost` not in `nas` |
 | Docker | **not installed**; `ghost` not in `docker` |
 | Tailscale | **not installed** |
@@ -79,7 +79,7 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 |---|---|---|---|---|
 | 0 | Source-of-truth reconciliation + this file | ✅ done | 2026-09-28 | this file |
 | 1 | Debian foundation | ✅ done (Windows SSH test pending) | 2026-09-28 | `docs/hardware/MOTHERLODE.md`, `docs/architecture/network.md` |
-| 2 | ZFS: install + import existing pools + `/other` | ⬜ | | `zfs/README.md` |
+| 2 | ZFS: install + import existing pools + `/other` | 🟨 imported, reboot check pending | | `zfs/README.md` |
 | 3 | Storage protection: SMART, scrubs, snapshots, replication | ⬜ | | `zfs/SNAPSHOTS.md`, `scripts/maintenance/` |
 | 4 | Samba (Windows LAN access) | ⬜ | | `samba/` |
 | 5 | Docker foundation | ⬜ | | `docs/services/docker.md` |
@@ -141,9 +141,24 @@ Steps:
 8. Write `zfs/README.md`: pools, by-id members, datasets, properties, import procedure.
 
 Done when:
-- All three pools ONLINE with zero errors after a reboot, mounted where expected.
-- `/other` mounted from fstab after reboot.
-- `zfs/README.md` committed with the exact by-id → pool mapping.
+- [ ] All three pools ONLINE with zero errors after a reboot, mounted where expected.
+- [ ] `/other` mounted from fstab after reboot.
+- [x] `zfs/README.md` committed with the exact by-id → pool mapping.
+
+Notes 2026-10-04:
+- Step 1 was done on 2026-09-28 (the DKMS build was running during the hard freeze, and
+  `dpkg --configure -a` finished it). `zfs` 2.3.9 loads.
+- Before importing, `kernel.hung_task_panic` went back to 0 in
+  `/etc/sysctl.d/90-lockup-panic.conf`, so slow I/O from the Toshiba or a scrub cannot panic the NAS.
+- All three pools needed `-f`: they were *last accessed by another system*, which is the old
+  install's hostid. Imported by-id into `/etc/zfs/zpool.cache`, all ONLINE. The first scrubs
+  of all three found 0 errors, but the pools are nearly empty.
+- `/dev/sr0 /media/cdrom0` fstab line commented out; `/media/cdrom0` and `/media/cdrom` removed.
+- `/other` is in fstab by UUID and mounted. Its journal was replayed on the first mount.
+- The ZFS boot units were already enabled by the package. Still to do: reboot and confirm that
+  pools, `/other` and the .59 address all come back.
+- The data directories are owned by `root:1001`, the old `nas` GID. Checkpoint 4 must use
+  `groupadd -g 1001 nas`.
 
 ## Checkpoint 3 — Storage protection
 
@@ -173,7 +188,7 @@ Rebuild Report sections 22–36. Recreate the documented configuration exactly.
 
 Steps:
 1. `apt install samba smbclient`.
-2. `groupadd nas`; `usermod -aG nas ghost`.
+2. `groupadd -g 1001 nas` (GID matches the existing directory ownership, see `zfs/README.md`); `usermod -aG nas ghost`.
 3. Ownership `root:nas`, mode `2775` on `/tank1tb/{Documents,Photos,Music}`, `/media`,
    `/media/{Movies,TV,Music}`, `/other`.
 4. Write `/etc/samba/smb.conf` from the Rebuild Report (shares: Documents, Photos, Music, Media, Other).
