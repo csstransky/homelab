@@ -86,9 +86,10 @@ it (`EXT4-fs (sde2): recovery complete`).
 `zfs-mount`, `zfs-zed`, `zfs-share`, `zfs-volume-wait`, `zfs.target`.
 `zfs-import-scan` stays disabled. Scrub timers come in Checkpoint 3.
 
-Debian's installer fstab line `/dev/sr0 /media/cdrom0` was commented out, and the empty
-`/media/cdrom0` directory and `/media/cdrom` symlink were removed, so the `media` pool mounts
-on an empty `/media`. Backup of the original: `/etc/fstab.bak-2026-10-04`.
+Debian's installer put the DVD drive at `/dev/sr0 /media/cdrom0`, inside the `media` pool's
+mountpoint. The line now points at `/mnt/cdrom`, and the empty `/media/cdrom0` directory and
+`/media/cdrom` symlink were removed, so the pool mounts on an empty `/media`. Keep anything
+non-ZFS out of `/media`. Backup of the original: `/etc/fstab.bak-2026-10-04`.
 
 ## Import procedure (fresh OS install, or pools missing after boot)
 

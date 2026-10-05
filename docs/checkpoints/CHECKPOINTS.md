@@ -153,7 +153,9 @@ Notes 2026-10-04:
 - All three pools needed `-f`: they were *last accessed by another system*, which is the old
   install's hostid. Imported by-id into `/etc/zfs/zpool.cache`, all ONLINE. The first scrubs
   of all three found 0 errors, but the pools are nearly empty.
-- `/dev/sr0 /media/cdrom0` fstab line commented out; `/media/cdrom0` and `/media/cdrom` removed.
+- The `/dev/sr0 /media/cdrom0` fstab line was moved, not dropped: the DVD drive is now at `/mnt/cdrom`, outside
+  the ZFS `media` pool. `/media/cdrom0` and `/media/cdrom` were removed. The drive is used for ripping
+  DVDs into `/media/Movies` (`docs/services/dvd-ripping.md`).
 - `/other` is in fstab by UUID and mounted. Its journal was replayed on the first mount.
 - The ZFS boot units were already enabled by the package. Still to do: reboot and confirm that
   pools, `/other` and the .59 address all come back.
@@ -241,8 +243,10 @@ Steps:
 1. `compose/jellyfin/compose.yaml`: official image, config in `/tank1tb/Apps/jellyfin`,
    `/media/Movies`, `/media/TV`, `/media/Music` mounted read-only, host networking or port 8096.
 2. Library structure: `Movies/<Title> (Year)/<file>`, `TV/<Show>/Season 01/<file>`.
+   DVDs are ripped on MOTHERLODE's own drive into `/media/Movies` (`docs/services/dvd-ripping.md`).
 3. Install the Jellyfin app on the LG webOS TV; connect over the LAN; play a file. Prefer Direct Play.
 4. If transcoding is needed, add NVENC via `nvidia-container-toolkit` (proprietary driver is fine for this).
+   While the GTX 1050 Ti is out, the option is Intel Quick Sync on the HD 530 (`/dev/dri`).
 5. Remote playback test over Tailscale from the phone.
 
 Done when:
