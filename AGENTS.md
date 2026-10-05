@@ -37,7 +37,8 @@ Work one checkpoint at a time and update its status there.
 | Architecture    | x86_64                          |
 | CPU             | Intel Core i7-6700              |
 | RAM             | 16 GiB                          |
-| GPU             | NVIDIA GeForce GTX 1050 Ti 4 GB |
+| GPU             | NVIDIA GeForce GTX 1050 Ti 4 GB — **removed 2026-10-04, untested** (`docs/hardware/GPU.md`) |
+| Display         | Intel HD Graphics 530 (iGPU, `i915`) |
 | Primary user    | `ghost`                         |
 | Boot/storage OS | SSD                             |
 | Data storage    | ZFS `/tank1tb`, `/tank500gb`, `/media`; ext4 `/other` |
@@ -175,6 +176,13 @@ NVIDIA GeForce GTX 1050 Ti
 Pascal architecture
 ```
 
+**Status (2026-10-04): the card is physically removed and its hardware is untested.**
+The display runs on the Intel HD 530 iGPU and Ollama runs CPU-only. The NVIDIA packages
+stay installed, so `NVRM: No NVIDIA GPU found` at boot is expected. Do not "fix" it by
+removing packages. The card returns as **compute-only** (no display, `multi-user.target`)
+once MOTHERLODE is a strict NAS, after the test procedure in `docs/hardware/GPU.md` passes.
+Do not describe the GPU as working or verified until then.
+
 The GTX 1050 Ti requires the proprietary NVIDIA kernel module.
 
 **Do NOT install the NVIDIA open kernel module on this machine.**
@@ -226,7 +234,7 @@ Use when:
 * additional local reasoning capability is useful
 * slower inference is acceptable
 
-It is substantially slower on the GTX 1050 Ti than Qwen3 4B.
+It is substantially slower on the GTX 1050 Ti than Qwen3 4B, and slower still while the GPU is out and Ollama is CPU-only.
 
 ### Cloud models
 

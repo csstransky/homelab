@@ -6,7 +6,7 @@ MOTHERLODE has a hybrid AI setup consisting of:
 
 * Ollama for local inference
 * Qwen3 local models
-* NVIDIA GTX 1050 Ti GPU acceleration
+* NVIDIA GTX 1050 Ti GPU acceleration (**currently unavailable**: card removed 2026-10-04, Ollama is CPU-only until it returns compute-only. See `docs/hardware/GPU.md`)
 * Pi coding agent
 * Cloud AI providers through Pi
 
@@ -19,7 +19,7 @@ The goal is to have a useful local AI system while retaining cloud models for wo
 ```text
 CPU: Intel Core i7-6700
 RAM: 16 GiB
-GPU: NVIDIA GeForce GTX 1050 Ti
+GPU: NVIDIA GeForce GTX 1050 Ti (removed 2026-10-04, untested)
 VRAM: 4 GiB
 OS: Debian 13 Trixie
 ```

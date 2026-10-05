@@ -75,7 +75,8 @@ The goal is **reproducibility, not documentation for documentation's sake.**
 HP Z240 Tower
 Intel Core i7-6700
 16 GiB RAM
-NVIDIA GeForce GTX 1050 Ti 4 GB
+NVIDIA GeForce GTX 1050 Ti 4 GB (removed 2026-10-04, untested; see docs/hardware/GPU.md)
+Intel HD Graphics 530 (display)
 Debian 13 Trixie
 ```
 
