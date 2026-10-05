@@ -55,6 +55,7 @@ svg text { font-family: var(--f-body); fill: var(--ink); }
 svg .t-mono { font-family: var(--f-mono); font-size: 12px; }
 svg .t-small { font-size: 12px; fill: var(--muted); }
 svg .t-head { font-family: var(--f-display); font-weight: 700; font-size: 17px; }
+svg .t-label { font-size: 14px; font-weight: 600; }
 svg .t-win { fill: var(--win); } svg .t-nas { fill: var(--nas); } svg .t-disk { fill: var(--disk); } svg .t-deny { fill: var(--deny); }
 svg .b-win { fill: var(--win-soft); stroke: var(--win); stroke-width: 1.5; }
 svg .b-nas { fill: var(--nas-soft); stroke: var(--nas); stroke-width: 1.5; }
@@ -172,10 +173,10 @@ svg .wire-os { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasha
 
       <!-- tank1tb disks -->
       <rect class="b-warn" x="14" y="34" width="226" height="58" rx="8"/>
-      <text x="26" y="56" font-weight="600">Toshiba DT01ACA100 · 1 TB</text>
+      <text x="26" y="56" class="t-label">Toshiba DT01ACA100 · 1 TB</text>
       <text class="t-small t-deny" x="26" y="76">24 pending sectors · watch it</text>
       <rect class="b-disk" x="14" y="102" width="226" height="58" rx="8"/>
-      <text x="26" y="124" font-weight="600">WD Blue WD10EZEX · 1 TB</text>
+      <text x="26" y="124" class="t-label">WD Blue WD10EZEX · 1 TB</text>
       <text class="t-small" x="26" y="144">healthy · 11,177 h</text>
 
       <rect class="b-mirror" x="290" y="50" width="220" height="94" rx="10"/>
@@ -202,10 +203,10 @@ svg .wire-os { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasha
 
       <!-- tank500gb -->
       <rect class="b-disk" x="14" y="224" width="226" height="58" rx="8"/>
-      <text x="26" y="246" font-weight="600">Seagate ST500DM002 · 500 GB</text>
+      <text x="26" y="246" class="t-label">Seagate ST500DM002 · 500 GB</text>
       <text class="t-small" x="26" y="266">healthy · 124 h</text>
       <rect class="b-disk" x="14" y="292" width="226" height="110" rx="8"/>
-      <text x="26" y="314" font-weight="600">WD Blue WD6400AAKS · 640 GB</text>
+      <text x="26" y="314" class="t-label">WD Blue WD6400AAKS · 640 GB</text>
       <rect class="b-panel" x="26" y="324" width="202" height="30" rx="5"/>
       <text class="t-mono" x="36" y="344">part1 · 466 GB</text>
       <rect class="b-panel" x="26" y="362" width="202" height="30" rx="5"/>
@@ -224,9 +225,8 @@ svg .wire-os { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasha
 
       <!-- other -->
       <rect class="b-os" x="290" y="356" width="220" height="50" rx="10"/>
-      <text class="t-head" x="304" y="380">ext4</text>
-      <text class="t-small" x="350" y="380">plain Linux filesystem, not ZFS</text>
-      <text class="t-small" x="304" y="398">label "other" · in /etc/fstab</text>
+      <text x="304" y="378"><tspan class="t-head">ext4</tspan><tspan class="t-small" dx="10">plain Linux filesystem</tspan></text>
+      <text class="t-small" x="304" y="397">not ZFS · label "other" · in fstab</text>
       <path class="wire" d="M228 377 H 290"/>
       <rect class="b-panel" x="550" y="356" width="260" height="50" rx="8"/>
       <text class="t-mono" x="564" y="386">/other</text>
@@ -235,11 +235,10 @@ svg .wire-os { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasha
 
       <!-- media -->
       <rect class="b-disk" x="14" y="422" width="226" height="58" rx="8"/>
-      <text x="26" y="444" font-weight="600">Seagate ST2000DX002 · 2 TB</text>
+      <text x="26" y="444" class="t-label">Seagate ST2000DX002 · 2 TB</text>
       <text class="t-small" x="26" y="464">past read errors · disposable only</text>
       <rect class="b-disk" x="290" y="424" width="220" height="56" rx="10"/>
-      <text class="t-head t-disk" x="304" y="448">media</text>
-      <text x="370" y="448">single disk · 1.81 TB</text>
+      <text x="304" y="448"><tspan class="t-head t-disk">media</tspan><tspan class="t-small" dx="10">single disk · 1.81 TB</tspan></text>
       <text class="t-small" x="304" y="468">no copy: a dead disk loses it</text>
       <path class="wire-disk" d="M240 451 H 290"/>
       <rect class="b-panel" x="550" y="424" width="260" height="56" rx="8"/>
@@ -250,7 +249,7 @@ svg .wire-os { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasha
 
       <!-- os -->
       <rect class="b-os" x="14" y="496" width="226" height="52" rx="8"/>
-      <text x="26" y="518" font-weight="600">Crucial MX200 SSD · 250 GB</text>
+      <text x="26" y="518" class="t-label">Crucial MX200 SSD · 250 GB</text>
       <text class="t-small" x="26" y="536">Debian 13 · 25% life left</text>
       <path class="wire-os" d="M240 522 H 290"/>
       <text class="t-small" x="300" y="527">operating system only · ZFS never touches it</text>

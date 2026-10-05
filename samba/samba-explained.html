@@ -55,6 +55,7 @@ svg text { font-family: var(--f-body); fill: var(--ink); }
 svg .t-mono { font-family: var(--f-mono); font-size: 12px; }
 svg .t-small { font-size: 12px; fill: var(--muted); }
 svg .t-head { font-family: var(--f-display); font-weight: 700; font-size: 17px; }
+svg .t-label { font-size: 14px; font-weight: 600; }
 svg .t-win { fill: var(--win); } svg .t-nas { fill: var(--nas); } svg .t-disk { fill: var(--disk); } svg .t-deny { fill: var(--deny); }
 svg .b-win { fill: var(--win-soft); stroke: var(--win); stroke-width: 1.5; }
 svg .b-nas { fill: var(--nas-soft); stroke: var(--nas); stroke-width: 1.5; }
@@ -170,21 +171,20 @@ footer { color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--lin
 
       <!-- MOTHERLODE -->
       <rect class="b-nas-out" x="300" y="14" width="646" height="402" rx="12"/>
-      <text class="t-head t-nas" x="318" y="40">MOTHERLODE</text>
-      <text class="t-small" x="430" y="40">Debian 13 · 192.168.1.59</text>
+      <text x="318" y="40"><tspan class="t-head t-nas">MOTHERLODE</tspan><tspan class="t-small" dx="12">Debian 13 · 192.168.1.59</tspan></text>
 
       <!-- smbd -->
       <rect class="b-nas" x="318" y="62" width="168" height="290" rx="8"/>
       <text class="t-head" x="332" y="88">smbd</text>
       <text class="t-small" x="332" y="106">the Samba server</text>
       <rect class="b-panel" x="330" y="120" width="144" height="56" rx="6"/>
-      <text x="342" y="142" font-weight="600">1 · Password?</text>
+      <text x="342" y="142" class="t-label">1 · Password?</text>
       <text class="t-small" x="342" y="162">Samba's own list</text>
       <rect class="b-panel" x="330" y="186" width="144" height="56" rx="6"/>
-      <text x="342" y="208" font-weight="600">2 · Allowed user?</text>
+      <text x="342" y="208" class="t-label">2 · Allowed user?</text>
       <text class="t-small" x="342" y="228">only <tspan class="t-mono">ghost</tspan></text>
       <rect class="b-panel" x="330" y="252" width="144" height="56" rx="6"/>
-      <text x="342" y="274" font-weight="600">3 · Which share?</text>
+      <text x="342" y="274" class="t-label">3 · Which share?</text>
       <text class="t-small" x="342" y="294">looks it up →</text>
       <text class="t-small t-deny" x="332" y="340">guest / wrong pw: refused</text>
       <path class="wire" d="M300 205 H 318"/>
@@ -202,20 +202,17 @@ footer { color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--lin
 
       <!-- disks -->
       <rect class="b-disk" x="730" y="62" width="200" height="150" rx="8"/>
-      <text class="t-head t-disk" x="744" y="86">tank1tb</text>
-      <text class="t-small" x="814" y="86">ZFS mirror, 2 disks</text>
+      <text x="744" y="86"><tspan class="t-head t-disk">tank1tb</tspan><tspan class="t-small" dx="10">ZFS mirror, 2 disks</tspan></text>
       <text class="t-mono" x="744" y="138">/tank1tb/Documents</text>
       <text class="t-mono" x="744" y="178">/tank1tb/Photos</text>
       <text class="t-mono" x="744" y="200">/tank1tb/Music</text>
 
       <rect class="b-disk" x="730" y="232" width="200" height="56" rx="8"/>
-      <text class="t-head t-disk" x="744" y="254">media</text>
-      <text class="t-small" x="800" y="254">ZFS, 1 disk</text>
+      <text x="744" y="254"><tspan class="t-head t-disk">media</tspan><tspan class="t-small" dx="10">ZFS, 1 disk</tspan></text>
       <text class="t-mono" x="744" y="276">/media</text>
 
       <rect class="b-disk" x="730" y="298" width="200" height="56" rx="8"/>
-      <text class="t-head t-disk" x="744" y="320">other</text>
-      <text class="t-small" x="800" y="320">ext4 partition</text>
+      <text x="744" y="320"><tspan class="t-head t-disk">other</tspan><tspan class="t-small" dx="10">ext4 partition</tspan></text>
       <text class="t-mono" x="744" y="342">/other</text>
 
       <path class="wire" d="M632 134 H 740"/>
@@ -226,8 +223,7 @@ footer { color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--lin
 
       <!-- not shared -->
       <rect class="b-deny" x="508" y="366" width="422" height="38" rx="6"/>
-      <text class="t-deny" x="522" y="390" font-weight="600">/tank1tb/Nextcloud</text>
-      <text class="t-small" x="660" y="390">deliberately not shared; Nextcloud owns it</text>
+      <text x="522" y="390"><tspan class="t-mono t-deny" font-weight="600">/tank1tb/Nextcloud</tspan><tspan class="t-small" dx="12">deliberately not shared; Nextcloud owns it</tspan></text>
 
       <text class="t-small" x="318" y="384">file lands as</text>
       <text class="t-mono" x="318" y="402">ghost:nas  rw-rw-r--</text>
