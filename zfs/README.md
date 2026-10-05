@@ -43,7 +43,8 @@ tank1tb/Nextcloud   /tank1tb/Nextcloud  NOT a Samba share
 tank1tb/Apps        /tank1tb/Apps       persistent container data
 ```
 
-`tank500gb` and `media` have no child datasets. `/media/Movies`, `/media/TV` and
+`media` has no child datasets. `tank500gb` holds read-only copies of Documents, Photos, Music,
+Apps and Nextcloud, made nightly by syncoid (`zfs/BACKUPS.md`). `/media/Movies`, `/media/TV` and
 `/media/Music` are plain directories. `/media/ghost` is a leftover udisks automount
 directory from the old install.
 
@@ -87,7 +88,8 @@ it (`EXT4-fs (sde2): recovery complete`).
 `zfs-import-cache.service` imports every pool listed in `/etc/zfs/zpool.cache`, then
 `zfs-mount.service` mounts them. Enabled units: `zfs-import-cache`, `zfs-import.target`,
 `zfs-mount`, `zfs-zed`, `zfs-share`, `zfs-volume-wait`, `zfs.target`.
-`zfs-import-scan` stays disabled. Scrub timers come in Checkpoint 3.
+`zfs-import-scan` stays disabled. Snapshots, the nightly copy, scrub timers and SMART tests:
+`zfs/BACKUPS.md` (Checkpoint 3).
 
 Debian's installer put the DVD drive at `/dev/sr0 /media/cdrom0`, inside the `media` pool's
 mountpoint. The line now points at `/mnt/cdrom`, and the empty `/media/cdrom0` directory and
@@ -124,7 +126,9 @@ A mirror with one member missing imports `DEGRADED`. That is fine for reading da
   and short self-tests fail reading LBA 1904285592 (about 908 GiB into a 931.5 GiB disk).
   The 2026-10-04 scrubs finished in seconds with 0 errors, but they only read allocated
   blocks and the pools are nearly empty, so the bad area was **not** exercised. ZFS repairs
-  it from the WD side when data lands there. A long SMART test is due in Checkpoint 3. Plan to replace this drive.
+  it from the WD side when data lands there. On 2026-10-04 a SMART long test stopped at that
+  same LBA (`Completed: read failure`), so the drive cannot complete a surface test. Plan to
+  replace it (`zfs/BACKUPS.md`).
 - **Seagate ST2000DX002** (`media`): clean now, but it has a history of UNC read errors.
   Disposable data only.
 

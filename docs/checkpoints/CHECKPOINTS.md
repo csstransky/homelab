@@ -80,7 +80,7 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 | 0 | Source-of-truth reconciliation + this file | ✅ done | 2026-09-28 | this file |
 | 1 | Debian foundation | ✅ done (Windows SSH test pending) | 2026-09-28 | `docs/hardware/MOTHERLODE.md`, `docs/architecture/network.md` |
 | 2 | ZFS: install + import existing pools + `/other` | 🟨 imported, reboot check pending | | `zfs/README.md`, `zfs/zfs-explained.html` |
-| 3 | Storage protection: SMART, scrubs, snapshots, replication | ⬜ deferred by user until after Samba; still due before real data | | `zfs/SNAPSHOTS.md`, `scripts/maintenance/` |
+| 3 | Storage protection: SMART, scrubs, snapshots, replication | 🟨 running and tested; first scheduled SMART test 2026-10-11 | | `zfs/BACKUPS.md`, `zfs/backups-explained.html` |
 | 4 | Samba (Windows LAN access) | ✅ done | 2026-10-04 | `samba/README.md`, `samba/samba-explained.html` |
 | 5 | Docker foundation | ⬜ | | `docs/services/docker.md` |
 | 6 | Tailscale (remote access) | ⬜ | | `docs/services/tailscale.md` |
@@ -179,10 +179,25 @@ Steps:
 6. Commit sanitized sanoid config and timer units under `zfs/` and `systemd/`.
 
 Done when:
-- `smartctl -l selftest` shows a completed test scheduled by smartd.
-- Scrub timers enabled and one manual scrub of each pool completes with 0 errors.
-- Snapshots appear on schedule; a test file restored from a snapshot.
-- A replicated dataset exists on `tank500gb` and a second syncoid run is incremental.
+- [ ] `smartctl -l selftest` shows a completed test scheduled by smartd. (First one: Sunday 2026-10-11 02:00.)
+- [x] Scrub timers enabled and one manual scrub of each pool completes with 0 errors.
+- [x] Snapshots appear on schedule; a test file restored from a snapshot.
+- [x] A replicated dataset exists on `tank500gb` and a second syncoid run is incremental.
+
+Notes 2026-10-04 (details and evidence: `zfs/BACKUPS.md`):
+- Retention agreed with the user after research (CISA 3-2-1, NIST SP 800-209, GFS rotation, sanoid's
+  templates; there is no IEEE retention standard): Documents/Photos/Nextcloud/Apps 24h/30d/8w/12m,
+  Music 0/30/4/6, Backups 0/14/4/3, `media` none.
+- `sanoid` 2.2.0 from Debian; `sanoid.timer` every 15 min. Snapshot names are UTC.
+- Nightly copy: `syncoid-tank500gb.timer` at 03:00 → `tank500gb/{Documents,Photos,Music,Apps,Nextcloud}`,
+  read-only, pruned to the same counts. The user wanted the off switch documented:
+  `sudo systemctl disable --now syncoid-tank500gb.timer`.
+- Scheduling with systemd timers, not cron (catch-up after downtime, no overlap, journal logs).
+- Scrubs: `zfs-scrub-monthly@{tank1tb,tank500gb,media}.timer` enabled, next 2026-11-01.
+- smartd: short Sundays 02:00, long on the 15th at 04:00. Mail alerts wait for Checkpoint 13.
+- The Toshiba long test stopped at the first bad sector (LBA 1904285592, 908 GiB in), so a full surface test
+  cannot complete on that disk. Recommendation: replace it (`zfs/BACKUPS.md`, "Toshiba long test").
+- Still not a full backup: everything is in one box until Checkpoint 11 adds an off-site, encrypted copy.
 
 ## Checkpoint 4 — Samba (Windows access on the LAN)
 
@@ -279,9 +294,20 @@ Steps:
 1. Update `nextcloud/compose.yaml`: `NEXTCLOUD_DATADIR=/tank1tb/Nextcloud`, volume path likewise.
    Keep `APACHE_IP_BINDING=127.0.0.1`, `APACHE_PORT=11000`.
 2. Decide the front door: Tailscale Serve / Funnel to port 11000, or a reverse proxy. Prefer Tailscale-only first.
+   **Decision 2026-10-04 (user): one folder per kind of file.** No second Photos or Documents inside
+   Nextcloud. Attach the existing `/tank1tb/Documents`, `/tank1tb/Photos` (and `Music` if wanted) to
+   Nextcloud with the **External Storage** app ("Local" type), and point the phone app's auto-upload at the
+   attached Photos folder. `/tank1tb/Nextcloud` then holds only Nextcloud's internal data and stays out of
+   Samba. Needs:
+   - `NEXTCLOUD_MOUNT=/tank1tb` in `nextcloud/compose.yaml`, so AIO containers can see the host folders.
+   - Default POSIX ACLs on the attached folders, giving both group `nas` and uid 33 (`www-data` in the
+     container) rwx, so files uploaded from the phone stay writable from Windows and vice versa
+     (`acltype=posixacl` is already set on the pool).
+   - External storage set to check for changes on access, so files added over Samba appear in Nextcloud.
+   No backup change needed: these folders are already snapshotted and copied nightly.
 3. Deploy; complete AIO setup using the Tailscale hostname as the domain.
 4. Test upload/download in the browser from the LAN and remotely.
-5. Confirm `/tank1tb/Nextcloud` is snapshotted (Checkpoint 3) and still not a Samba share.
+5. Confirm `/tank1tb/Nextcloud` is snapshotted (Checkpoint 3, done) and still not a Samba share.
 
 Done when:
 - Nextcloud reachable remotely over Tailscale, files landing under `/tank1tb/Nextcloud`.

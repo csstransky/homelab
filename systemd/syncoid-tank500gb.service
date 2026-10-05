@@ -1,0 +1,12 @@
+[Unit]
+Description=Copy tank1tb datasets to tank500gb (syncoid)
+Documentation=file:///home/ghost/homelab/zfs/BACKUPS.md
+Requires=zfs.target
+After=zfs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/syncoid-tank500gb
+Environment=HOME=/root
+Nice=10
+IOSchedulingClass=idle
