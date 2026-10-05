@@ -106,10 +106,11 @@ re-committed. `network.md` was rewritten from the facts already in those two fil
    With this, a CPU lockup produces a stack trace in pstore instead of silence.
 3. **Commit to Git early and often**; the repo is the record of the build and a crash
    during a commit is recoverable, but uncommitted new files are not.
-4. The Toshiba 1 TB (`ata-TOSHIBA_DT01ACA100_Z5B2VRDNS`, future `tank1tb` mirror member)
-   still reports **24 pending sectors** and smartd now warns about it on every start.
-   Unrelated to the freeze (it is not the OS disk) but do not put it in the mirror
-   without a full SMART long test first (Checkpoint 3).
+4. The Toshiba 1 TB (`ata-TOSHIBA_DT01ACA100_Z5B2VRDNS`) still reports **24 pending sectors**
+   and smartd warns about it on every start. It is unrelated to the freeze (it is not the OS
+   disk). Correction 2026-10-04: it has been a `tank1tb` mirror member since the pool was
+   created on 2026-09-27, so "keep it out of the mirror" was never possible. Instead, run a
+   SMART long test in Checkpoint 3 and plan to replace it (`zfs/README.md`).
 5. smartd's mail hook fails because `/usr/bin/mail` is absent; install `bsd-mailx` or
    point `smartd.conf` at a different notifier during Checkpoint 3.
 
@@ -278,6 +279,8 @@ If it freezes again:
 slow I/O (a dying disk retrying, a heavy scrub). The Toshiba 1 TB still has pending sectors.
 Remove that line, or raise `kernel.hung_task_timeout_secs`, before pools are imported and in
 real use.
+**Done 2026-10-04:** `kernel.hung_task_panic = 0` set before the pools were imported. The
+other panic settings (`hardlockup`, `softlockup`, `panic_on_oops`) stay in place.
 
 ## 2026-10-04 (later): GPU removed
 
