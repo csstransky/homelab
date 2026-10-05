@@ -3,6 +3,9 @@
 **Pools created:** 2026-09-27 (previous Debian install, see `zpool history`).
 **Re-imported:** 2026-10-04 on the current Debian 13 install (Checkpoint 2).
 
+Visual walk-through (disk map, pool roles, settings, boot order, every command): open
+`zfs/zfs-explained.html` in a browser.
+
 Software: `zfs-dkms` + `zfsutils-linux` 2.3.9 from Debian `contrib`. Secure Boot stays
 disabled so the DKMS module loads unsigned. The ZFS DKMS build was running when the
 2026-09-28 hard freeze hit (`docs/recovery/2026-09-28-HARD-FREEZE.md`); `dpkg --configure -a`
@@ -124,6 +127,13 @@ A mirror with one member missing imports `DEGRADED`. That is fine for reading da
   it from the WD side when data lands there. A long SMART test is due in Checkpoint 3. Plan to replace this drive.
 - **Seagate ST2000DX002** (`media`): clean now, but it has a history of UNC read errors.
   Disposable data only.
+
+## Memory (ARC)
+
+ZFS caches reads in RAM (the ARC). On this box the ceiling is `c_max` = 14.4 GB of 16 GB
+(`/proc/spl/kstat/zfs/arcstats`). The ARC shrinks under memory pressure, but once Ollama and
+Docker run alongside, consider capping it (e.g. `options zfs zfs_arc_max=<bytes>` in
+`/etc/modprobe.d/zfs.conf`). Not changed yet.
 
 ## Verification (2026-10-04)
 

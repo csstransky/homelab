@@ -1,0 +1,448 @@
+<meta charset="utf-8">
+<title>MOTHERLODE ZFS Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; the cable diagram is the hero, then shares, gates, discovery, commands. */
+:root {
+  --bg: #f3f5f7;
+  --panel: #ffffff;
+  --ink: #18212b;
+  --muted: #5b6876;
+  --line: #d5dce3;
+  --win: #2563c9;        /* Windows side */
+  --nas: #0f7c6b;        /* MOTHERLODE side */
+  --disk: #8a5a12;       /* storage */
+  --deny: #b4232c;
+  --win-soft: #e4ecfa;
+  --nas-soft: #dff1ed;
+  --disk-soft: #f6ecd9;
+  --deny-soft: #f8e1e2;
+  --code-bg: #eaeef2;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11161c; --panel: #19212a; --ink: #e6ebf0; --muted: #98a6b4; --line: #2c3743;
+  --win: #7aa7f0; --nas: #4cc2ad; --disk: #e0b161; --deny: #f07b82;
+  --win-soft: #1c2b44; --nas-soft: #15302c; --disk-soft: #33291a; --deny-soft: #3a1d21; --code-bg: #0d1217;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11161c; --panel: #19212a; --ink: #e6ebf0; --muted: #98a6b4; --line: #2c3743;
+  --win: #7aa7f0; --nas: #4cc2ad; --disk: #e0b161; --deny: #f07b82;
+  --win-soft: #1c2b44; --nas-soft: #15302c; --disk-soft: #33291a; --deny-soft: #3a1d21; --code-bg: #0d1217;
+  color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.55; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 800; font-stretch: 80%; letter-spacing: -0.01em; }
+h2 { font-size: 1.7rem; font-weight: 700; font-stretch: 85%; }
+h3 { font-size: 1.1rem; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+section { display: grid; gap: 18px; min-width: 0; }
+.lede { font-size: 1.2rem; color: var(--muted); }
+.lede strong { color: var(--ink); }
+
+/* hero diagram */
+.diagram { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; padding: 12px; }
+.diagram svg { display: block; min-width: 820px; width: 100%; height: auto; }
+svg text { font-family: var(--f-body); fill: var(--ink); }
+svg .t-mono { font-family: var(--f-mono); font-size: 12px; }
+svg .t-small { font-size: 12px; fill: var(--muted); }
+svg .t-head { font-family: var(--f-display); font-weight: 700; font-size: 17px; }
+svg .t-win { fill: var(--win); } svg .t-nas { fill: var(--nas); } svg .t-disk { fill: var(--disk); } svg .t-deny { fill: var(--deny); }
+svg .b-win { fill: var(--win-soft); stroke: var(--win); stroke-width: 1.5; }
+svg .b-nas { fill: var(--nas-soft); stroke: var(--nas); stroke-width: 1.5; }
+svg .b-nas-out { fill: none; stroke: var(--nas); stroke-width: 2; stroke-dasharray: 6 5; }
+svg .b-disk { fill: var(--disk-soft); stroke: var(--disk); stroke-width: 1.5; }
+svg .b-deny { fill: var(--deny-soft); stroke: var(--deny); stroke-width: 1.5; stroke-dasharray: 4 3; }
+svg .b-panel { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+svg .cable { stroke: var(--ink); stroke-width: 3; fill: none; }
+svg .wire { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+svg .wire-deny { stroke: var(--deny); stroke-width: 1.4; fill: none; stroke-dasharray: 3 3; }
+svg .dot { fill: var(--ink); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 0.92rem; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; border: 1.5px solid; }
+.lg-win::before { background: var(--win-soft); border-color: var(--win) !important; }
+.lg-nas::before { background: var(--nas-soft); border-color: var(--nas) !important; }
+.lg-disk::before { background: var(--disk-soft); border-color: var(--disk) !important; }
+.lg-deny::before { background: var(--deny-soft); border-color: var(--deny) !important; }
+
+/* shares table */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.95rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--f-mono); font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+.drive { font-family: var(--f-display); font-weight: 800; font-size: 1.3rem; color: var(--win); }
+.chip { display: inline-block; font-family: var(--f-mono); font-size: 0.76rem; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+.chip.safe { background: var(--nas-soft); color: var(--nas); }
+.chip.risk { background: var(--disk-soft); color: var(--disk); }
+.chip.no { background: var(--deny-soft); color: var(--deny); }
+
+/* gates */
+.gates { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.gate { background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--nas); border-radius: 8px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.gate .n { font-family: var(--f-mono); font-size: 0.78rem; color: var(--nas); letter-spacing: 0.06em; text-transform: uppercase; }
+.gate p { font-size: 0.97rem; }
+.gate .fail { font-size: 0.88rem; color: var(--deny); font-family: var(--f-mono); }
+
+/* discovery */
+.disc { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.svc { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.svc .port { font-family: var(--f-mono); font-size: 0.82rem; color: var(--muted); }
+
+/* config annotation */
+.conf { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); }
+.conf-row { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); border-bottom: 1px solid var(--line); }
+.conf-row:last-child { border-bottom: 0; }
+.conf-row code { background: var(--code-bg); padding: 9px 14px; display: block; white-space: pre-wrap; word-break: break-word; font-size: 0.84rem; }
+.conf-row .why { padding: 9px 14px; font-size: 0.95rem; }
+.conf-row.sect code { color: var(--nas); font-weight: 600; }
+@media (max-width: 620px) { .conf-row { grid-template-columns: minmax(0, 1fr); } }
+
+/* commands */
+.phase { display: grid; gap: 10px; }
+.phase h3 { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.phase h3 .eyebrow { font-weight: 400; }
+.cmds { display: grid; gap: 8px; }
+.cmd { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.cmd pre { margin: 0; background: var(--code-bg); padding: 10px 14px; font-family: var(--f-mono); font-size: 0.82rem; white-space: pre-wrap; word-break: break-word; }
+.cmd .why { padding: 10px 14px; font-size: 0.95rem; }
+.cmd.you { border-color: var(--win); }
+.cmd.you pre { box-shadow: inset 4px 0 0 var(--win); }
+@media (max-width: 700px) { .cmd { grid-template-columns: minmax(0, 1fr); } }
+
+/* zephyr */
+.zephyr { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; font-size: 0.95rem; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; font-family: var(--f-mono); font-size: 0.86rem; word-break: break-word; }
+.note { font-family: var(--f-mono); font-size: 0.86rem; background: var(--code-bg); border-radius: 6px; padding: 10px 12px; white-space: pre-wrap; }
+
+.gloss { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px 28px; }
+.gloss div { display: grid; gap: 2px; }
+.gloss b { font-family: var(--f-display); font-weight: 700; }
+.gloss span { color: var(--muted); font-size: 0.95rem; }
+footer { color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--line); padding-top: 16px; }
+
+svg .b-os { fill: var(--code-bg); stroke: var(--muted); stroke-width: 1.2; }
+svg .b-warn { fill: var(--deny-soft); stroke: var(--deny); stroke-width: 2; }
+svg .b-mirror { fill: var(--nas-soft); stroke: var(--nas); stroke-width: 1.5; }
+svg .wire-strong { stroke: var(--nas); stroke-width: 2; fill: none; }
+svg .wire-disk { stroke: var(--disk); stroke-width: 2; fill: none; }
+svg .wire-os { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasharray: 4 3; }
+.diagram.tall svg { min-width: 860px; }
+.flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; counter-reset: step; }
+.flow .stepbox { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.flow .stepbox .n { font-family: var(--f-mono); font-size: .76rem; color: var(--nas); letter-spacing: .06em; text-transform: uppercase; }
+.flow .stepbox p { font-size: .94rem; }
+.layers { display: grid; gap: 8px; }
+.layer { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) max-content; gap: 14px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+.layer b { font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; }
+.layer p { font-size: .95rem; color: var(--muted); }
+@media (max-width: 680px) { .layer { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
+.chip.todo { background: var(--code-bg); color: var(--muted); }
+.hostid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+</style>
+
+<div class="wrap">
+
+<header style="display:grid;gap:14px">
+  <div class="eyebrow">MOTHERLODE · Checkpoint 2 · pools built 2026-09-27, re-imported 2026-10-04</div>
+  <h1>How six disks became three pools and a pile of folders</h1>
+  <p class="lede"><strong>ZFS</strong> is the filesystem that holds the NAS data. It groups whole disks into <strong>pools</strong>, can keep two disks as exact copies of each other (a <strong>mirror</strong>), and checksums every block so it notices when a disk hands back bad data. Inside a pool you carve out <strong>datasets</strong>, which show up as ordinary folders.</p>
+</header>
+
+<section aria-labelledby="h-map">
+  <div class="eyebrow">Disk → pool → folder → Windows</div>
+  <h2 id="h-map">Every disk in the box, and where it ends up</h2>
+  <div class="diagram tall" role="img" aria-label="Diagram: the Toshiba 1 TB and WD 1 TB form the tank1tb mirror, holding Documents, Photos, Music, Backups, Nextcloud and Apps. The Seagate 500 GB and the first partition of the WD 640 GB form the tank500gb mirror, the backup target. The second partition of the WD 640 GB is the ext4 /other filesystem. The Seagate 2 TB alone is the media pool. The Crucial SSD holds Debian and is not part of ZFS.">
+    <svg viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg">
+      <text class="t-small" x="14" y="18">PHYSICAL DISKS (by-id)</text>
+      <text class="t-small" x="300" y="18">POOL / FILESYSTEM</text>
+      <text class="t-small" x="560" y="18">FOLDERS (mountpoints)</text>
+      <text class="t-small" x="830" y="18">SAMBA SHARE</text>
+
+      <!-- tank1tb disks -->
+      <rect class="b-warn" x="14" y="34" width="226" height="58" rx="8"/>
+      <text x="26" y="56" font-weight="600">Toshiba DT01ACA100 · 1 TB</text>
+      <text class="t-small t-deny" x="26" y="76">24 pending sectors · watch it</text>
+      <rect class="b-disk" x="14" y="102" width="226" height="58" rx="8"/>
+      <text x="26" y="124" font-weight="600">WD Blue WD10EZEX · 1 TB</text>
+      <text class="t-small" x="26" y="144">healthy · 11,177 h</text>
+
+      <rect class="b-mirror" x="290" y="50" width="220" height="94" rx="10"/>
+      <text class="t-head t-nas" x="304" y="76">tank1tb</text>
+      <text x="304" y="98">mirror · 928 GB usable</text>
+      <text class="t-small" x="304" y="120">survives one dead disk</text>
+      <path class="wire-strong" d="M240 63 C 266 63, 266 80, 290 80"/>
+      <path class="wire-strong" d="M240 131 C 266 131, 266 114, 290 114"/>
+
+      <rect class="b-panel" x="550" y="34" width="260" height="168" rx="8"/>
+      <text class="t-mono" x="564" y="58">/tank1tb/Documents</text>
+      <text class="t-mono" x="564" y="82">/tank1tb/Photos</text>
+      <text class="t-mono" x="564" y="106">/tank1tb/Music</text>
+      <text class="t-mono" x="564" y="130">/tank1tb/Backups</text>
+      <text class="t-mono t-deny" x="564" y="154">/tank1tb/Nextcloud</text>
+      <text class="t-mono" x="564" y="178">/tank1tb/Apps</text>
+      <path class="wire" d="M510 97 H 550"/>
+      <text class="t-mono t-win" x="828" y="58">Documents</text>
+      <text class="t-mono t-win" x="828" y="82">Photos</text>
+      <text class="t-mono t-win" x="828" y="106">Music</text>
+      <text class="t-small" x="828" y="130">(not shared)</text>
+      <text class="t-small t-deny" x="828" y="154">never shared</text>
+      <text class="t-small" x="828" y="178">(containers)</text>
+
+      <!-- tank500gb -->
+      <rect class="b-disk" x="14" y="224" width="226" height="58" rx="8"/>
+      <text x="26" y="246" font-weight="600">Seagate ST500DM002 · 500 GB</text>
+      <text class="t-small" x="26" y="266">healthy · 124 h</text>
+      <rect class="b-disk" x="14" y="292" width="226" height="110" rx="8"/>
+      <text x="26" y="314" font-weight="600">WD Blue WD6400AAKS · 640 GB</text>
+      <rect class="b-panel" x="26" y="324" width="202" height="30" rx="5"/>
+      <text class="t-mono" x="36" y="344">part1 · 466 GB</text>
+      <rect class="b-panel" x="26" y="362" width="202" height="30" rx="5"/>
+      <text class="t-mono" x="36" y="382">part2 · 130 GB</text>
+
+      <rect class="b-mirror" x="290" y="236" width="220" height="94" rx="10"/>
+      <text class="t-head t-nas" x="304" y="262">tank500gb</text>
+      <text x="304" y="284">mirror · 464 GB usable</text>
+      <text class="t-small" x="304" y="306">backup target (Checkpoint 3)</text>
+      <path class="wire-strong" d="M240 253 C 266 253, 266 266, 290 266"/>
+      <path class="wire-strong" d="M228 339 C 266 339, 266 300, 290 300"/>
+      <rect class="b-panel" x="550" y="258" width="260" height="50" rx="8"/>
+      <text class="t-mono" x="564" y="288">/tank500gb</text>
+      <path class="wire" d="M510 283 H 550"/>
+      <text class="t-small" x="828" y="288">(not shared)</text>
+
+      <!-- other -->
+      <rect class="b-os" x="290" y="356" width="220" height="50" rx="10"/>
+      <text class="t-head" x="304" y="380">ext4</text>
+      <text class="t-small" x="350" y="380">plain Linux filesystem, not ZFS</text>
+      <text class="t-small" x="304" y="398">label "other" · in /etc/fstab</text>
+      <path class="wire" d="M228 377 H 290"/>
+      <rect class="b-panel" x="550" y="356" width="260" height="50" rx="8"/>
+      <text class="t-mono" x="564" y="386">/other</text>
+      <path class="wire" d="M510 381 H 550"/>
+      <text class="t-mono t-win" x="828" y="386">Other</text>
+
+      <!-- media -->
+      <rect class="b-disk" x="14" y="422" width="226" height="58" rx="8"/>
+      <text x="26" y="444" font-weight="600">Seagate ST2000DX002 · 2 TB</text>
+      <text class="t-small" x="26" y="464">past read errors · disposable only</text>
+      <rect class="b-disk" x="290" y="424" width="220" height="56" rx="10"/>
+      <text class="t-head t-disk" x="304" y="448">media</text>
+      <text x="370" y="448">single disk · 1.81 TB</text>
+      <text class="t-small" x="304" y="468">no copy: a dead disk loses it</text>
+      <path class="wire-disk" d="M240 451 H 290"/>
+      <rect class="b-panel" x="550" y="424" width="260" height="56" rx="8"/>
+      <text class="t-mono" x="564" y="446">/media</text>
+      <text class="t-small" x="564" y="468">Movies · TV · Music</text>
+      <path class="wire" d="M510 452 H 550"/>
+      <text class="t-mono t-win" x="828" y="446">Media</text>
+
+      <!-- os -->
+      <rect class="b-os" x="14" y="496" width="226" height="52" rx="8"/>
+      <text x="26" y="518" font-weight="600">Crucial MX200 SSD · 250 GB</text>
+      <text class="t-small" x="26" y="536">Debian 13 · 25% life left</text>
+      <path class="wire-os" d="M240 522 H 290"/>
+      <text class="t-small" x="300" y="527">operating system only · ZFS never touches it</text>
+    </svg>
+  </div>
+  <div class="legend"><span class="lg-nas">mirror pool (two copies)</span><span class="lg-disk">single disk</span><span class="lg-deny">disk to keep an eye on</span><span class="lg-win">Samba share name</span></div>
+  <p style="color:var(--muted);font-size:.95rem">A mirror is only as big as its smaller disk. That is why the 640 GB WD was split: 466 GB pairs with the 500 GB Seagate, and the 130 GB left over became <code>/other</code>.</p>
+</section>
+
+<section aria-labelledby="h-pools">
+  <div class="eyebrow">The three pools</div>
+  <h2 id="h-pools">What each pool is for</h2>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Pool</th><th>Layout</th><th>Usable</th><th>Used today</th><th>Job</th><th>If one disk dies</th></tr></thead>
+      <tbody>
+        <tr><td><b>tank1tb</b></td><td>mirror of 2</td><td>928 GB</td><td class="mono">1.8 MB</td><td>Important data: documents, photos, the real music library, Nextcloud, app data</td><td><span class="chip safe">keeps running</span></td></tr>
+        <tr><td><b>tank500gb</b></td><td>mirror of 2</td><td>464 GB</td><td class="mono">0.9 MB</td><td>Second copy of the important datasets (nightly, from Checkpoint 3)</td><td><span class="chip safe">keeps running</span></td></tr>
+        <tr><td><b>media</b></td><td>1 disk</td><td>1.81 TB</td><td class="mono">1.0 MB</td><td>Movies, TV, spare music. Things you can re-rip or re-download.</td><td><span class="chip risk">data lost</span></td></tr>
+        <tr><td><b>/other</b></td><td>ext4 partition</td><td>128 GB</td><td class="mono">2.1 MB</td><td>Miscellaneous</td><td><span class="chip risk">data lost</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="h-words">
+  <div class="eyebrow">The four ideas</div>
+  <h2 id="h-words">Pool, mirror, dataset, checksum</h2>
+  <div class="gates">
+    <div class="gate"><div class="n">Pool</div><h3>A bucket made of disks</h3><p>ZFS treats one or more disks as one storage space. You never format the disks yourself; the pool manages them. Each pool here is named after its size.</p></div>
+    <div class="gate"><div class="n">Mirror</div><h3>Two disks, same data</h3><p>Every write goes to both. If one disk dies, the other has everything and the pool shows <code>DEGRADED</code> instead of failing. You lose half the raw space.</p></div>
+    <div class="gate"><div class="n">Dataset</div><h3>A folder with superpowers</h3><p><code>tank1tb/Photos</code> looks like a folder at <code>/tank1tb/Photos</code>, but it can have its own snapshots, compression and quotas. That is why each big category is its own dataset.</p></div>
+    <div class="gate"><div class="n">Checksum + scrub</div><h3>ZFS notices bad data</h3><p>Every block is stored with a fingerprint. A <em>scrub</em> reads everything and compares. On a mirror, a bad copy is repaired from the good one automatically.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-props">
+  <div class="eyebrow">How the pools were created (2026-09-27)</div>
+  <h2 id="h-props">The settings, line by line</h2>
+  <p>From <code>zpool history</code>. Every dataset inherits these from its pool.</p>
+  <div class="conf">
+    <div class="conf-row sect"><code>zpool create tank1tb mirror …WD10EZEX…-part1 …TOSHIBA…-part1</code><div class="why">Make a pool called <code>tank1tb</code> from two disks as a mirror, named by their permanent <code>/dev/disk/by-id/</code> names.</div></div>
+    <div class="conf-row"><code>-o ashift=12</code><div class="why">Use 4 KB blocks, matching modern disks' physical sectors. Can never be changed later, so it matters.</div></div>
+    <div class="conf-row"><code>-o cachefile=/etc/zfs/zpool.cache</code><div class="why">Write the pool into the list Debian reads at boot to import pools automatically.</div></div>
+    <div class="conf-row"><code>-O compression=lz4</code><div class="why">Compress everything with a very fast method. Already-compressed files (photos, movies) pass through untouched; documents shrink.</div></div>
+    <div class="conf-row"><code>-O xattr=sa
+-O acltype=posixacl</code><div class="why">Store extra file attributes and Linux permission lists efficiently. Samba and Windows metadata use these.</div></div>
+    <div class="conf-row"><code>-O dnodesize=auto</code><div class="why">Lets those attributes fit inside the file's own record, so reading them costs no extra disk seek.</div></div>
+    <div class="conf-row"><code>-O relatime=on</code><div class="why">Update "last opened" times only occasionally, not on every read. Fewer pointless writes.</div></div>
+    <div class="conf-row"><code>-O mountpoint=/tank1tb</code><div class="why">Where the pool appears as a folder. Datasets appear underneath: <code>/tank1tb/Photos</code>.</div></div>
+    <div class="conf-row sect"><code>zfs create tank1tb/Documents</code> (×6)<div class="why">One dataset per category: Documents, Photos, Music, Backups, Nextcloud, Apps.</div></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-hostid">
+  <div class="eyebrow">Why the import needed -f</div>
+  <h2 id="h-hostid">"The pool was last accessed by another system"</h2>
+  <div class="hostid">
+    <div class="card"><h3>What ZFS saw</h3><p>Each pool remembers the <em>hostid</em> of the computer that last used it. The pools were built on 09-27 by the old Debian install. Debian was then reinstalled, and the new install got a new hostid (<code>017c5e3e</code>).</p></div>
+    <div class="card"><h3>Why ZFS stops you</h3><p>Two computers writing to one pool at the same time would wreck it. So when the hostid does not match, ZFS refuses unless you say <code>-f</code> (force), meaning "I know no other computer is using these disks".</p></div>
+    <div class="card"><h3>Why -f was safe here</h3><p>The "other system" was this same machine before the reinstall. The disks are only connected to MOTHERLODE. After the import the pools carry the new hostid, so this happens only once.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-boot">
+  <div class="eyebrow">What happens at every boot</div>
+  <h2 id="h-boot">From power-on to mounted folders</h2>
+  <div class="flow">
+    <div class="stepbox"><div class="n">zfs-load-module</div><p>Loads the ZFS kernel module (built by DKMS for each kernel; needs Secure Boot off).</p></div>
+    <div class="stepbox"><div class="n">zfs-import-cache</div><p>Reads <code>/etc/zfs/zpool.cache</code> and imports the three pools listed there.</p></div>
+    <div class="stepbox"><div class="n">zfs-mount</div><p>Mounts every dataset at its mountpoint: <code>/tank1tb/*</code>, <code>/tank500gb</code>, <code>/media</code>.</p></div>
+    <div class="stepbox"><div class="n">/etc/fstab</div><p>Mounts <code>/other</code> by its UUID. The DVD drive's line points at <code>/mnt/cdrom</code>, outside <code>/media</code>.</p></div>
+    <div class="stepbox"><div class="n">zfs-zed</div><p>The ZFS event daemon. Watches for disk errors (alerts get wired up in Checkpoint 13).</p></div>
+    <div class="stepbox"><div class="n">smbd</div><p>Samba starts and shares the mounted folders.</p></div>
+  </div>
+  <p style="color:var(--muted);font-size:.95rem">All of these were already enabled by the Debian package. The reboot check (still pending) confirms this order works without anyone touching it.</p>
+</section>
+
+<section aria-labelledby="h-protect">
+  <div class="eyebrow">How safe is the data right now</div>
+  <h2 id="h-protect">Layers of protection</h2>
+  <div class="layers">
+    <div class="layer"><b>Mirror</b><p>A dead disk in tank1tb or tank500gb loses nothing.</p><span class="chip safe">active</span></div>
+    <div class="layer"><b>Checksums</b><p>Bad data from a disk is detected, and repaired from the mirror copy.</p><span class="chip safe">active</span></div>
+    <div class="layer"><b>Scrub</b><p>One manual scrub per pool on 2026-10-04: 0 errors. It took seconds because the pools are almost empty, so it never reached the Toshiba's bad sectors.</p><span class="chip risk">manual only</span></div>
+    <div class="layer"><b>Snapshots</b><p>Undo for deleted or overwritten files. Without them, deleting from Windows is permanent.</p><span class="chip todo">Checkpoint 3</span></div>
+    <div class="layer"><b>Replication</b><p>Nightly copy of tank1tb's important datasets to tank500gb.</p><span class="chip todo">Checkpoint 3</span></div>
+    <div class="layer"><b>SMART tests</b><p>Drives test themselves on a schedule. The Toshiba's long test is owed.</p><span class="chip todo">Checkpoint 3</span></div>
+    <div class="layer"><b>Off-site backup</b><p>A copy outside this box, for fire, theft or a bad PSU taking out every disk.</p><span class="chip todo">Checkpoint 11</span></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-cmds">
+  <div class="eyebrow">Every command, in order</div>
+  <h2 id="h-cmds">What was run for Checkpoint 2</h2>
+  <p>On 2026-10-04 unless marked. <code>sudo</code> means "run as administrator". Nothing here created, wiped or formatted a disk: the pools already existed and were only <em>imported</em>.</p>
+
+  <div class="phase">
+    <h3>Before today <span class="eyebrow">2026-09-27 / 09-28</span></h3>
+    <div class="cmds">
+      <div class="cmd"><pre>zpool create … / zfs create …</pre><div class="why">09-27, old Debian install: built the three pools and six datasets (settings above).</div></div>
+      <div class="cmd"><pre>sudo apt install zfs-dkms zfsutils-linux</pre><div class="why">09-28, new install: installs ZFS 2.3.9. DKMS compiles the kernel module. The hard freeze hit during this compile.</div></div>
+      <div class="cmd"><pre>sudo dpkg --configure -a</pre><div class="why">Finished the interrupted install after the freeze. The module built cleanly.</div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <h3>Look first <span class="eyebrow">nothing changed</span></h3>
+    <div class="cmds">
+      <div class="cmd"><pre>lsmod | grep zfs
+dpkg -l | grep zfs</pre><div class="why">Is the ZFS module loaded, and which version is installed? Yes, 2.3.9.</div></div>
+      <div class="cmd"><pre>sudo zpool list
+sudo zpool import</pre><div class="why"><code>list</code>: no pools imported yet. <code>import</code> with no name only <em>scans</em>: found all three pools, every disk ONLINE, "last accessed by another system".</div></div>
+      <div class="cmd"><pre>sudo smartctl -H -A /dev/disk/by-id/ata-…</pre><div class="why">Health of every drive. Found the Toshiba's 24 pending sectors.</div></div>
+      <div class="cmd"><pre>cat /etc/fstab; lsblk; hostid</pre><div class="why">What mounts at boot, which partitions exist, and this install's hostid (<code>017c5e3e</code>).</div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <h3>Make it safe to import</h3>
+    <div class="cmds">
+      <div class="cmd"><pre>sudo sed -i 's/hung_task_panic = 1/… = 0/' /etc/sysctl.d/90-lockup-panic.conf
+sudo sysctl --system</pre><div class="why">Turn off "crash the machine if a task waits on disk for 2 minutes". A struggling disk or a long scrub could otherwise crash the NAS. The other crash-capture settings stay.</div></div>
+      <div class="cmd"><pre>sudo cp -a /etc/fstab /etc/fstab.bak-2026-10-04</pre><div class="why">Back up the boot mount list before editing it.</div></div>
+      <div class="cmd"><pre>sudo sed -i 's|^/dev/sr0|#/dev/sr0|' /etc/fstab
+sudo rm /media/cdrom; sudo rmdir /media/cdrom0</pre><div class="why">Debian had put the DVD drive at <code>/media/cdrom0</code>, inside the folder where the <code>media</code> pool mounts. Cleared it so the pool mounts on an empty <code>/media</code>.</div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <h3>Import the pools</h3>
+    <div class="cmds">
+      <div class="cmd"><pre>sudo zpool import -f -d /dev/disk/by-id \
+  -o cachefile=/etc/zfs/zpool.cache tank1tb</pre><div class="why">Bring the pool online. <code>-f</code>: hostid mismatch (explained above). <code>-d /dev/disk/by-id</code>: use permanent disk names, never <code>sda</code>/<code>sdb</code>, which change between boots. <code>cachefile</code>: remember it for the next boot. Repeated for <code>tank500gb</code> and <code>media</code>.</div></div>
+      <div class="cmd"><pre>sudo zpool status
+zfs list</pre><div class="why">All three ONLINE, 0 read/write/checksum errors. All datasets mounted.</div></div>
+      <div class="cmd"><pre>sudo zpool scrub tank1tb tank500gb media</pre><div class="why">Read and verify every stored block. 0 errors, in seconds, because the pools are nearly empty.</div></div>
+      <div class="cmd"><pre>zfs get compression,xattr,acltype,…
+zpool get ashift,autotrim …
+sudo zpool history</pre><div class="why">Read back the settings and the full log of how each pool was created, for the docs.</div></div>
+      <div class="cmd"><pre>find /tank1tb /tank500gb /media -maxdepth 2 -ls</pre><div class="why">What is on the pools: almost nothing. Owner group <code>1001</code> on the share folders, the old <code>nas</code> group ID, later reused for Samba.</div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <h3>Bring back /other</h3>
+    <div class="cmds">
+      <div class="cmd"><pre>sudo blkid …WD6400AAKS…-part2</pre><div class="why">Confirm the partition: ext4, label <code>other</code>, UUID <code>5250af8d…</code>.</div></div>
+      <div class="cmd"><pre>sudo e2fsck -fn …-part2
+sudo dumpe2fs -h …-part2</pre><div class="why">Read-only check (<code>-n</code> changes nothing). Clean, except the old install had shut down without unmounting it, so its journal was waiting to be replayed.</div></div>
+      <div class="cmd"><pre>sudo mkdir -p /other
+echo 'UUID=5250af8d-… /other ext4 defaults,noatime 0 2' | sudo tee -a /etc/fstab</pre><div class="why">Create the mount folder and add <code>/other</code> to the boot mount list, by UUID so it never depends on drive letters.</div></div>
+      <div class="cmd"><pre>sudo systemctl daemon-reload
+sudo mount /other
+findmnt /other; dmesg | tail</pre><div class="why">Tell systemd about the fstab change, mount it, confirm. Kernel said <code>recovery complete</code>: the journal was replayed.</div></div>
+      <div class="cmd"><pre>systemctl is-enabled zfs-import-cache zfs-mount zfs.target …</pre><div class="why">Check the boot services: all already enabled.</div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <h3>DVD drive back <span class="eyebrow">later the same evening</span></h3>
+    <div class="cmds">
+      <div class="cmd"><pre>sudo mkdir -p /mnt/cdrom
+sudo sed -i 's|^#/dev/sr0 … /media/cdrom0|/dev/sr0 /mnt/cdrom|' /etc/fstab</pre><div class="why">Re-enabled the DVD drive with its mount point outside the ZFS pool.</div></div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-next">
+  <div class="eyebrow">Still open</div>
+  <h2 id="h-next">Loose ends</h2>
+  <div class="layers">
+    <div class="layer"><b>Reboot check</b><p>Reboot once and run <code>zpool status -x; findmnt /other; systemctl is-active smbd</code>. That closes Checkpoint 2.</p><span class="chip todo">you</span></div>
+    <div class="layer"><b>Toshiba 1 TB</b><p>Long SMART test, then plan a replacement. Swapping a mirror disk is one <code>zpool replace</code> with no downtime.</p><span class="chip todo">Checkpoint 3</span></div>
+    <div class="layer"><b>Memory use</b><p>ZFS's read cache (ARC) may grow to 14.4 GB of the 16 GB RAM. It gives memory back under pressure, but it is worth capping once Ollama and Docker run alongside.</p><span class="chip todo">later</span></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-gloss">
+  <div class="eyebrow">Words</div>
+  <h2 id="h-gloss">Glossary</h2>
+  <div class="gloss">
+    <div><b>by-id</b><span>Permanent disk names from the model and serial number, in <code>/dev/disk/by-id/</code>. <code>sda</code>, <code>sdb</code>… change between boots.</span></div>
+    <div><b>Import / export</b><span>Bringing a pool online on this machine, or cleanly handing it off.</span></div>
+    <div><b>hostid</b><span>An ID for this installation. Pools remember the last one that used them.</span></div>
+    <div><b>DEGRADED</b><span>A mirror with one disk missing or failed. Still works; replace the disk.</span></div>
+    <div><b>DKMS</b><span>Rebuilds the ZFS kernel module whenever Debian installs a new kernel.</span></div>
+    <div><b>fstab</b><span><code>/etc/fstab</code>: the list of non-ZFS filesystems to mount at boot.</span></div>
+    <div><b>ARC</b><span>ZFS's read cache in RAM.</span></div>
+    <div><b>ext4</b><span>Debian's standard filesystem. No checksums or mirrors, but simple.</span></div>
+  </div>
+</section>
+
+<footer>Source: <code>zfs/README.md</code>, <code>docs/checkpoints/CHECKPOINTS.md</code>, <code>zpool history</code> in the homelab repo. Companion page: <code>samba/samba-explained.html</code>.</footer>
+</div>

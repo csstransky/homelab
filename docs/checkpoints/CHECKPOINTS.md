@@ -79,9 +79,9 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 |---|---|---|---|---|
 | 0 | Source-of-truth reconciliation + this file | ✅ done | 2026-09-28 | this file |
 | 1 | Debian foundation | ✅ done (Windows SSH test pending) | 2026-09-28 | `docs/hardware/MOTHERLODE.md`, `docs/architecture/network.md` |
-| 2 | ZFS: install + import existing pools + `/other` | 🟨 imported, reboot check pending | | `zfs/README.md` |
+| 2 | ZFS: install + import existing pools + `/other` | 🟨 imported, reboot check pending | | `zfs/README.md`, `zfs/zfs-explained.html` |
 | 3 | Storage protection: SMART, scrubs, snapshots, replication | ⬜ deferred by user until after Samba; still due before real data | | `zfs/SNAPSHOTS.md`, `scripts/maintenance/` |
-| 4 | Samba (Windows LAN access) | ✅ done | 2026-10-04 | `samba/` |
+| 4 | Samba (Windows LAN access) | ✅ done | 2026-10-04 | `samba/README.md`, `samba/samba-explained.html` |
 | 5 | Docker foundation | ⬜ | | `docs/services/docker.md` |
 | 6 | Tailscale (remote access) | ⬜ | | `docs/services/tailscale.md` |
 | 7 | Jellyfin (movies on the LG TV) | ⬜ | | `compose/jellyfin/` |

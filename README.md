@@ -47,8 +47,8 @@ The goal is **reproducibility, not documentation for documentation's sake.**
 │
 ├── compose/                  # Docker Compose projects
 ├── nextcloud/                # Nextcloud configuration
-├── samba/                    # Samba configuration/documentation
-├── zfs/                      # ZFS documentation/configuration
+├── samba/                    # Samba config, README, samba-explained.html (visual guide)
+├── zfs/                      # ZFS README, zfs-explained.html (visual guide)
 ├── systemd/                  # Custom systemd units
 │
 ├── scripts/
@@ -94,6 +94,8 @@ Storage is three ZFS pools plus one ext4 filesystem (architecture fixed 2026-09-
 /media       ZFS single   disposable media (Movies, TV, Music)
 /other       ext4         miscellaneous
 ```
+
+Visual guides (open in a browser): `zfs/zfs-explained.html` and `samba/samba-explained.html`.
 
 Persistent disk references should use:
 
