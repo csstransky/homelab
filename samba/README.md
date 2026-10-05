@@ -55,7 +55,8 @@ Debian's default config is kept at `/etc/samba/smb.conf.debian-default`.
 
 ## Samba password
 
-Set or change it (interactive; never stored in Git):
+Set 2026-10-04 (a non-empty password; an empty one would let any LAN or tailnet device log in
+as `ghost`). Set or change it (interactive; never stored in Git):
 
 ```bash
 sudo smbpasswd -a ghost      # first time (adds the account)
@@ -63,15 +64,49 @@ sudo smbpasswd ghost         # change later
 sudo pdbedit -L              # list Samba accounts
 ```
 
-## Windows
+## Windows 10 / 11: all shares in File Explorer
 
-```text
-Explorer → This PC → Map network drive → \\MOTHERLODE\Documents
-           (or \\192.168.1.59\Documents) → "Connect using different credentials" → ghost
+Goal: every share shows up as a drive in File Explorer on both Windows machines, reconnects
+at sign-in, and asks for the password only once.
+
+**Quick look, no setup:** type `\\MOTHERLODE` in the Explorer address bar. All five shares are
+listed. Sign in as `MOTHERLODE\ghost` and tick *Remember my credentials*.
+
+**Permanent drive letters (recommended).** Open **Command Prompt** (not as administrator: a
+mapping made in an elevated prompt does not show in Explorer) and paste:
+
+```bat
+cmdkey /add:MOTHERLODE /user:MOTHERLODE\ghost /pass
+net use N: \\MOTHERLODE\Documents /persistent:yes
+net use P: \\MOTHERLODE\Photos    /persistent:yes
+net use M: \\MOTHERLODE\Music     /persistent:yes
+net use V: \\MOTHERLODE\Media     /persistent:yes
+net use O: \\MOTHERLODE\Other     /persistent:yes
 ```
 
-Map each share you use. If Windows has cached a wrong login, clear it with `net use * /delete`
-in a Windows terminal, or under *Credential Manager → Windows Credentials*.
+`cmdkey ... /pass` prompts for the Samba password and stores it in Windows Credential Manager.
+The `net use` lines then connect without asking. Drive letters: **N** Documents, **P** Photos,
+**M** Music, **V** Media (video), **O** Other. Change any letter that is already taken on that PC.
+
+Use the user name `MOTHERLODE\ghost`, not plain `ghost`, so Windows does not send its own PC
+or Microsoft-account name as the domain.
+
+How Windows finds the server by name: `wsdd2` answers WS-Discovery (so it appears under
+*Network*) and LLMNR, and `nmbd` answers NetBIOS. If the name still does not resolve, use the IP:
+`\\192.168.1.59\Documents` (and `cmdkey /add:192.168.1.59 ...`).
+
+### Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| *System error 1219: multiple connections ... by the same user, using more than one user name* | `net use * /delete /y`, then run the block again |
+| Wrong password was saved | Control Panel → Credential Manager → Windows Credentials → remove `MOTHERLODE`, then `cmdkey` again |
+| Drives show a red X after boot | Normal until opened. Clicking the drive reconnects. Check that MOTHERLODE is up. |
+| `MOTHERLODE` not found, IP works | Name resolution only. Use the IP mapping, or check `systemctl status wsdd2 nmbd` |
+| Windows 11 24H2 refuses the connection | 24H2 requires SMB signing. Samba 4.22 supports it, so check the password first (`smbclient //localhost/Documents -U ghost` on MOTHERLODE) |
+
+When the machine is away from home, the same shares work over Tailscale (Checkpoint 6) at
+`\\motherlode.<tailnet>.ts.net\Documents`.
 
 ## Adding folders vs. adding shares
 

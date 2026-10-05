@@ -81,7 +81,7 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 | 1 | Debian foundation | ✅ done (Windows SSH test pending) | 2026-09-28 | `docs/hardware/MOTHERLODE.md`, `docs/architecture/network.md` |
 | 2 | ZFS: install + import existing pools + `/other` | 🟨 imported, reboot check pending | | `zfs/README.md` |
 | 3 | Storage protection: SMART, scrubs, snapshots, replication | ⬜ deferred by user until after Samba; still due before real data | | `zfs/SNAPSHOTS.md`, `scripts/maintenance/` |
-| 4 | Samba (Windows LAN access) | 🟨 running, password + Windows test pending | | `samba/` |
+| 4 | Samba (Windows LAN access) | 🟨 server verified, Windows test pending | | `samba/` |
 | 5 | Docker foundation | ⬜ | | `docs/services/docker.md` |
 | 6 | Tailscale (remote access) | ⬜ | | `docs/services/tailscale.md` |
 | 7 | Jellyfin (movies on the LG TV) | ⬜ | | `compose/jellyfin/` |
@@ -202,7 +202,7 @@ Steps:
 
 Done when:
 - [ ] Windows machine reads and writes all five shares by hostname or IP.
-- [ ] Written files show `ghost:nas` with group inheritance.
+- [x] Written files show `ghost:nas` with group inheritance.
 - [x] Config committed.
 
 Notes 2026-10-04:
@@ -212,7 +212,12 @@ Notes 2026-10-04:
   AD-DC/winbind recommends.
 - `/etc/samba/smb.conf` = Rebuild Report section 26 verbatim (`samba/smb.conf`). `testparm` is clean
   (ROLE_STANDALONE). `smbd` listens on 139/445; `nmbd` is kept enabled; `wsdd2` was added for Windows discovery.
-- Pending: `sudo smbpasswd -a ghost` (interactive), smbclient write test, Windows test.
+- Samba password set by the user (`pdbedit -L` → `ghost:1000:ghost`). An empty password is rejected
+  (`NT_STATUS_LOGON_FAILURE`). Anonymous access is refused (`NT_STATUS_ACCESS_DENIED`). The Linux login
+  password was not touched by `unix password sync` (`passwd -S`: last change 2026-09-28).
+- smbclient write test, on localhost and `192.168.1.59`: put/get/mkdir on all five shares, data read back
+  identical, files `ghost:nas 0664`, dirs `ghost:nas 2775`. Test files removed.
+- Pending: Windows 10 and 11 machines map all five shares (`samba/README.md`, "Windows 10 / 11").
 
 ## Checkpoint 5 — Docker foundation
 
