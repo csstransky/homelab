@@ -53,7 +53,7 @@ Three planning documents exist. Later documents override earlier ones where they
 | ZFS software | **not installed** (`zfsutils-linux`, `zfs-dkms` absent). 2026-10-04: 2.3.9 installed, pools imported (Checkpoint 2) |
 | ZFS on disk | pool labels present and intact: `tank1tb`, `tank500gb`, `media` |
 | `/other` | ext4 partition present (UUID `5250af8d-6988-4201-9c8c-bedd00c234b1`), **not in fstab, not mounted**. 2026-10-04: in fstab and mounted |
-| Samba | **not installed**; `nas` group does not exist; `ghost` not in `nas` |
+| Samba | **not installed**; `nas` group does not exist; `ghost` not in `nas`. 2026-10-04: installed, `nas` GID 1001 (Checkpoint 4) |
 | Docker | **not installed**; `ghost` not in `docker` |
 | Tailscale | **not installed** |
 | Sleep | disabled 2026-09-29: sleep/suspend/hibernate targets masked, XFCE idle sleep off (`docs/services/always-on.md`) |
@@ -80,8 +80,8 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 | 0 | Source-of-truth reconciliation + this file | ✅ done | 2026-09-28 | this file |
 | 1 | Debian foundation | ✅ done (Windows SSH test pending) | 2026-09-28 | `docs/hardware/MOTHERLODE.md`, `docs/architecture/network.md` |
 | 2 | ZFS: install + import existing pools + `/other` | 🟨 imported, reboot check pending | | `zfs/README.md` |
-| 3 | Storage protection: SMART, scrubs, snapshots, replication | ⬜ | | `zfs/SNAPSHOTS.md`, `scripts/maintenance/` |
-| 4 | Samba (Windows LAN access) | ⬜ | | `samba/` |
+| 3 | Storage protection: SMART, scrubs, snapshots, replication | ⬜ deferred by user until after Samba; still due before real data | | `zfs/SNAPSHOTS.md`, `scripts/maintenance/` |
+| 4 | Samba (Windows LAN access) | 🟨 running, password + Windows test pending | | `samba/` |
 | 5 | Docker foundation | ⬜ | | `docs/services/docker.md` |
 | 6 | Tailscale (remote access) | ⬜ | | `docs/services/tailscale.md` |
 | 7 | Jellyfin (movies on the LG TV) | ⬜ | | `compose/jellyfin/` |
@@ -154,8 +154,8 @@ Notes 2026-10-04:
   install's hostid. Imported by-id into `/etc/zfs/zpool.cache`, all ONLINE. The first scrubs
   of all three found 0 errors, but the pools are nearly empty.
 - The `/dev/sr0 /media/cdrom0` fstab line was moved, not dropped: the DVD drive is now at `/mnt/cdrom`, outside
-  the ZFS `media` pool. `/media/cdrom0` and `/media/cdrom` were removed. The drive is used for ripping
-  DVDs into `/media/Movies` (`docs/services/dvd-ripping.md`).
+  the ZFS `media` pool. `/media/cdrom0` and `/media/cdrom` were removed. Movie ripping happens on the
+  Windows PC's Blu-ray drive, not this drive (`docs/services/movie-ripping.md`).
 - `/other` is in fstab by UUID and mounted. Its journal was replayed on the first mount.
 - The ZFS boot units were already enabled by the package. Still to do: reboot and confirm that
   pools, `/other` and the .59 address all come back.
@@ -201,9 +201,18 @@ Steps:
 7. Commit `samba/smb.conf` (no secrets) and `samba/README.md`.
 
 Done when:
-- Windows machine reads and writes all five shares by hostname or IP.
-- Written files show `ghost:nas` with group inheritance.
-- Config committed.
+- [ ] Windows machine reads and writes all five shares by hostname or IP.
+- [ ] Written files show `ghost:nas` with group inheritance.
+- [x] Config committed.
+
+Notes 2026-10-04:
+- Done out of order: the user chose Samba before Checkpoint 3. No real data until snapshots exist.
+- `nas` created as GID 1001, so the existing `root:1001 2775` share roots needed no changes.
+- `apt install --no-install-recommends samba smbclient attr wsdd2` (Samba 4.22.11). This skips the
+  AD-DC/winbind recommends.
+- `/etc/samba/smb.conf` = Rebuild Report section 26 verbatim (`samba/smb.conf`). `testparm` is clean
+  (ROLE_STANDALONE). `smbd` listens on 139/445; `nmbd` is kept enabled; `wsdd2` was added for Windows discovery.
+- Pending: `sudo smbpasswd -a ghost` (interactive), smbclient write test, Windows test.
 
 ## Checkpoint 5 — Docker foundation
 
@@ -243,7 +252,8 @@ Steps:
 1. `compose/jellyfin/compose.yaml`: official image, config in `/tank1tb/Apps/jellyfin`,
    `/media/Movies`, `/media/TV`, `/media/Music` mounted read-only, host networking or port 8096.
 2. Library structure: `Movies/<Title> (Year)/<file>`, `TV/<Show>/Season 01/<file>`.
-   DVDs are ripped on MOTHERLODE's own drive into `/media/Movies` (`docs/services/dvd-ripping.md`).
+   Movies are ripped on the Windows PC (Blu-ray, MakeMKV) and copied to `\\MOTHERLODE\Media\Movies`
+   (`docs/services/movie-ripping.md`).
 3. Install the Jellyfin app on the LG webOS TV; connect over the LAN; play a file. Prefer Direct Play.
 4. If transcoding is needed, add NVENC via `nvidia-container-toolkit` (proprietary driver is fine for this).
    While the GTX 1050 Ti is out, the option is Intel Quick Sync on the HD 530 (`/dev/dri`).
