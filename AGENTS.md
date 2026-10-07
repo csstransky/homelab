@@ -36,12 +36,14 @@ Work one checkpoint at a time and update its status there.
 | OS              | Debian 13 (Trixie)              |
 | Architecture    | x86_64                          |
 | CPU             | Intel Core i7-6700              |
-| RAM             | 16 GiB                          |
+| RAM             | 16 GiB (4 × 4 GB). **Running on 8 GiB (DIMM2 + DIMM4) since 2026-10-06** during the crash investigation |
 | GPU             | NVIDIA GeForce GTX 1050 Ti 4 GB — **removed 2026-10-04, untested** (`docs/hardware/GPU.md`) |
 | Display         | Intel HD Graphics 530 (iGPU, `i915`) |
 | Primary user    | `ghost`                         |
 | Boot/storage OS | SSD                             |
 | Data storage    | ZFS `/tank1tb`, `/tank500gb`, `/media`; ext4 `/other` |
+| Docker volumes  | on ZFS: `/tank1tb/Apps/docker-volumes` bind-mounted at `/var/lib/docker/volumes` |
+| Public exposure | **Only Nextcloud**, via Tailscale Funnel `https://motherlode.tailb6c0f2.ts.net` → `127.0.0.1:11000` |
 
 ---
 
@@ -314,6 +316,12 @@ MOTHERLODE has previously exhibited intermittent:
 
 These issues are separate from the NVIDIA driver incident unless evidence establishes otherwise.
 
+**Kernel panics with single-bit memory corruption (2026-09-28 to 2026-10-06).** memtest86+ is clean
+(7 passes), but panics recur during kernel/ZFS memory activity. Running on two sticks for a 72 h test.
+Read `docs/recovery/2026-10-04-ZFS-PANIC.md` first. After any unexpected reboot run `sudo last-crash`;
+new folders in `/var/lib/systemd/pstore/` are crash dumps. Do not blame ZFS, Docker or Nextcloud for
+these without new evidence.
+
 Do not attribute hardware problems to software without evidence.
 
 ---
@@ -326,8 +334,14 @@ Especially:
 
 ```text
 docs/recovery/NVIDIA-DRIVER-INCIDENT.md
-docs/recovery/BOOT-RECOVERY.md
+docs/recovery/BOOT-RECOVERY.md        (not written yet: Checkpoint 10)
+docs/recovery/2026-09-28-HARD-FREEZE.md
+docs/recovery/2026-10-04-ZFS-PANIC.md
+docs/recovery/SSD-BACKUP.md
 ```
+
+Never add Tailscale Funnel to anything but Nextcloud, never port-forward on the router, and never
+change `NEXTCLOUD_DATADIR` after install (`docs/services/nextcloud.md`).
 
 These documents exist specifically to prevent repeating previous mistakes.
 

@@ -97,7 +97,7 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 - **Hardware stability (top priority):** kernel panics with single-bit corruption; memtest86+ clean.
   Running on 2 of 4 sticks since 2026-10-06 21:15; bar is 72 h without a panic
   (`docs/recovery/2026-10-04-ZFS-PANIC.md`). Keep Windows originals until then.
-- **TODO Ollama:** revisit models and memory once the RAM is back to 16 GB (`qwen3:14b` does not fit in 8 GB).
+- **TODO when 16 GB is back:** revisit Ollama models (`qwen3:14b` does not fit in 8 GB) and raise the ZFS ARC cap from 3 GiB (`zfs/README.md`).
 - Toshiba DT01ACA100 in `tank1tb`: long SMART test fails; replace (`zfs/BACKUPS.md`).
 - Delete `/var/lib/docker/volumes.ssd-old-2026-10-06` after a few days of Docker on ZFS.
 - AIO Borg backup (application-consistent Nextcloud backups): not set up.
@@ -318,6 +318,7 @@ Steps:
    attached Photos folder. `/tank1tb/Nextcloud` then holds only Nextcloud's internal data and stays out of
    Samba. Needs:
    - `NEXTCLOUD_MOUNT=/tank1tb` in `nextcloud/compose.yaml`, so AIO containers can see the host folders.
+     (Superseded: became `/srv/nas` with bind mounts so Media and Other fit too; see the result below.)
    - Default POSIX ACLs on the attached folders, giving both group `nas` and uid 33 (`www-data` in the
      container) rwx, so files uploaded from the phone stay writable from Windows and vice versa
      (`acltype=posixacl` is already set on the pool).

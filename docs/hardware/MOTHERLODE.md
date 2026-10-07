@@ -10,7 +10,7 @@
 | Board | HP 802F, serial PESRHAACYAQ5Q6 (replacement board installed during the 2026-09 rebuild) |
 | BIOS | N51 Ver. 01.70, 2018-06-19 |
 | CPU | Intel Core i7-6700 @ 3.40 GHz, 4 cores / 8 threads, VT-x, 8 MiB L3 |
-| RAM | 16 GiB: 4 × 4 GB DDR4-2133, non-ECC, DIMM1–DIMM4 |
+| RAM | 16 GiB: 4 × 4 GB DDR4-2133, non-ECC, DIMM1–DIMM4 (Kingston 9905622-024.A00G ×3, DIMM2 -025.A01G). **Since 2026-10-06 only DIMM2 + DIMM4 installed (8 GiB)**, see `docs/recovery/2026-10-04-ZFS-PANIC.md` |
 | GPU | NVIDIA GeForce GTX 1050 Ti 4 GB (GP107, `10de:1c82`), proprietary driver 550.163.01. **Removed 2026-10-04, untested**; returns compute-only on the strict NAS. See `GPU.md`. |
 | Display | Intel HD Graphics 530 iGPU (`8086:1912`, `i915`). Only visible on the PCI bus with the NVIDIA card out. |
 | Secure Boot | disabled (required for ZFS module) |
