@@ -78,6 +78,14 @@ attached to Nextcloud with the **External Storage** app ("Local" type):
   added over Samba show up in Nextcloud.
 - `/tank1tb/Nextcloud` (`NEXTCLOUD_DATADIR`) holds only Nextcloud's internal data (`admin/`,
   `appdata_*`). It is not a Samba share. **Never change `NEXTCLOUD_DATADIR` after install.**
+- `lost+found` (root-only folder on the ext4 `/other` disk) is hidden from Nextcloud with
+  `occ config:system:set forbidden_filenames 1 --value=lost+found` (index 0 stays `.htaccess`). Before
+  that, every scan of Other failed on it (`opendir(...lost+found): Permission denied`), marked the
+  storage "not available", and left Other's size at -1.
+- Files added over Samba appear in Nextcloud when a folder is opened (check-on-access), but a
+  brand-new folder can show **-1 B** (size not computed yet) until it is opened or scanned:
+  `occ files:scan --path="/admin/files/Other"`. Windows Explorer, in turn, often does not refresh a
+  network folder by itself, especially during a big copy into it: press F5.
 - `/media/ghost` is where XFCE auto-mounts USB drives. It is left without Nextcloud permissions, so
   USB drives don't appear in Nextcloud.
 
