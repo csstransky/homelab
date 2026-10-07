@@ -101,8 +101,7 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 - Toshiba DT01ACA100 in `tank1tb`: long SMART test fails; replace (`zfs/BACKUPS.md`).
 - Delete `/var/lib/docker/volumes.ssd-old-2026-10-06` after a few days of Docker on ZFS.
 - AIO Borg backup (application-consistent Nextcloud backups): not set up.
-- Nextcloud: stale index rows for the old `/tank1tb` mount paths, and 6 favourites to re-star
-  (`docs/services/nextcloud.md` → Leftover). Phone auto-upload → `/Photos` not set yet.
+- Nextcloud phone auto-upload → `/Photos` not set yet.
 
 Checkpoints 1–9 deliver the stated goals: Windows access on the LAN, remote access,
 movies on the TV, and music to Home Assistant / Music Assistant. 10–14 make it trustworthy.

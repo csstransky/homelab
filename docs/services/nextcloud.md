@@ -188,18 +188,27 @@ automatic updates with backups later).
 | Full-text search | `fulltextsearch:test` passed |
 | Brute force | test failure from `100.111.72.91` recorded with delay 200 ms, then reset |
 
-## Leftover: old index entries (harmless)
+## Cleanup of the old index (2026-10-06, user-approved)
 
 Changing the mounts' paths from `/tank1tb/...` to `/srv/nas/...` made Nextcloud treat them as new
-storages, so the database still holds the old index for storage 3 (`local::/tank1tb/Photos/`,
-13,452 rows) and 4 (`local::/tank1tb/Documents/`, 92,932 rows). Nothing mounts them, no share or
-search entry uses them, and `occ files:cleanup` does not remove them because the storage rows still
-exist. Six **favourites** set during the first test (four car folders in Photos and two mount roots)
-point at those old entries, so they no longer show as starred. Re-star them in the web UI.
+storages, leaving the old index behind (storage 3 `local::/tank1tb/Photos/`, storage 4
+`local::/tank1tb/Documents/`). `occ files:cleanup` alone skips them because the storage rows still
+exist. Done with the user's explicit go-ahead, after `zfs snapshot tank1tb/Apps@pre-nc-storage-cleanup`:
 
-Removing the old rows needs direct SQL on the Nextcloud database (migrate the favourites to the
-new file ids, delete `oc_storages` rows 3 and 4, then `occ files:cleanup`). That was not done:
-direct database edits need the user's explicit go-ahead. Take a snapshot of `tank1tb/Apps` first.
+```sql
+-- move favourites to the same path on the new storage (3→8 Photos, 4→9 Documents): UPDATE 7
+update oc_vcategory_to_object o set objid = n.fileid from oc_filecache old
+  join oc_filecache n on n.path = old.path and n.storage = (case old.storage when 3 then 8 when 4 then 9 end)
+  where o.objid = old.fileid and old.storage in (3,4);
+delete from oc_storages where numeric_id in (3,4);   -- DELETE 2
+```
+
+then `occ files:cleanup`: 106,384 orphaned file cache and 19 extended entries deleted. Favourites
+kept (4 car folders in Photos, the Photos and Documents roots), 0 orphaned favourites, `status.php` ok.
+Undo: stop Nextcloud and roll back `tank1tb/Apps` to that snapshot (affects all Docker volumes).
+
+**Lesson:** decide the external storage paths before the first scan; changing them later means
+re-indexing and this cleanup.
 
 ## History
 
