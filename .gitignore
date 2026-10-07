@@ -1,4 +1,7 @@
 # Secrets
+*backup-codes*
+*passphrase*
+*password*
 .env
 .env.*
 !.env.example
