@@ -83,15 +83,26 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 | 3 | Storage protection: SMART, scrubs, snapshots, replication | 🟨 running and tested; first scheduled SMART test 2026-10-11 | | `zfs/BACKUPS.md`, `zfs/backups-explained.html` |
 | 4 | Samba (Windows LAN access) | ✅ done | 2026-10-04 | `samba/README.md`, `samba/samba-explained.html` |
 | 5 | Docker foundation | ✅ done (each app adds its own folder) | 2026-10-04 | `docs/services/docker.md`, `compose/README.md` |
-| 6 | Tailscale (remote access) | ✅ done (disable key expiry in console) | 2026-10-04 | `docs/services/tailscale.md` |
+| 6 | Tailscale (remote access) | ✅ done; Funnel on for Nextcloud | 2026-10-04 | `docs/services/tailscale.md` |
 | 7 | Jellyfin (movies on the LG TV) | ⬜ | | `compose/jellyfin/` |
-| 8 | Nextcloud AIO on `/tank1tb/Nextcloud` | ⬜ | | `nextcloud/` |
+| 8 | Nextcloud AIO on `/tank1tb/Nextcloud` | ✅ done, public via Funnel, 2FA | 2026-10-06 | `docs/services/nextcloud.md`, `nextcloud/nextcloud-explained.html` |
 | 9 | Music: NAS library → Music Assistant / Sonos, YouTube audio | ⬜ | | `docs/services/music.md` |
 | 10 | Reboot / autostart / recovery validation | ⬜ | | `docs/recovery/BOOT-RECOVERY.md` |
 | 11 | Backups off the NAS + restore test | ⬜ | | `docs/recovery/BACKUP-RESTORE.md` |
 | 12 | AdGuard Home DNS filtering | ⬜ | | `compose/adguard/` |
 | 13 | Monitoring + alerts | ⬜ | | `docs/services/monitoring.md` |
 | 14 | Ubiquiti VLAN segmentation (optional) | ⬜ | | `docs/architecture/network.md` |
+
+**Open items outside the checkpoints**
+- **Hardware stability (top priority):** kernel panics with single-bit corruption; memtest86+ clean.
+  Running on 2 of 4 sticks since 2026-10-06 21:15; bar is 72 h without a panic
+  (`docs/recovery/2026-10-04-ZFS-PANIC.md`). Keep Windows originals until then.
+- **TODO Ollama:** revisit models and memory once the RAM is back to 16 GB (`qwen3:14b` does not fit in 8 GB).
+- Toshiba DT01ACA100 in `tank1tb`: long SMART test fails; replace (`zfs/BACKUPS.md`).
+- Delete `/var/lib/docker/volumes.ssd-old-2026-10-06` after a few days of Docker on ZFS.
+- AIO Borg backup (application-consistent Nextcloud backups): not set up.
+- Nextcloud: stale index rows for the old `/tank1tb` mount paths, and 6 favourites to re-star
+  (`docs/services/nextcloud.md` → Leftover). Phone auto-upload → `/Photos` not set yet.
 
 Checkpoints 1–9 deliver the stated goals: Windows access on the LAN, remote access,
 movies on the TV, and music to Home Assistant / Music Assistant. 10–14 make it trustworthy.
@@ -320,6 +331,13 @@ Steps:
 Done when:
 - Nextcloud reachable remotely over Tailscale, files landing under `/tank1tb/Nextcloud`.
 - Compose committed without secrets.
+
+Result (2026-10-06): AIO v14.2.0, Nextcloud 34.0.4, with Collabora (Nextcloud Office), Fulltextsearch
+and Imaginary. **Front door changed from "Tailscale-only first" to public, by user choice:** Tailscale
+Funnel `https://motherlode.tailb6c0f2.ts.net` → `127.0.0.1:11000`. 2FA enforced, brute-force throttling
+and audit log see real client IPs. All five Samba shares attached as External Storage through
+`/srv/nas` bind mounts (`NEXTCLOUD_MOUNT=/srv/nas`), not only Photos and Documents. Docker volumes
+moved to ZFS. Tested from the phone on 5G with Tailscale off. Details: `docs/services/nextcloud.md`.
 
 ## Checkpoint 9 — Music to Home Assistant / Music Assistant
 

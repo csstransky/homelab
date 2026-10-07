@@ -1,23 +1,23 @@
+# Nextcloud All-in-One (Checkpoint 8). Docs: docs/services/nextcloud.md
+# The mastercontainer creates and updates the other Nextcloud containers itself,
+# so it stays on :latest (AIO's own update mechanism), unlike other apps.
 services:
   nextcloud-aio-mastercontainer:
     image: ghcr.io/nextcloud-releases/all-in-one:latest
     init: true
     container_name: nextcloud-aio-mastercontainer
     restart: always
-    dns:
-      - 100.100.100.100
-      - 127.0.0.53
-      - 1.1.1.1
     ports:
-      - "8080:8080"
+      - "8080:8080"                          # AIO admin interface, LAN/tailnet only: https://192.168.1.59:8080
     environment:
-      APACHE_PORT: 11000
-      APACHE_IP_BINDING: 127.0.0.1
-      NEXTCLOUD_DATADIR: /tank/Nextcloud
+      APACHE_PORT: 11000                     # Nextcloud itself, reached only through Tailscale Funnel
+      APACHE_IP_BINDING: 127.0.0.1           # not reachable from the LAN directly
+      NEXTCLOUD_DATADIR: /tank1tb/Nextcloud  # never change after the first install
+      NEXTCLOUD_MOUNT: /srv/nas              # every Samba share, bind-mounted (fstab); External Storage attaches each
+      SKIP_DOMAIN_VALIDATION: "false"
     volumes:
       - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /tank/Nextcloud:/tank/Nextcloud
 
 volumes:
   nextcloud_aio_mastercontainer:

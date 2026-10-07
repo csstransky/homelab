@@ -38,7 +38,9 @@ Nothing is exposed to the internet. No port forwards on the UDM.
 
 Tailscale with MagicDNS is the only intended path in from outside the LAN.
 MagicDNS name `motherlode.tailb6c0f2.ts.net`, tailnet address `100.111.72.91` (unchanged after the
-2026-10-04 reinstall). Tailscale SSH on, no subnet routes, no Funnel. Details: `docs/services/tailscale.md`.
+2026-10-04 reinstall). Tailscale SSH on, no subnet routes. **Funnel on since 2026-10-06: `https://motherlode.tailb6c0f2.ts.net`
+(443) → Nextcloud on `127.0.0.1:11000` is public.** Nothing else is public, and nothing is
+port-forwarded on the router. Details: `docs/services/tailscale.md`, `docs/services/nextcloud.md`.
 No DuckDNS, no dynamic-DNS cron, no public ports.
 
 ## DNS (planned, Checkpoint 12)

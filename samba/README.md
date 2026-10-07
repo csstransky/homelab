@@ -19,6 +19,10 @@ Visual walk-through (diagram, shares, permissions, every setup command): open
 `/tank1tb/Nextcloud` is **not** shared and must not be. Nextcloud owns that directory, and
 files changed behind its back break its database.
 
+The five shares themselves **are** in Nextcloud (2026-10-06), attached as External Storage through
+`/srv/nas` bind mounts, with ACLs so both Samba and Nextcloud can write. Same files, two ways in:
+`docs/services/nextcloud.md`. Adding a share means doing both sides (recipe there).
+
 ## Security model
 
 - `security = user`, `map to guest = Never`, `guest ok = no`: no anonymous access.

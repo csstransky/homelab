@@ -47,7 +47,7 @@ The goal is **reproducibility, not documentation for documentation's sake.**
 │
 ├── compose/                  # One folder per Docker app (recipe in compose/README.md)
 ├── docker/                   # daemon.json (Docker engine config)
-├── nextcloud/                # Nextcloud configuration
+├── nextcloud/                # Nextcloud AIO compose.yaml, nextcloud-explained.html (visual guide)
 ├── samba/                    # Samba config, README, samba-explained.html (visual guide)
 ├── zfs/                      # ZFS README, BACKUPS.md, sanoid.conf, visual guides
 ├── systemd/                  # Custom systemd units (syncoid-tank500gb timer)
@@ -96,8 +96,8 @@ Storage is three ZFS pools plus one ext4 filesystem (architecture fixed 2026-09-
 /other       ext4         miscellaneous
 ```
 
-Visual guides (open in a browser): `zfs/zfs-explained.html`, `zfs/backups-explained.html` and
-`samba/samba-explained.html`. Backups and snapshots: `zfs/BACKUPS.md`.
+Visual guides (open in a browser): `zfs/zfs-explained.html`, `zfs/backups-explained.html`,
+`samba/samba-explained.html` and `nextcloud/nextcloud-explained.html`. Backups and snapshots: `zfs/BACKUPS.md`.
 
 Persistent disk references should use:
 

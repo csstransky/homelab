@@ -22,7 +22,7 @@ port-forwarded on the router, so nothing on MOTHERLODE is exposed to the public 
 | MagicDNS on this host | on: `/etc/resolv.conf` is written by Tailscale (`nameserver 100.100.100.100`); normal names and `motherlode.local` still resolve |
 | Subnet routes / exit node | none. Home Assistant and the UDM are **not** reachable through MOTHERLODE |
 | Connectivity | direct UDP (no relay needed): `tailscale netcheck` UDP: true |
-| Node key expiry | 2027-04-03 unless disabled in the admin console (see To do) |
+| Node key expiry | disabled (2026-10-06) |
 
 On the LAN, OpenSSH (`ssh ghost@192.168.1.59`) and Samba keep working exactly as before.
 
@@ -54,8 +54,7 @@ sudo journalctl -u tailscaled | grep 'SSH login'   # Tailscale SSH audit log
 
 ## To do (admin console, https://login.tailscale.com/admin/machines)
 
-- **Disable key expiry on motherlode** (… → Disable key expiry). Otherwise it drops off the
-  tailnet on 2027-04-03 until someone re-authenticates at the console.
+- ~~Disable key expiry on motherlode~~ done by the user 2026-10-06 (`KeyExpiry` absent).
 - Remove stale machines from before the reinstall, if any are listed.
 
 ## Decisions
@@ -64,7 +63,10 @@ sudo journalctl -u tailscaled | grep 'SSH login'   # Tailscale SSH audit log
   no SSH keys to copy to the phone. The default tailnet policy may ask for a browser re-check.
 - **No subnet routing:** off until there is a reason to reach Home Assistant / the UDM remotely
   through MOTHERLODE (`tailscale set --advertise-routes=192.168.1.0/24` + approve in console).
-- **No Funnel / Serve:** nothing is published to the public internet.
+- **Funnel on for Nextcloud only (2026-10-06, user choice: public share links):**
+  `tailscale funnel --bg 11000` → `https://motherlode.tailb6c0f2.ts.net` (port 443) is on the public
+  internet. Approved in the admin console (Funnel + HTTPS certificates). Off: `tailscale funnel --https=443 off`.
+  Funnel only allows ports 443/8443/10000; SSH, Samba and the AIO interface stay tailnet/LAN-only.
 - Auth keys are never committed. The login was interactive; no key exists.
 
 ## Rebuild
