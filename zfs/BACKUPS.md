@@ -59,7 +59,7 @@ name twice).
 
 | Item | Value |
 |---|---|
-| Datasets | `Documents`, `Photos`, `Music`, `Apps`, `Nextcloud` (not `Backups`) |
+| Datasets | `Documents`, `Photos`, `Music`, `Apps`, `Nextcloud`, `Backups` (Backups added 2026-10-06) |
 | Target | `tank500gb/<name>`, mounted read-only at `/tank500gb/<name>` |
 | When | 03:00 local, `syncoid-tank500gb.timer` (`Persistent=true`: runs at boot if 03:00 was missed) |
 | Script | `/usr/local/sbin/syncoid-tank500gb` (repo `scripts/backup/syncoid-tank500gb.sh`) |
@@ -92,6 +92,27 @@ Why systemd timers and not cron: Debian already ships `sanoid.timer`; timers cat
 downtime (`Persistent=true`), never start a second copy while one runs, log to the journal, and all
 schedules show in `systemctl list-timers`. Debian's `/etc/cron.d/sanoid` is a fallback that only
 runs on machines without systemd.
+
+## Off the SSD (2026-10-06)
+
+Two additions so nothing important lives only on the unmirrored OS SSD:
+
+- **Docker volumes** (Nextcloud database, AIO config, search index) moved to
+  `/tank1tb/Apps/docker-volumes`, bind-mounted at `/var/lib/docker/volumes`. They get the Apps
+  snapshots (hourly) and the nightly copy.
+- **`ssd-backup.timer` at 02:30** copies `/etc`, `/root` and `/home/ghost` to
+  `/tank1tb/Backups/motherlode-ssd/`, and `Backups` joined the 03:00 copy
+  (`template_replica_backups`: 14 daily, 4 weekly, 3 monthly).
+
+Details and SSD rebuild steps: `docs/recovery/SSD-BACKUP.md`.
+
+### Missed copies after a crash
+
+The 21:08 boot on 2026-10-06 started a catch-up copy (`Persistent=true`, 03:00 was missed during
+memtest). The 21:12 panic killed it mid-Photos, and a timer counts a run as done when it **starts**,
+so nothing retried until the next 03:00. `tank500gb/Music` was still empty and Photos at 11.5 of
+40 GB. After any crash, start a copy by hand: `sudo systemctl start syncoid-tank500gb`.
+syncoid resumes an interrupted receive.
 
 ## Restoring
 

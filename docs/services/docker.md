@@ -11,6 +11,7 @@
 | Packages | `docker-ce` 29.8.2, `docker-ce-cli`, `containerd.io`, `docker-buildx-plugin`, `docker-compose-plugin` (Compose v5.6.0) |
 | Services | `docker.service`, `containerd.service`: enabled, start at boot |
 | Images/containers | `/var/lib/docker` on the SSD (overlayfs, cgroup v2 / systemd) |
+| **Volumes** | **on ZFS since 2026-10-06:** `/tank1tb/Apps/docker-volumes`, bind-mounted at `/var/lib/docker/volumes` (fstab); `docker.service` drop-in `RequiresMountsFor=/var/lib/docker/volumes` (repo `systemd/docker.service.d/zfs-volumes.conf`) |
 | Daemon config | `/etc/docker/daemon.json` (repo copy `docker/daemon.json`) |
 | GPU | none: `nvidia-container-toolkit` is **not** installed (only if Checkpoint 7 needs NVENC) |
 
@@ -22,6 +23,8 @@ cannot fill the SSD (the default `json-file` driver never rotates).
 - **Compose files:** `~/homelab/compose/<app>/compose.yaml`, in git. Recipe in `compose/README.md`.
 - **App data:** `/tank1tb/Apps/<app>/`, which gets snapshots and the nightly copy for free (Checkpoint 3).
   Large disposable data (movies) stays on `/media` and is mounted read-only where possible.
+- **Named volumes** (e.g. Nextcloud AIO's database): on ZFS too, through the bind mount above, so
+  they are snapshotted hourly and copied nightly with `tank1tb/Apps`. Details in `docs/recovery/SSD-BACKUP.md`.
 - **Images:** the SSD. They are re-downloadable, so they are not backed up.
 - **Secrets:** `compose/<app>/.env`, gitignored. Commit `.env.example` with placeholders.
 

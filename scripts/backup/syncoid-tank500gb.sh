@@ -7,7 +7,7 @@
 #                   even if sanoid has already pruned the snapshot it last sent
 # Copies are set readonly=on: browse them under /tank500gb/<name>, never edit them there.
 set -u
-DATASETS="Documents Photos Music Apps Nextcloud"
+DATASETS="Documents Photos Music Apps Nextcloud Backups"
 rc=0
 for d in $DATASETS; do
   echo "== tank1tb/$d -> tank500gb/$d"

@@ -1,0 +1,11 @@
+[Unit]
+Description=Copy OS SSD configs and home to ZFS (tank1tb/Backups)
+Documentation=file:///home/ghost/homelab/docs/recovery/SSD-BACKUP.md
+Requires=zfs.target
+After=zfs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ssd-backup
+Nice=10
+IOSchedulingClass=idle
