@@ -99,10 +99,32 @@ Practical rule: **after replacing existing files outside Nextcloud** (fixing cor
 re-exporting edited ones with the same name), run `nc-stale-previews --fix`. Adding new files is
 fine; only *replacing* a file that already had a preview is affected.
 
-Possible later automation (not set up): a systemd timer running `nc-stale-previews --fix` every
-15 minutes. It is cheap (one SQL join over `oc_previews`) and only ever deletes cached previews.
-Limit: it catches a file only after Nextcloud re-indexes it (someone opens the folder, or a
-`files:scan`).
+### Automatic: `nc-stale-previews.timer` (every 15 minutes, since 2026-10-08)
+
+Runs `nc-stale-previews --fix` at :00, :15, :30 and :45. Cheap (one SQL join over `oc_previews`),
+only ever deletes cached previews. Limit: it catches a file only after Nextcloud re-indexes it
+(someone opens the folder, or a `files:scan`), so right after replacing files the manual steps
+above are still the fastest.
+
+Repo `systemd/nc-stale-previews.{service,timer}`, installed in `/etc/systemd/system/`:
+
+```bash
+sudo install -m 644 systemd/nc-stale-previews.service systemd/nc-stale-previews.timer /etc/systemd/system/
+sudo install -m 755 scripts/diagnostics/nc-stale-previews.sh /usr/local/sbin/nc-stale-previews
+sudo systemctl daemon-reload && sudo systemctl enable --now nc-stale-previews.timer
+```
+
+systemd timers for someone used to `crontab -e`:
+
+| Cron habit | systemd |
+|---|---|
+| `crontab -l` (what's scheduled) | `systemctl list-timers` (`--all` includes stopped ones) |
+| `crontab -e` (add/edit a job) | a `.service` (what to run) + `.timer` (when) in `/etc/systemd/system/`, then `sudo systemctl daemon-reload` |
+| `*/15 * * * *` | `OnCalendar=*:0/15` (test a schedule: `systemd-analyze calendar '*:0/15'`) |
+| job's output in mail / nowhere | `journalctl -u nc-stale-previews.service` (`-f` to follow) |
+| run it now to test | `sudo systemctl start nc-stale-previews.service` |
+| comment the line out | `sudo systemctl disable --now nc-stale-previews.timer` |
+| missed runs while off are lost | `Persistent=true` runs a missed job at boot |
 
 ## Others with the same problem
 

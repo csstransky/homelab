@@ -1,0 +1,10 @@
+[Unit]
+Description=Clear Nextcloud previews of files replaced outside Nextcloud
+Documentation=file:///home/ghost/homelab/docs/recovery/2026-10-08-STALE-NEXTCLOUD-PREVIEWS.md
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/nc-stale-previews --fix
+Nice=10
