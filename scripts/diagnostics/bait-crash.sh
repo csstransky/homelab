@@ -50,7 +50,7 @@ destroy_scratch() {
   for ds in tank1tb/baittest tank500gb/baittest; do
     zfs list -H "$ds" >/dev/null 2>&1 || continue
     for try in 1 2 3 4 5; do
-      zfs destroy -r "$ds" 2>/dev/null && { log "destroyed $ds"; continue 2; }
+      zfs destroy -rf "$ds" 2>/dev/null && { log "destroyed $ds"; continue 2; }
       sleep 5
     done
     log "WARNING: could not destroy $ds, remove it by hand: sudo zfs destroy -r $ds"
