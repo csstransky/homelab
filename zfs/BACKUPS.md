@@ -61,10 +61,10 @@ name twice).
 |---|---|
 | Datasets | `Documents`, `Photos`, `Music`, `Apps`, `Nextcloud`, `Backups` (Backups added 2026-10-06) |
 | Target | `tank500gb/<name>`, mounted read-only at `/tank500gb/<name>` |
-| When | 03:00 local, `syncoid-tank500gb.timer` (`Persistent=true`: runs at boot if 03:00 was missed) |
-| Script | `/usr/local/sbin/syncoid-tank500gb` (repo `scripts/backup/syncoid-tank500gb.sh`) |
-| Units | `/etc/systemd/system/syncoid-tank500gb.{service,timer}` (repo `systemd/`) |
-| Logs | `sudo journalctl -u syncoid-tank500gb` |
+| When | 03:00 local, `syncoid-backup-tank1tb-to-tank500gb.timer` (`Persistent=true`: runs at boot if 03:00 was missed) |
+| Script | `/usr/local/sbin/syncoid-backup-tank1tb-to-tank500gb` (repo `scripts/backup/syncoid-backup-tank1tb-to-tank500gb.sh`) |
+| Units | `/etc/systemd/system/syncoid-backup-tank1tb-to-tank500gb.{service,timer}` (repo `systemd/`) |
+| Logs | `sudo journalctl -u syncoid-backup-tank1tb-to-tank500gb` |
 
 How it works: `syncoid --no-sync-snap --create-bookmark tank1tb/X tank500gb/X` for each dataset.
 It sends only sanoid's snapshots made since the last run (ZFS incremental send: only changed
@@ -79,10 +79,10 @@ copied datasets approach ~400 GB together, decide what to drop from the list in 
 ### Turn it off / on / run now
 
 ```bash
-sudo systemctl disable --now syncoid-tank500gb.timer    # stop nightly copies (existing copies stay)
-sudo systemctl enable --now syncoid-tank500gb.timer     # resume
-sudo systemctl start syncoid-tank500gb.service          # copy right now
-systemctl list-timers sanoid.timer syncoid-tank500gb.timer 'zfs-scrub*'
+sudo systemctl disable --now syncoid-backup-tank1tb-to-tank500gb.timer    # stop nightly copies (existing copies stay)
+sudo systemctl enable --now syncoid-backup-tank1tb-to-tank500gb.timer     # resume
+sudo systemctl start syncoid-backup-tank1tb-to-tank500gb.service          # copy right now
+systemctl list-timers sanoid.timer syncoid-backup-tank1tb-to-tank500gb.timer 'zfs-scrub*'
 ```
 
 Snapshots: `sudo systemctl disable --now sanoid.timer` stops both taking and pruning.
@@ -111,8 +111,9 @@ Details and SSD rebuild steps: `docs/recovery/SSD-BACKUP.md`.
 The 21:08 boot on 2026-10-06 started a catch-up copy (`Persistent=true`, 03:00 was missed during
 memtest). The 21:12 panic killed it mid-Photos, and a timer counts a run as done when it **starts**,
 so nothing retried until the next 03:00. `tank500gb/Music` was still empty and Photos at 11.5 of
-40 GB. After any crash, start a copy by hand: `sudo systemctl start syncoid-tank500gb`.
+40 GB. After any crash, start a copy by hand: `sudo systemctl start syncoid-backup-tank1tb-to-tank500gb`.
 syncoid resumes an interrupted receive.
+
 
 ## Restoring
 

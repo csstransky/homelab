@@ -50,7 +50,7 @@ The goal is **reproducibility, not documentation for documentation's sake.**
 ├── nextcloud/                # Nextcloud AIO compose.yaml, nextcloud-explained.html (visual guide)
 ├── samba/                    # Samba config, README, samba-explained.html (visual guide)
 ├── zfs/                      # ZFS README, BACKUPS.md, sanoid.conf, visual guides
-├── systemd/                  # Custom systemd units (syncoid-tank500gb timer)
+├── systemd/                  # Custom systemd units (syncoid-backup-tank1tb-to-tank500gb timer)
 │
 ├── scripts/
 │   ├── diagnostics/

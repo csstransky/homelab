@@ -128,7 +128,7 @@ $OCC files_external:create /NewThing local null::null -c datadir=/srv/nas/NewThi
 $OCC files_external:applicable --add-user admin <id>
 $OCC files_external:option <id> enable_sharing true
 $OCC files_external:scan <id>   # or: $OCC files:scan admin
-# 7. snapshots/nightly copy: add it to zfs/sanoid.conf and scripts/backup/syncoid-tank500gb.sh
+# 7. snapshots/nightly copy: add it to zfs/sanoid.conf and scripts/backup/syncoid-backup-tank1tb-to-tank500gb.sh
 ```
 
 ## Security (the login page is public)

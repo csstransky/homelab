@@ -343,9 +343,9 @@ svg .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
 
       <path class="cable" d="M314 150 H 640"/>
       <path class="cable" d="M626 140 L 640 150 L 626 160"/>
-      <rect class="b-panel" x="372" y="62" width="214" height="62" rx="8"/>
-      <text class="t-label" x="386" y="86">03:00 · syncoid</text>
-      <text class="t-small" x="386" y="106">syncoid-tank500gb.timer</text>
+      <rect class="b-panel" x="330" y="62" width="300" height="62" rx="8"/>
+      <text class="t-label" x="344" y="86">03:00 · syncoid</text>
+      <text class="t-small" x="344" y="106">syncoid-backup-tank1tb-to-tank500gb.timer</text>
       <text class="t-small" x="350" y="178">sends only the snapshots taken since</text>
       <text class="t-small" x="350" y="196">last night: changed blocks, not whole files</text>
       <text class="t-mono" x="350" y="222">tonight: ~33 KB, about 2 seconds</text>
@@ -360,7 +360,7 @@ svg .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
     </svg>
   </div>
   <div class="conf">
-    <div class="conf-row sect"><code>syncoid --no-sync-snap --create-bookmark tank1tb/Documents tank500gb/Documents</code><div class="why">The whole job, once per dataset, in <code>/usr/local/sbin/syncoid-tank500gb</code>.</div></div>
+    <div class="conf-row sect"><code>syncoid --no-sync-snap --create-bookmark tank1tb/Documents tank500gb/Documents</code><div class="why">The whole job, once per dataset, in <code>/usr/local/sbin/syncoid-backup-tank1tb-to-tank500gb</code>.</div></div>
     <div class="conf-row"><code>--no-sync-snap</code><div class="why">Send only sanoid's snapshots, no extra ones of its own. The copy ends up with the same hourly/daily/weekly/monthly history.</div></div>
     <div class="conf-row"><code>--create-bookmark</code><div class="why">Leave a tiny marker on the source. Even if sanoid has pruned the snapshot sent last night, tomorrow's copy can still be incremental.</div></div>
     <div class="conf-row"><code>readonly=on</code><div class="why">Set on every copy, so nothing edits tank500gb by accident. You can still browse and copy out.</div></div>
@@ -373,13 +373,13 @@ svg .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
   <div class="eyebrow">You asked for an off switch</div>
   <h2 id="h-off">Turn it off, on, or run it now</h2>
   <div class="cmds">
-    <div class="cmd"><pre>sudo systemctl disable --now syncoid-tank500gb.timer</pre><div class="why"><b>Stop</b> the nightly copy. Copies already on tank500gb stay.</div></div>
-    <div class="cmd"><pre>sudo systemctl enable --now syncoid-tank500gb.timer</pre><div class="why"><b>Resume</b> it.</div></div>
-    <div class="cmd"><pre>sudo systemctl start syncoid-tank500gb.service</pre><div class="why"><b>Copy right now</b>, outside the schedule.</div></div>
+    <div class="cmd"><pre>sudo systemctl disable --now syncoid-backup-tank1tb-to-tank500gb.timer</pre><div class="why"><b>Stop</b> the nightly copy. Copies already on tank500gb stay.</div></div>
+    <div class="cmd"><pre>sudo systemctl enable --now syncoid-backup-tank1tb-to-tank500gb.timer</pre><div class="why"><b>Resume</b> it.</div></div>
+    <div class="cmd"><pre>sudo systemctl start syncoid-backup-tank1tb-to-tank500gb.service</pre><div class="why"><b>Copy right now</b>, outside the schedule.</div></div>
     <div class="cmd"><pre>sudo systemctl disable --now sanoid.timer</pre><div class="why">Stop <b>snapshots</b> (both taking and pruning).</div></div>
     <div class="cmd"><pre>sudoedit /etc/sanoid/sanoid.conf</pre><div class="why">Change how many snapshots are kept. Picked up within 15 minutes.</div></div>
-    <div class="cmd"><pre>systemctl list-timers sanoid.timer syncoid-tank500gb.timer 'zfs-scrub*'</pre><div class="why">See every schedule, last run and next run.</div></div>
-    <div class="cmd"><pre>sudo journalctl -u syncoid-tank500gb</pre><div class="why">Read what the copy did each night.</div></div>
+    <div class="cmd"><pre>systemctl list-timers sanoid.timer syncoid-backup-tank1tb-to-tank500gb.timer 'zfs-scrub*'</pre><div class="why">See every schedule, last run and next run.</div></div>
+    <div class="cmd"><pre>sudo journalctl -u syncoid-backup-tank1tb-to-tank500gb</pre><div class="why">Read what the copy did each night.</div></div>
   </div>
   <div class="hostid">
     <div class="card"><h3>Why timers, not cron</h3><p>systemd timers are the standard on current Debian, and Debian's sanoid package already ships one. A timer runs a missed job after boot, never starts a second copy while one is still running, logs to the journal, and every schedule shows in one command.</p></div>
@@ -477,12 +477,12 @@ zfs list -t snapshot</pre><div class="why">First real run: 22 snapshots, one per
   <div class="phase">
     <h3>Nightly copy</h3>
     <div class="cmds">
-      <div class="cmd"><pre>sudo tee /usr/local/sbin/syncoid-tank500gb</pre><div class="why">The script: loop over 5 datasets, run syncoid, set the copy read-only, keep going if one fails.</div></div>
-      <div class="cmd"><pre>sudo tee /etc/systemd/system/syncoid-tank500gb.{service,timer}
+      <div class="cmd"><pre>sudo tee /usr/local/sbin/syncoid-backup-tank1tb-to-tank500gb</pre><div class="why">The script: loop over 5 datasets, run syncoid, set the copy read-only, keep going if one fails.</div></div>
+      <div class="cmd"><pre>sudo tee /etc/systemd/system/syncoid-backup-tank1tb-to-tank500gb.{service,timer}
 systemd-analyze verify …</pre><div class="why">The job (low CPU and disk priority) and its 03:00 schedule. <code>verify</code> checks the unit files for mistakes.</div></div>
-      <div class="cmd"><pre>sudo systemctl start syncoid-tank500gb.service
+      <div class="cmd"><pre>sudo systemctl start syncoid-backup-tank1tb-to-tank500gb.service
 zfs list -r tank500gb; zfs list -t bookmark</pre><div class="why">First run: full copy of 5 datasets, read-only, bookmarks on the source.</div></div>
-      <div class="cmd"><pre>sudo systemctl enable --now syncoid-tank500gb.timer</pre><div class="why">Arm the nightly schedule. Next run 03:00.</div></div>
+      <div class="cmd"><pre>sudo systemctl enable --now syncoid-backup-tank1tb-to-tank500gb.timer</pre><div class="why">Arm the nightly schedule. Next run 03:00.</div></div>
     </div>
   </div>
   <div class="phase">
@@ -503,7 +503,7 @@ sudo systemctl restart smartmontools</pre><div class="why">Check that smartd acc
       <div class="cmd"><pre>until … grep _02:00 …_hourly; do sleep 20; done</pre><div class="why">Wait for the 22:00 snapshot from the timer, not a hand-made one.</div></div>
       <div class="cmd"><pre>sudo rm …/restore-test.txt
 sudo cp -a …/.zfs/snapshot/autosnap_…_02:00:11_hourly/restore-test.txt …</pre><div class="why">Delete it, then get it back from the snapshot.</div></div>
-      <div class="cmd"><pre>sudo systemctl start syncoid-tank500gb.service
+      <div class="cmd"><pre>sudo systemctl start syncoid-backup-tank1tb-to-tank500gb.service
 touch /tank500gb/Documents/x</pre><div class="why">Second copy run: incremental only. The <code>touch</code> fails, proving the copy is read-only.</div></div>
       <div class="cmd"><pre>sudo sanoid --prune-snapshots --readonly --verbose</pre><div class="why">Pruning dry run: nothing to prune yet. It starts once more than 24 hourlies exist.</div></div>
     </div>
@@ -524,5 +524,5 @@ touch /tank500gb/Documents/x</pre><div class="why">Second copy run: incremental 
   </div>
 </section>
 
-<footer>Source: <code>zfs/BACKUPS.md</code>, <code>zfs/sanoid.conf</code>, <code>systemd/syncoid-tank500gb.*</code>, <code>scripts/backup/syncoid-tank500gb.sh</code>. Companion pages: <code>zfs/zfs-explained.html</code>, <code>samba/samba-explained.html</code>.</footer>
+<footer>Source: <code>zfs/BACKUPS.md</code>, <code>zfs/sanoid.conf</code>, <code>systemd/syncoid-backup-tank1tb-to-tank500gb.*</code>, <code>scripts/backup/syncoid-backup-tank1tb-to-tank500gb.sh</code>. Companion pages: <code>zfs/zfs-explained.html</code>, <code>samba/samba-explained.html</code>.</footer>
 </div>

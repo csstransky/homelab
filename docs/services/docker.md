@@ -64,7 +64,7 @@ docker image prune              # remove unused images
 | `docker run --rm hello-world` as `ghost` (no sudo) | "Hello from Docker!" |
 | Compose project: `nginx:alpine` on `127.0.0.1:8099`, bind-mounting a folder in `/tank1tb/Apps` | `curl` returned the file from tank1tb; `compose down` removed container and network |
 | `docker info` | overlayfs, cgroup v2, systemd cgroup driver, `local` logging |
-| Other services after install | `smbd`, `nmbd`, `wsdd2`, `sanoid.timer`, `syncoid-tank500gb.timer` active; SSH and SMB still listening |
+| Other services after install | `smbd`, `nmbd`, `wsdd2`, `sanoid.timer`, `syncoid-backup-tank1tb-to-tank500gb.timer` active; SSH and SMB still listening |
 
 Test container, image and folder were removed afterwards. Containers coming back after a reboot is
 checked with the first real app and again in Checkpoint 10.

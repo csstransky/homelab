@@ -199,9 +199,9 @@ Notes 2026-10-04 (details and evidence: `zfs/BACKUPS.md`):
   templates; there is no IEEE retention standard): Documents/Photos/Nextcloud/Apps 24h/30d/8w/12m,
   Music 0/30/4/6, Backups 0/14/4/3, `media` none.
 - `sanoid` 2.2.0 from Debian; `sanoid.timer` every 15 min. Snapshot names are UTC.
-- Nightly copy: `syncoid-tank500gb.timer` at 03:00 → `tank500gb/{Documents,Photos,Music,Apps,Nextcloud}`,
+- Nightly copy: `syncoid-backup-tank1tb-to-tank500gb.timer` at 03:00 → `tank500gb/{Documents,Photos,Music,Apps,Nextcloud}`,
   read-only, pruned to the same counts. The user wanted the off switch documented:
-  `sudo systemctl disable --now syncoid-tank500gb.timer`.
+  `sudo systemctl disable --now syncoid-backup-tank1tb-to-tank500gb.timer`.
 - Scheduling with systemd timers, not cron (catch-up after downtime, no overlap, journal logs).
 - Scrubs: `zfs-scrub-monthly@{tank1tb,tank500gb,media}.timer` enabled, next 2026-11-01.
 - smartd: short Sundays 02:00, long on the 15th at 04:00. Mail alerts wait for Checkpoint 13.

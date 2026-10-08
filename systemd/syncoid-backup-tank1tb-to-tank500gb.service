@@ -6,7 +6,7 @@ After=zfs.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/sbin/syncoid-tank500gb
+ExecStart=/usr/local/sbin/syncoid-backup-tank1tb-to-tank500gb
 Environment=HOME=/root
 Nice=10
 IOSchedulingClass=idle

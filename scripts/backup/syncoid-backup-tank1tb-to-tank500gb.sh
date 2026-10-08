@@ -1,6 +1,6 @@
 #!/bin/bash
 # Nightly copy of the important tank1tb datasets to the tank500gb mirror (Checkpoint 3).
-# Run by syncoid-tank500gb.timer at 03:00. Repo copy: scripts/backup/syncoid-tank500gb.sh
+# Run by syncoid-backup-tank1tb-to-tank500gb.timer at 03:00. Repo copy: scripts/backup/syncoid-backup-tank1tb-to-tank500gb.sh
 #
 # --no-sync-snap    send only sanoid's own snapshots, so tank500gb keeps the same history
 # --create-bookmark leave a bookmark on the source, so the next run can stay incremental

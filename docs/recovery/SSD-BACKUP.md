@@ -18,7 +18,7 @@ of its own. Everything worth keeping on it is copied onto ZFS every night.
 ```text
 02:30  ssd-backup.timer      rsync /etc, /root, /home/ghost → /tank1tb/Backups/motherlode-ssd   (root-only, 700)
 every 15 min  sanoid.timer   snapshots: Apps hourly (docker volumes), Backups daily
-03:00  syncoid-tank500gb     copies Documents Photos Music Apps Nextcloud Backups → tank500gb
+03:00  syncoid-backup-tank1tb-to-tank500gb     copies Documents Photos Music Apps Nextcloud Backups → tank500gb
 ```
 
 Backups keeps 14 daily / 4 weekly / 3 monthly snapshots on both pools. Because the Backups daily
@@ -65,7 +65,7 @@ Samba share or Nextcloud mount. It is not encrypted.
 |---|---|
 | `ssd-backup` first run | `/etc`, `/root`, `/home/ghost` copied, 718 MB, service exit 0 |
 | Docker on ZFS | `findmnt /var/lib/docker/volumes` → `tank1tb/Apps[/docker-volumes]`; all 9 Nextcloud containers healthy afterwards |
-| Reached tank500gb | manual snapshots `tank1tb/Apps@first-zfs-volumes`, `tank1tb/Backups@first-ssd-backup` + `syncoid-tank500gb`: `tank500gb/Apps` 833 MB with every `nextcloud_aio_*` volume, `tank500gb/Backups` 703 MB with `motherlode-ssd/{etc,home_ghost,root}` |
+| Reached tank500gb | manual snapshots `tank1tb/Apps@first-zfs-volumes`, `tank1tb/Backups@first-ssd-backup` + `syncoid-backup-tank1tb-to-tank500gb`: `tank500gb/Apps` 833 MB with every `nextcloud_aio_*` volume, `tank500gb/Backups` 703 MB with `motherlode-ssd/{etc,home_ghost,root}` |
 
 The two manual snapshots are not pruned by sanoid (only `autosnap_*` are); delete them once newer
 automatic ones exist on both pools.
