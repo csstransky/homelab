@@ -268,6 +268,24 @@ Prefer small, understandable commits.
 
 ---
 
+## Naming Scripts and Services
+
+The user reads these names in `systemctl list-timers` and `/usr/local/sbin`, so a name must say
+what the thing does with no other context. Spell words out and include a verb:
+
+```text
+<program or service>-<verb>-<what>
+nextcloud-fix-stale-previews          not nc-stale-previews
+nextcloud-show-logins                 not nc-logins
+syncoid-backup-tank1tb-to-tank500gb   not syncoid-tank500gb
+```
+
+The script, its `.service` and its `.timer` share the name; the repo copy adds `.sh`
+(`scripts/<diagnostics|backup|maintenance>/`, installed to `/usr/local/sbin`). Commit messages: one
+short line like the rest of `git log`, no body, no signature or Co-Authored-By lines.
+
+---
+
 ## Documentation Principle
 
 If a problem required substantial troubleshooting, document:

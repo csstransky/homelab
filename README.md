@@ -50,13 +50,13 @@ The goal is **reproducibility, not documentation for documentation's sake.**
 ├── nextcloud/                # Nextcloud AIO compose.yaml, nextcloud-explained.html (visual guide)
 ├── samba/                    # Samba config, README, samba-explained.html (visual guide)
 ├── zfs/                      # ZFS README, BACKUPS.md, sanoid.conf, visual guides
-├── systemd/                  # Custom systemd units (syncoid-backup-tank1tb-to-tank500gb timer)
+├── systemd/                  # Custom systemd units (backup timers, nextcloud-fix-stale-previews)
 │
-├── scripts/
-│   ├── diagnostics/
+├── scripts/                  # installed to /usr/local/sbin without the .sh
+│   ├── diagnostics/          # look, don't change: last-crash, nextcloud-show-logins, bait/burn-in tests
 │   ├── install/
-│   ├── backup/
-│   └── maintenance/
+│   ├── backup/               # ssd-backup, syncoid-backup-tank1tb-to-tank500gb
+│   └── maintenance/          # fix things: nextcloud-fix-stale-previews
 │
 └── docs/
     ├── architecture/

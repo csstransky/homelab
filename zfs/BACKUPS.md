@@ -114,6 +114,17 @@ so nothing retried until the next 03:00. `tank500gb/Music` was still empty and P
 40 GB. After any crash, start a copy by hand: `sudo systemctl start syncoid-backup-tank1tb-to-tank500gb`.
 syncoid resumes an interrupted receive.
 
+### Killed by the bait test (2026-10-08)
+
+The first run under the new name (13:30, started by hand to test the rename from
+`syncoid-tank500gb`) lost `Apps` at 13:40:25: `Terminated`, `cannot receive: failed to read from
+stream`. Cause: the RAM bait test (`scripts/diagnostics/bait-crash.sh`) reached its 8 h runtime at
+13:39:57 and its cleanup runs `pkill -f "zfs send .*@autosnap"` to stop its own test sends. That
+pattern also matches this backup's `zfs send ... tank1tb/Apps@autosnap_...`. Photos, Documents
+and Music had already copied. A rerun at 13:43, after the bait test had finished, resumed Apps from
+where it stopped (51 MB of the 142 MB left) and exited 0. **Don't run a backup while a bait test is running or ending**, and
+narrow that `pkill` to the bait script's own processes before the next bait run (not done while
+the 2026-10-08 run was still in its cleanup: editing a running bash script can break it).
 
 ## Restoring
 
