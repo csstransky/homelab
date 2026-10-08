@@ -60,7 +60,7 @@ $OCC preview:generate -s 2048x1536 -s 256x256 -c <fileid>
 
 Then reload the page in the browser with Ctrl/Cmd+Shift+R.
 
-`nextcloud-fix-stale-previews` is `scripts/diagnostics/nextcloud-fix-stale-previews.sh`. Delete the row **and** the file
+`nextcloud-fix-stale-previews` is `scripts/maintenance/nextcloud-fix-stale-previews.sh`. Delete the row **and** the file
 together: a row without its file (or the reverse) is its own bug, where Nextcloud thinks a preview
 exists and never regenerates it ([nextcloud/server#63513](https://github.com/nextcloud/server/issues/63513)).
 
@@ -110,7 +110,7 @@ Repo `systemd/nextcloud-fix-stale-previews.{service,timer}`, installed in `/etc/
 
 ```bash
 sudo install -m 644 systemd/nextcloud-fix-stale-previews.service systemd/nextcloud-fix-stale-previews.timer /etc/systemd/system/
-sudo install -m 755 scripts/diagnostics/nextcloud-fix-stale-previews.sh /usr/local/sbin/nextcloud-fix-stale-previews
+sudo install -m 755 scripts/maintenance/nextcloud-fix-stale-previews.sh /usr/local/sbin/nextcloud-fix-stale-previews
 sudo systemctl daemon-reload && sudo systemctl enable --now nextcloud-fix-stale-previews.timer
 ```
 

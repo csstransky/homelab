@@ -173,7 +173,7 @@ OCC='docker exec --user www-data nextcloud-aio-nextcloud php occ'
 $OCC status
 $OCC files_external:list
 $OCC files:scan admin                 # pick up changes made outside Nextcloud (normally automatic)
-nextcloud-fix-stale-previews          # old thumbnail after replacing a file outside Nextcloud (scripts/diagnostics/nextcloud-fix-stale-previews.sh)
+nextcloud-fix-stale-previews          # old thumbnail after replacing a file outside Nextcloud (scripts/maintenance/nextcloud-fix-stale-previews.sh)
 $OCC twofactorauth:state admin
 $OCC security:bruteforce:attempts <ip>
 $OCC security:bruteforce:reset <ip>
