@@ -338,6 +338,7 @@ docs/recovery/BOOT-RECOVERY.md        (not written yet: Checkpoint 10)
 docs/recovery/2026-09-28-HARD-FREEZE.md
 docs/recovery/2026-10-04-ZFS-PANIC.md
 docs/recovery/SSD-BACKUP.md
+docs/recovery/2026-10-08-STALE-NEXTCLOUD-PREVIEWS.md
 ```
 
 Never add Tailscale Funnel to anything but Nextcloud, never port-forward on the router, and never

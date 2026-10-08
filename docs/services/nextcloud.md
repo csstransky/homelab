@@ -86,6 +86,9 @@ attached to Nextcloud with the **External Storage** app ("Local" type):
   brand-new folder can show **-1 B** (size not computed yet) until it is opened or scanned:
   `occ files:scan --path="/admin/files/Other"`. Windows Explorer, in turn, often does not refresh a
   network folder by itself, especially during a big copy into it: press F5.
+- Check-on-access updates the file index, **not previews**: a file *replaced* over Samba keeps its
+  old thumbnail in Nextcloud. Run `nc-stale-previews --fix` afterwards
+  (`docs/recovery/2026-10-08-STALE-NEXTCLOUD-PREVIEWS.md`).
 - `/media/ghost` is where XFCE auto-mounts USB drives. It is left without Nextcloud permissions, so
   USB drives don't appear in Nextcloud.
 
@@ -170,6 +173,7 @@ OCC='docker exec --user www-data nextcloud-aio-nextcloud php occ'
 $OCC status
 $OCC files_external:list
 $OCC files:scan admin                 # pick up changes made outside Nextcloud (normally automatic)
+nc-stale-previews --fix               # old thumbnail after replacing a file outside Nextcloud (scripts/diagnostics/nc-stale-previews.sh)
 $OCC twofactorauth:state admin
 $OCC security:bruteforce:attempts <ip>
 $OCC security:bruteforce:reset <ip>
