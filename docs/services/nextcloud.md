@@ -87,8 +87,8 @@ attached to Nextcloud with the **External Storage** app ("Local" type):
   `occ files:scan --path="/admin/files/Other"`. Windows Explorer, in turn, often does not refresh a
   network folder by itself, especially during a big copy into it: press F5.
 - Check-on-access updates the file index, **not previews**: a file *replaced* over Samba keeps its
-  old thumbnail in Nextcloud. `nextcloud-stale-previews.timer` clears those every 15 minutes; run
-  `nextcloud-stale-previews --fix` to do it now (`docs/recovery/2026-10-08-STALE-NEXTCLOUD-PREVIEWS.md`).
+  old thumbnail in Nextcloud. `nextcloud-fix-stale-previews.timer` clears those every 15 minutes; run
+  `nextcloud-fix-stale-previews` to do it now (`docs/recovery/2026-10-08-STALE-NEXTCLOUD-PREVIEWS.md`).
 - `/media/ghost` is where XFCE auto-mounts USB drives. It is left without Nextcloud permissions, so
   USB drives don't appear in Nextcloud.
 
@@ -146,8 +146,8 @@ $OCC files_external:scan <id>   # or: $OCC files:scan admin
 Who logged in, from where:
 
 ```bash
-nc-logins            # last 30 successful/failed logins with IP (repo scripts/diagnostics/nc-logins.sh)
-nc-logins 50 --failed
+nextcloud-show-logins    # last 30 successful/failed logins with IP (repo scripts/diagnostics/nextcloud-show-logins.sh)
+nextcloud-show-logins 50 --failed
 ```
 
 The audit log was 48 MB after the first scan (it logs every file touched) and is not trimmed
@@ -173,7 +173,7 @@ OCC='docker exec --user www-data nextcloud-aio-nextcloud php occ'
 $OCC status
 $OCC files_external:list
 $OCC files:scan admin                 # pick up changes made outside Nextcloud (normally automatic)
-nextcloud-stale-previews --fix               # old thumbnail after replacing a file outside Nextcloud (scripts/diagnostics/nextcloud-stale-previews.sh)
+nextcloud-fix-stale-previews          # old thumbnail after replacing a file outside Nextcloud (scripts/diagnostics/nextcloud-fix-stale-previews.sh)
 $OCC twofactorauth:state admin
 $OCC security:bruteforce:attempts <ip>
 $OCC security:bruteforce:reset <ip>

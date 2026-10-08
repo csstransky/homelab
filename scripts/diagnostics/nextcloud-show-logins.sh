@@ -1,7 +1,7 @@
 #!/bin/bash
 # Who logged in to Nextcloud, and from which IP. Reads the audit log (admin_audit app)
 # plus the main log (failed logins, brute-force throttling).
-# Usage: nc-logins [N, default 30] [--failed]
+# Usage: nextcloud-show-logins [N, default 30] [--failed]
 n=${1:-30}
 pattern='Login successful|Login failed'
 [ "$2" = "--failed" ] && pattern='Login failed|Bruteforce|throttl'

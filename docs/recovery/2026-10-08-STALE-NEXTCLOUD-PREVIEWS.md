@@ -3,7 +3,7 @@
 **Short version:** Nextcloud only throws away a file's thumbnails/previews when the file is
 changed *through Nextcloud*. Replace a file any other way (Samba, a shell, a copy into
 `/tank1tb/...`) and Nextcloud keeps showing the preview of the old file, forever. No setting
-changes this in Nextcloud 34. Fix: `nextcloud-stale-previews --fix`.
+changes this in Nextcloud 34. Fix: `nextcloud-fix-stale-previews`.
 
 ## Symptoms
 
@@ -52,15 +52,15 @@ OCC='docker exec --user www-data nextcloud-aio-nextcloud php occ'
 # 1. make sure Nextcloud has re-indexed the changed files (opening the folder in the web UI also does it)
 $OCC files:scan --path="/admin/files/Photos/1985 Corvette"
 # 2. list, then delete, every preview whose etag no longer matches its file
-nextcloud-stale-previews          # read-only
-nextcloud-stale-previews --fix    # deletes the rows in oc_previews + the files under appdata_*/preview
+nextcloud-fix-stale-previews --dry-run   # read-only
+nextcloud-fix-stale-previews             # deletes the rows in oc_previews + the files under appdata_*/preview
 # 3. optional: render them again now instead of on next view
 $OCC preview:generate -s 2048x1536 -s 256x256 -c <fileid>
 ```
 
 Then reload the page in the browser with Ctrl/Cmd+Shift+R.
 
-`nextcloud-stale-previews` is `scripts/diagnostics/nextcloud-stale-previews.sh`. Delete the row **and** the file
+`nextcloud-fix-stale-previews` is `scripts/diagnostics/nextcloud-fix-stale-previews.sh`. Delete the row **and** the file
 together: a row without its file (or the reverse) is its own bug, where Nextcloud thinks a preview
 exists and never regenerates it ([nextcloud/server#63513](https://github.com/nextcloud/server/issues/63513)).
 
@@ -75,7 +75,7 @@ Nextcloud).
 ## Verification
 
 ```text
-$ nextcloud-stale-previews
+$ nextcloud-fix-stale-previews --dry-run
 No stale previews.
 ```
 
@@ -96,22 +96,22 @@ There is **no setting** to turn on. What was checked:
 | Edit/replace files through Nextcloud (web, client, WebDAV) | Triggers `postWrite`, previews are deleted correctly. The real fix, but not how Samba is used. |
 
 Practical rule: **after replacing existing files outside Nextcloud** (fixing corrupted photos,
-re-exporting edited ones with the same name), run `nextcloud-stale-previews --fix`. Adding new files is
+re-exporting edited ones with the same name), run `nextcloud-fix-stale-previews`. Adding new files is
 fine; only *replacing* a file that already had a preview is affected.
 
-### Automatic: `nextcloud-stale-previews.timer` (every 15 minutes, since 2026-10-08)
+### Automatic: `nextcloud-fix-stale-previews.timer` (every 15 minutes, since 2026-10-08)
 
-Runs `nextcloud-stale-previews --fix` at :00, :15, :30 and :45. Cheap (one SQL join over `oc_previews`),
+Runs `nextcloud-fix-stale-previews` at :00, :15, :30 and :45. Cheap (one SQL join over `oc_previews`),
 only ever deletes cached previews. Limit: it catches a file only after Nextcloud re-indexes it
 (someone opens the folder, or a `files:scan`), so right after replacing files the manual steps
 above are still the fastest.
 
-Repo `systemd/nextcloud-stale-previews.{service,timer}`, installed in `/etc/systemd/system/`:
+Repo `systemd/nextcloud-fix-stale-previews.{service,timer}`, installed in `/etc/systemd/system/`:
 
 ```bash
-sudo install -m 644 systemd/nextcloud-stale-previews.service systemd/nextcloud-stale-previews.timer /etc/systemd/system/
-sudo install -m 755 scripts/diagnostics/nextcloud-stale-previews.sh /usr/local/sbin/nextcloud-stale-previews
-sudo systemctl daemon-reload && sudo systemctl enable --now nextcloud-stale-previews.timer
+sudo install -m 644 systemd/nextcloud-fix-stale-previews.service systemd/nextcloud-fix-stale-previews.timer /etc/systemd/system/
+sudo install -m 755 scripts/diagnostics/nextcloud-fix-stale-previews.sh /usr/local/sbin/nextcloud-fix-stale-previews
+sudo systemctl daemon-reload && sudo systemctl enable --now nextcloud-fix-stale-previews.timer
 ```
 
 systemd timers for someone used to `crontab -e`:
@@ -121,9 +121,9 @@ systemd timers for someone used to `crontab -e`:
 | `crontab -l` (what's scheduled) | `systemctl list-timers` (`--all` includes stopped ones) |
 | `crontab -e` (add/edit a job) | a `.service` (what to run) + `.timer` (when) in `/etc/systemd/system/`, then `sudo systemctl daemon-reload` |
 | `*/15 * * * *` | `OnCalendar=*:0/15` (test a schedule: `systemd-analyze calendar '*:0/15'`) |
-| job's output in mail / nowhere | `journalctl -u nextcloud-stale-previews.service` (`-f` to follow) |
-| run it now to test | `sudo systemctl start nextcloud-stale-previews.service` |
-| comment the line out | `sudo systemctl disable --now nextcloud-stale-previews.timer` |
+| job's output in mail / nowhere | `journalctl -u nextcloud-fix-stale-previews.service` (`-f` to follow) |
+| run it now to test | `sudo systemctl start nextcloud-fix-stale-previews.service` |
+| comment the line out | `sudo systemctl disable --now nextcloud-fix-stale-previews.timer` |
 | missed runs while off are lost | `Persistent=true` runs a missed job at boot |
 
 ## Others with the same problem

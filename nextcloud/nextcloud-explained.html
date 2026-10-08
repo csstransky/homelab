@@ -333,7 +333,7 @@ svg .arrow-win { fill: var(--win); } svg .arrow-nas { fill: var(--nas); } svg .a
     <div class="gate"><div class="n">2 · Password</div><h3>Changed from the generated one</h3><p>The AIO-generated password was visible in a screenshot, so it was replaced.</p></div>
     <div class="gate"><div class="n">3 · Two-factor</div><h3>Required for every account</h3><p><code>twofactorauth:enforce --on</code>. A 6-digit code from Duo Mobile, plus backup codes kept out of git.</p></div>
     <div class="gate"><div class="n">4 · Brute force</div><h3>Throttled per visitor IP</h3><p>Repeated failures slow that IP down. It sees the real IP, not the proxy, so an attacker can't lock you out.</p></div>
-    <div class="gate"><div class="n">5 · Audit log</div><h3>Every login, with its IP</h3><p>Your phone showed up as <code>166.198.25.32</code> and <code>2600:387:f:5f33::8</code>, your carrier's addresses. Read it with <code>nc-logins</code>.</p></div>
+    <div class="gate"><div class="n">5 · Audit log</div><h3>Every login, with its IP</h3><p>Your phone showed up as <code>166.198.25.32</code> and <code>2600:387:f:5f33::8</code>, your carrier's addresses. Read it with <code>nextcloud-show-logins</code>.</p></div>
   </div>
 </section>
 
