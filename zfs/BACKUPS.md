@@ -125,6 +125,8 @@ and Music had already copied. A rerun at 13:43, after the bait test had finished
 where it stopped (51 MB of the 142 MB left) and exited 0. **Don't run a backup while a bait test is running or ending**, and
 narrow that `pkill` to the bait script's own processes before the next bait run (not done while
 the 2026-10-08 run was still in its cleanup: editing a running bash script can break it).
+**Fixed 2026-10-08:** cleanup now kills only the script's own process tree and cancels only the
+scrubs it started; tested with a decoy `zfs send ...@autosnap` process, which survived.
 
 ## Restoring
 

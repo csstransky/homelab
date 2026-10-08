@@ -38,6 +38,7 @@ SRC1=tank1tb/Photos      # sent to tank500gb/baittest/recv
 SRC2=tank500gb/Music     # sent to tank1tb/baittest/recv
 ARC_PARAM=/sys/module/zfs/parameters/zfs_arc_max
 ARC_ORIG=$(cat "$ARC_PARAM")
+SCRUBBED=""
 
 log() {
   echo "$(date '+%F %T') $*" >> "$LOG"
@@ -57,19 +58,21 @@ destroy_scratch() {
   done
 }
 
+# kill_tree <pid>: kill every descendant of <pid>, deepest first (not <pid> itself)
+kill_tree() {
+  local c
+  for c in $(pgrep -P "$1"); do kill_tree "$c"; kill "$c" 2>/dev/null; done
+}
+
 cleanup() {
   [ "$BASHPID" = "$$" ] || exit 0   # background workers inherit the trap; only the main shell cleans up
   trap - EXIT INT TERM
   log "STOP: cleaning up"
-  pkill -P $$ 2>/dev/null
-  sleep 2
-  pkill -f "zfs send .*@autosnap" 2>/dev/null
-  pkill -f "stress-ng --cpu 8 --timeout 2s" 2>/dev/null
-  pkill -f "zfs receive -u .*/baittest/" 2>/dev/null
-  pkill -f "cp -a /usr/share/doc" 2>/dev/null
+  # Only this script's own descendants. A pattern like "zfs send .*@autosnap" also matched the
+  # nightly syncoid backup and killed it (zfs/BACKUPS.md, 2026-10-08).
+  kill_tree $$; sleep 2; kill_tree $$
   echo "$ARC_ORIG" > "$ARC_PARAM"
-  zpool scrub -s tank1tb 2>/dev/null
-  zpool scrub -s tank500gb 2>/dev/null
+  for p in $SCRUBBED; do zpool scrub -s "$p" 2>/dev/null; done
   sleep 3
   destroy_scratch
   log "zfs_arc_max restored to $ARC_ORIG; done"
@@ -192,7 +195,9 @@ destroy_scratch   # leftovers from a run that crashed
 zfs create -o mountpoint=/tank1tb/baittest tank1tb/baittest
 zfs create -o mountpoint=/tank500gb/baittest tank500gb/baittest
 
-zpool scrub tank1tb; zpool scrub tank500gb; log "scrub: started on tank1tb and tank500gb"
+SCRUBBED=""   # cancel on exit only the scrubs this script started
+for p in tank1tb tank500gb; do zpool scrub "$p" 2>/dev/null && SCRUBBED="$SCRUBBED $p"; done
+log "scrub: started on${SCRUBBED:- nothing (already running?)}"
 
 arcflap &
 sendrecv "$SRC1" tank500gb/baittest &
