@@ -4,8 +4,8 @@
 # A preview row stores the file's etag at render time; if that differs from the file's current
 # etag, the preview is stale. Nextcloud 34 stores the etag but never compares it.
 # See docs/recovery/2026-10-08-STALE-NEXTCLOUD-PREVIEWS.md.
-# Usage: nc-stale-previews          list stale previews (changes nothing)
-#        nc-stale-previews --fix    delete them; Nextcloud re-renders them on next view
+# Usage: nextcloud-stale-previews          list stale previews (changes nothing)
+#        nextcloud-stale-previews --fix    delete them; Nextcloud re-renders them on next view
 # Only finds files Nextcloud has already re-indexed (opened folder or files:scan), see the doc.
 set -euo pipefail
 

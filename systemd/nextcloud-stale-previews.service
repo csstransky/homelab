@@ -6,5 +6,5 @@ After=docker.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/sbin/nc-stale-previews --fix
+ExecStart=/usr/local/sbin/nextcloud-stale-previews --fix
 Nice=10
