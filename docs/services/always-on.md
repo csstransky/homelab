@@ -7,8 +7,8 @@
 | Layer | Setting | Where |
 |---|---|---|
 | systemd | `sleep.target`, `suspend.target`, `hibernate.target`, `hybrid-sleep.target` masked (linked to `/dev/null`). Nothing can suspend the machine, not even `systemctl suspend`. | `/etc/systemd/system/*.target` symlinks |
-| logind | Suspend/hibernate keys, lid switch and idle action all `ignore` | `/etc/systemd/logind.conf.d/nas-always-on.conf` |
-| XFCE power manager | Inactivity sleep set to never (value `0`) on AC and battery; lid handling off. Screen blanking and monitor power-off (DPMS) off since 2026-10-04 (see below). | xfconf channel `xfce4-power-manager` |
+| logind | Suspend/hibernate keys, lid switch and idle action all `ignore`. Power button `poweroff` (since 2026-10-09, see below). | `/etc/systemd/logind.conf.d/nas-always-on.conf` |
+| XFCE power manager | Inactivity sleep set to never (value `0`) on AC and battery; lid handling off. Screen blanking and monitor power-off (DPMS) off since 2026-10-04 (see below). Power button `4` = shut down (since 2026-10-09). | xfconf channel `xfce4-power-manager` |
 
 Verify:
 
@@ -81,6 +81,39 @@ xset s off; xset s noblank; xset -dpms     # running session, immediately
 **Note:** with blanking off, light-locker never triggers, so the screen does not lock by itself.
 Lock by hand with `light-locker-command -l` (or the XFCE menu) if needed. The monitor now stays
 on; turn it off with its own button.
+
+## 2026-10-09: power button shuts down, no dialog
+
+**Goal:** headless, a short press of the case power button must start a clean shutdown with no
+questions asked.
+
+**Evidence:** logind already had `HandlePowerKey` = `poweroff` (the systemd default), but
+`systemd-inhibit --list` showed `xfce4-power-manager` holding a **block** lock on
+`handle-power-key`. While someone is logged into XFCE, the press goes to the power manager, not
+logind, and its `power-button-action` was `3` (Ask: the log out / shut down dialog).
+
+**Fix:**
+
+```bash
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/power-button-action -s 4   # 4 = shut down
+# /etc/systemd/logind.conf.d/nas-always-on.conf, under [Login]:
+#   HandlePowerKey=poweroff        (the default, written down so it cannot drift)
+sudo systemctl kill -s HUP systemd-logind   # reload logind config without restarting it
+```
+
+So the press powers off with or without a desktop login: logind handles it when nobody is logged in,
+XFCE when someone is. Holding the button 4+ s is still the hardware forced off: never use it for a
+normal shutdown.
+
+**Verify:**
+
+```bash
+busctl get-property org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager HandlePowerKey   # s "poweroff"
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/power-button-action   # 4
+```
+
+Then tap the button once: the machine shuts down within a few seconds, with no dialog.
+**Not yet tested with a real press** (both settings verified as above on 2026-10-09).
 
 ## Still to do in BIOS (F10 at POST)
 
