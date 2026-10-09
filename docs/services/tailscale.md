@@ -49,7 +49,7 @@ sudo journalctl -u tailscaled | grep 'SSH login'   # Tailscale SSH audit log
 | Login | `Success.`; same MagicDNS name as before the reinstall |
 | Phone on 5G (Wi-Fi off), Tailscale app | both devices connected (screenshot) |
 | SSH from phone (Termius) | `audit: SSH login: user=ghost ... from=100.78.106.52 ts_user=csstransky@github node=oneplus-13` at 22:31; ran `ls`, wrote `~/word.txt` |
-| SMB from phone (CX File Explorer) | browsed `Photos` (41 GB shown); uploaded 3 screenshots to `Other` at 22:38–22:39, landed as `ghost:nas` in `/other` |
+| SMB from phone (CX File Explorer) | browsed `Pictures` (41 GB shown); uploaded 3 screenshots to `Other` at 22:38–22:39, landed as `ghost:nas` in `/other` |
 | Host after install | DNS (public and `.local`) works; Samba, Docker, timers active; LAN address unchanged |
 
 ## To do (admin console, https://login.tailscale.com/admin/machines)

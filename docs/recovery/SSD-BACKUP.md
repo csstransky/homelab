@@ -18,7 +18,7 @@ of its own. Everything worth keeping on it is copied onto ZFS every night.
 ```text
 02:30  ssd-backup.timer      rsync /etc, /root, /home/ghost → /tank1tb/Backups/motherlode-ssd   (root-only, 700)
 every 15 min  sanoid.timer   snapshots: Apps hourly (docker volumes), Backups daily
-03:00  syncoid-backup-tank1tb-to-tank500gb     copies Documents Photos Music Apps Nextcloud Backups → tank500gb
+03:00  syncoid-backup-tank1tb-to-tank500gb     copies Documents Pictures Music Apps Nextcloud Backups → tank500gb
 ```
 
 Backups keeps 14 daily / 4 weekly / 3 monthly snapshots on both pools. Because the Backups daily

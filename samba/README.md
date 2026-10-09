@@ -11,7 +11,7 @@ Visual walk-through (diagram, shares, permissions, every setup command): open
 | Share | Path | Storage |
 |---|---|---|
 | `\\MOTHERLODE\Documents` | `/tank1tb/Documents` | ZFS mirror, important |
-| `\\MOTHERLODE\Photos` | `/tank1tb/Photos` | ZFS mirror, important |
+| `\\MOTHERLODE\Pictures` | `/tank1tb/Pictures` | ZFS mirror, important |
 | `\\MOTHERLODE\Music` | `/tank1tb/Music` | ZFS mirror, the important music library |
 | `\\MOTHERLODE\Media` | `/media` (`Movies`, `TV`, `Music`) | single disk, disposable |
 | `\\MOTHERLODE\Other` | `/other` | ext4, misc |
@@ -85,14 +85,14 @@ mapping made in an elevated prompt does not show in Explorer) and paste:
 ```bat
 cmdkey /add:MOTHERLODE /user:MOTHERLODE\ghost /pass
 net use N: \\MOTHERLODE\Documents /persistent:yes
-net use P: \\MOTHERLODE\Photos    /persistent:yes
+net use P: \\MOTHERLODE\Pictures    /persistent:yes
 net use M: \\MOTHERLODE\Music     /persistent:yes
 net use V: \\MOTHERLODE\Media     /persistent:yes
 net use O: \\MOTHERLODE\Other     /persistent:yes
 ```
 
 `cmdkey ... /pass` prompts for the Samba password and stores it in Windows Credential Manager.
-The `net use` lines then connect without asking. Drive letters: **N** Documents, **P** Photos,
+The `net use` lines then connect without asking. Drive letters: **N** Documents, **P** Pictures,
 **M** Music, **V** Media (video), **O** Other. Change any letter that is already taken on that PC.
 
 Use the user name `MOTHERLODE\ghost`, not plain `ghost`, so Windows does not send its own PC

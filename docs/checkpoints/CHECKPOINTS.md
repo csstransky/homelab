@@ -25,13 +25,13 @@ Three planning documents exist. Later documents override earlier ones where they
 
 - Pools: `tank1tb` (mirror, primary important data), `tank500gb` (mirror, backup target),
   `media` (single disk, disposable), plus ext4 `/other` (label `other`).
-- Datasets on `tank1tb`: `Documents`, `Photos`, `Music`, `Backups`, `Nextcloud`, `Apps`.
+- Datasets on `tank1tb`: `Documents`, `Pictures`, `Music`, `Backups`, `Nextcloud`, `Apps`.
   No `data/` wrapper dataset.
 - `/media/Movies`, `/media/TV`, `/media/Music` are plain directories on the `media` pool.
 - `/tank1tb/Music` is the important music library. `/media/Music` is disposable.
 - `/tank1tb/Nextcloud` is **not** a Samba share.
 - Samba: `security = user`, no guest, SMB2 minimum, `nas` group with setgid 2775 dirs,
-  shares `Documents`, `Photos`, `Music`, `Media`, `Other`, user `ghost`.
+  shares `Documents`, `Pictures`, `Music`, `Media`, `Other`, user `ghost`.
 - Seagate ST2000DX002 (2 TB) holds only disposable media. Never important data.
 - Secure Boot stays **disabled** (ZFS module signing).
 - NVIDIA: proprietary `nvidia-kernel-dkms` only. Never the open module.
@@ -101,7 +101,7 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 - Toshiba DT01ACA100 in `tank1tb`: long SMART test fails; replace (`zfs/BACKUPS.md`).
 - Delete `/var/lib/docker/volumes.ssd-old-2026-10-06` after a few days of Docker on ZFS.
 - AIO Borg backup (application-consistent Nextcloud backups): not set up.
-- Nextcloud phone auto-upload → `/Photos` not set yet.
+- Nextcloud phone auto-upload → `/Pictures` not set yet.
 
 Checkpoints 1–9 deliver the stated goals: Windows access on the LAN, remote access,
 movies on the TV, and music to Home Assistant / Music Assistant. 10–14 make it trustworthy.
@@ -182,9 +182,9 @@ Steps:
 3. Scrub schedule: monthly `tank1tb` and `tank500gb`; monthly `media` too (cheap early warning on the 2 TB).
    Debian ships `zfs-scrub-monthly@.timer` units; enable per pool.
 4. Snapshots: install `sanoid`; policy per dataset. Suggested starting point:
-   `Documents`, `Photos`, `Nextcloud`, `Apps`: hourly 24 / daily 30 / monthly 6.
+   `Documents`, `Pictures`, `Nextcloud`, `Apps`: hourly 24 / daily 30 / monthly 6.
    `Music`, `Backups`: daily 14 / monthly 3. `media`: no snapshots.
-5. Replication: `syncoid` from `tank1tb/{Documents,Photos,Apps}` (and `Nextcloud` if it fits)
+5. Replication: `syncoid` from `tank1tb/{Documents,Pictures,Apps}` (and `Nextcloud` if it fits)
    to `tank500gb/`. Decide the exact set given `tank500gb` is ~464 G. Schedule nightly via systemd timer.
 6. Commit sanitized sanoid config and timer units under `zfs/` and `systemd/`.
 
@@ -196,10 +196,10 @@ Done when:
 
 Notes 2026-10-04 (details and evidence: `zfs/BACKUPS.md`):
 - Retention agreed with the user after research (CISA 3-2-1, NIST SP 800-209, GFS rotation, sanoid's
-  templates; there is no IEEE retention standard): Documents/Photos/Nextcloud/Apps 24h/30d/8w/12m,
+  templates; there is no IEEE retention standard): Documents/Pictures/Nextcloud/Apps 24h/30d/8w/12m,
   Music 0/30/4/6, Backups 0/14/4/3, `media` none.
 - `sanoid` 2.2.0 from Debian; `sanoid.timer` every 15 min. Snapshot names are UTC.
-- Nightly copy: `syncoid-backup-tank1tb-to-tank500gb.timer` at 03:00 → `tank500gb/{Documents,Photos,Music,Apps,Nextcloud}`,
+- Nightly copy: `syncoid-backup-tank1tb-to-tank500gb.timer` at 03:00 → `tank500gb/{Documents,Pictures,Music,Apps,Nextcloud}`,
   read-only, pruned to the same counts. The user wanted the off switch documented:
   `sudo systemctl disable --now syncoid-backup-tank1tb-to-tank500gb.timer`.
 - Scheduling with systemd timers, not cron (catch-up after downtime, no overlap, journal logs).
@@ -216,9 +216,9 @@ Rebuild Report sections 22–36. Recreate the documented configuration exactly.
 Steps:
 1. `apt install samba smbclient`.
 2. `groupadd -g 1001 nas` (GID matches the existing directory ownership, see `zfs/README.md`); `usermod -aG nas ghost`.
-3. Ownership `root:nas`, mode `2775` on `/tank1tb/{Documents,Photos,Music}`, `/media`,
+3. Ownership `root:nas`, mode `2775` on `/tank1tb/{Documents,Pictures,Music}`, `/media`,
    `/media/{Movies,TV,Music}`, `/other`.
-4. Write `/etc/samba/smb.conf` from the Rebuild Report (shares: Documents, Photos, Music, Media, Other).
+4. Write `/etc/samba/smb.conf` from the Rebuild Report (shares: Documents, Pictures, Music, Media, Other).
    Keep `/tank1tb/Nextcloud` out of Samba.
 5. `smbpasswd -a ghost`; `testparm`; enable `smbd`. Decide whether `nmbd`/`wsdd2` is wanted for
    Windows network discovery.
@@ -282,7 +282,7 @@ Done when:
 - MagicDNS hostname recorded; nothing exposed to the public internet.
 
 Result (2026-10-04): `motherlode.tailb6c0f2.ts.net` / `100.111.72.91`, Tailscale SSH on. From the
-phone on 5G: SSH (Termius) and SMB (CX File Explorer: browse Photos, upload to Other) both worked.
+phone on 5G: SSH (Termius) and SMB (CX File Explorer: browse Pictures, upload to Other) both worked.
 No subnet routes. Key expiry still to be disabled in the admin console.
 
 ## Checkpoint 7 — Jellyfin (movies on the LG TV)
@@ -312,10 +312,10 @@ Steps:
 1. Update `nextcloud/compose.yaml`: `NEXTCLOUD_DATADIR=/tank1tb/Nextcloud`, volume path likewise.
    Keep `APACHE_IP_BINDING=127.0.0.1`, `APACHE_PORT=11000`.
 2. Decide the front door: Tailscale Serve / Funnel to port 11000, or a reverse proxy. Prefer Tailscale-only first.
-   **Decision 2026-10-04 (user): one folder per kind of file.** No second Photos or Documents inside
-   Nextcloud. Attach the existing `/tank1tb/Documents`, `/tank1tb/Photos` (and `Music` if wanted) to
+   **Decision 2026-10-04 (user): one folder per kind of file.** No second Pictures or Documents inside
+   Nextcloud. Attach the existing `/tank1tb/Documents`, `/tank1tb/Pictures` (and `Music` if wanted) to
    Nextcloud with the **External Storage** app ("Local" type), and point the phone app's auto-upload at the
-   attached Photos folder. `/tank1tb/Nextcloud` then holds only Nextcloud's internal data and stays out of
+   attached Pictures folder. `/tank1tb/Nextcloud` then holds only Nextcloud's internal data and stays out of
    Samba. Needs:
    - `NEXTCLOUD_MOUNT=/tank1tb` in `nextcloud/compose.yaml`, so AIO containers can see the host folders.
      (Superseded: became `/srv/nas` with bind mounts so Media and Other fit too; see the result below.)
@@ -336,7 +336,7 @@ Result (2026-10-06): AIO v14.2.0, Nextcloud 34.0.4, with Collabora (Nextcloud Of
 and Imaginary. **Front door changed from "Tailscale-only first" to public, by user choice:** Tailscale
 Funnel `https://motherlode.tailb6c0f2.ts.net` → `127.0.0.1:11000`. 2FA enforced, brute-force throttling
 and audit log see real client IPs. All five Samba shares attached as External Storage through
-`/srv/nas` bind mounts (`NEXTCLOUD_MOUNT=/srv/nas`), not only Photos and Documents. Docker volumes
+`/srv/nas` bind mounts (`NEXTCLOUD_MOUNT=/srv/nas`), not only Pictures and Documents. Docker volumes
 moved to ZFS. Tested from the phone on 5G with Tailscale off. Details: `docs/services/nextcloud.md`.
 
 ## Checkpoint 9 — Music to Home Assistant / Music Assistant
@@ -370,7 +370,7 @@ Steps:
 Build Plan phase 11.
 
 Steps:
-1. Define irreplaceable data: `Documents`, `Photos`, Nextcloud data, service configs.
+1. Define irreplaceable data: `Documents`, `Pictures`, Nextcloud data, service configs.
 2. Choose an independent target (external USB disk rotated off-site, or a cloud bucket via `restic`/`rclone`).
 3. Automate; encrypt; test a restore of a real file.
 4. Document in `docs/recovery/BACKUP-RESTORE.md`.

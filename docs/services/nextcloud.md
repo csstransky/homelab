@@ -60,12 +60,12 @@ tailscale funnel --bg 11000           # put it back
 
 ## One folder per kind of file (External Storage)
 
-User decision 2026-10-04: no second Photos or Documents inside Nextcloud. Every Samba share is
+User decision 2026-10-04: no second Pictures or Documents inside Nextcloud. Every Samba share is
 attached to Nextcloud with the **External Storage** app ("Local" type):
 
 | Mount | Host path | Samba share | Snapshots / nightly copy |
 |---|---|---|---|
-| /Photos | `/srv/nas/Photos` = `/tank1tb/Photos` | Photos | yes / yes |
+| /Pictures | `/srv/nas/Pictures` = `/tank1tb/Pictures` | Pictures | yes / yes |
 | /Documents | `/srv/nas/Documents` = `/tank1tb/Documents` | Documents | yes / yes |
 | /Music | `/srv/nas/Music` = `/tank1tb/Music` | Music | yes / yes |
 | /Media | `/srv/nas/Media` = `/media` | Media | no (disposable by design) |
@@ -103,7 +103,7 @@ user:www-data:rwx   group:nas:rwx   default:user:www-data:rwx   default:group:na
 The `default:` entries make new files and folders inherit both, whichever side creates them.
 Checked: a file created as `ghost` gets `www-data` rw; a file created by Nextcloud is
 `www-data:nas rw-rw-r--` (setgid folders keep group `nas`). All existing entries were
-updated: Photos 13,432, Documents 92,933, Music 8,919, Media 4, Other 6.
+updated: Pictures 13,432, Documents 92,933, Music 8,919, Media 4, Other 6.
 
 ### Adding a new share later
 
@@ -130,6 +130,45 @@ $OCC files_external:option <id> enable_sharing true
 $OCC files_external:scan <id>   # or: $OCC files:scan admin
 # 7. snapshots/nightly copy: add it to zfs/sanoid.conf and scripts/backup/syncoid-backup-tank1tb-to-tank500gb.sh
 ```
+
+### Renaming a share later
+
+Nextcloud names a Local storage after its path (`local::/srv/nas/Old/`), so changing `datadir` with
+`occ` makes a new storage: everything is re-indexed and favourites are lost (see the cleanup below).
+Rename the storage row instead, and file ids, favourites and previews stay. Tested 2026-10-09:
+`files:scan` afterwards found 0 new, 0 removed, and the folder kept its file id and 11 favourites.
+
+```bash
+# stop what touches it; snapshot the Nextcloud database (Docker volumes) for undo
+sudo systemctl stop sanoid.timer syncoid-backup-tank1tb-to-tank500gb.timer nextcloud-fix-stale-previews.timer
+sudo docker exec --user www-data nextcloud-aio-nextcloud php occ maintenance:mode --on
+sudo docker stop nextcloud-aio-nextcloud && sudo systemctl stop smbd
+sudo zfs snapshot tank1tb/Apps@pre-rename
+# rename the dataset (snapshots go with it) and its nightly copy
+sudo umount /srv/nas/Old
+sudo zfs rename tank1tb/Old tank1tb/New && sudo zfs rename tank500gb/Old tank500gb/New
+# edit Old → New in /etc/fstab, /etc/samba/smb.conf, /etc/sanoid/sanoid.conf,
+# scripts/backup/syncoid-backup-tank1tb-to-tank500gb.sh (then install it to /usr/local/sbin)
+sudo rmdir /srv/nas/Old && sudo mkdir /srv/nas/New && sudo systemctl daemon-reload && sudo mount /srv/nas/New
+sudo systemctl start smbd
+# Nextcloud: rename the storage, the mount and its path in one transaction (<id> = files_external:list)
+sudo docker exec -i nextcloud-aio-database psql -U oc_nextcloud -d nextcloud_database <<'SQL'
+begin;
+update oc_storages set id = 'local::/srv/nas/New/' where id = 'local::/srv/nas/Old/';
+update oc_external_mounts set mount_point = '/New' where mount_id = <id>;
+update oc_external_config set value = '/srv/nas/New' where mount_id = <id> and key = 'datadir';
+update oc_mounts set mount_point = '/admin/files/New/' where mount_point = '/admin/files/Old/';
+commit;
+SQL
+sudo docker start nextcloud-aio-nextcloud      # also makes the container see the new bind mount
+sudo docker exec --user www-data nextcloud-aio-nextcloud php occ maintenance:mode --off
+sudo docker exec --user www-data nextcloud-aio-nextcloud php occ files:scan --path="/admin/files/New"   # expect 0 new, 0 removed
+sudo systemctl start sanoid.timer syncoid-backup-tank1tb-to-tank500gb.timer nextcloud-fix-stale-previews.timer
+```
+
+Windows: `net use X: /delete`, then map the new share name. A mount hides whatever sits at the same
+path in admin's own files (`/tank1tb/Nextcloud/admin/files/`, e.g. Nextcloud's sample folders), so
+after a rename those can appear next to the new name.
 
 ## Security (the login page is public)
 
@@ -193,9 +232,9 @@ automatic updates with backups later).
 | Phone, Nextcloud Android app 35.0.1, Tailscale off, 5G | logged in with 2FA, browsed files; audit log shows public carrier IPs |
 | Browser on ZEPHYR (Firefox 157) and on MOTHERLODE | logged in |
 | External storage | 5 mounts, `files_external:verify` status ok on all |
-| First scan (Photos, Documents under `/tank1tb`) | 106,364 entries (41,425 files, 65,009 folders), 0 errors, 11 min 29 s |
-| Rescan after the move to `/srv/nas` | Photos 13,452 · Documents 92,932 · Music 8,919 · Media 5 · Other 7 entries (~35 min, during the 95 GB tank500gb copy) |
-| Write test as www-data | file created in Photos as `www-data:nas rw-rw-r--` |
+| First scan (Pictures, Documents under `/tank1tb`) | 106,364 entries (41,425 files, 65,009 folders), 0 errors, 11 min 29 s |
+| Rescan after the move to `/srv/nas` | Pictures 13,452 · Documents 92,932 · Music 8,919 · Media 5 · Other 7 entries (~35 min, during the 95 GB tank500gb copy) |
+| Write test as www-data | file created in Pictures as `www-data:nas rw-rw-r--` |
 | Collabora | `richdocuments:activate-config` → WOPI at `nextcloud-aio-apache:23973`, public URL autodetected |
 | Full-text search | `fulltextsearch:test` passed |
 | Brute force | test failure from `100.111.72.91` recorded with delay 200 ms, then reset |
@@ -203,12 +242,12 @@ automatic updates with backups later).
 ## Cleanup of the old index (2026-10-06, user-approved)
 
 Changing the mounts' paths from `/tank1tb/...` to `/srv/nas/...` made Nextcloud treat them as new
-storages, leaving the old index behind (storage 3 `local::/tank1tb/Photos/`, storage 4
+storages, leaving the old index behind (storage 3 `local::/tank1tb/Pictures/`, storage 4
 `local::/tank1tb/Documents/`). `occ files:cleanup` alone skips them because the storage rows still
 exist. Done with the user's explicit go-ahead, after `zfs snapshot tank1tb/Apps@pre-nc-storage-cleanup`:
 
 ```sql
--- move favourites to the same path on the new storage (3→8 Photos, 4→9 Documents): UPDATE 7
+-- move favourites to the same path on the new storage (3→8 Pictures, 4→9 Documents): UPDATE 7
 update oc_vcategory_to_object o set objid = n.fileid from oc_filecache old
   join oc_filecache n on n.path = old.path and n.storage = (case old.storage when 3 then 8 when 4 then 9 end)
   where o.objid = old.fileid and old.storage in (3,4);
@@ -216,17 +255,17 @@ delete from oc_storages where numeric_id in (3,4);   -- DELETE 2
 ```
 
 then `occ files:cleanup`: 106,384 orphaned file cache and 19 extended entries deleted. Favourites
-kept (4 car folders in Photos, the Photos and Documents roots), 0 orphaned favourites, `status.php` ok.
+kept (4 car folders in Pictures, the Pictures and Documents roots), 0 orphaned favourites, `status.php` ok.
 Undo: stop Nextcloud and roll back `tank1tb/Apps` to that snapshot (affects all Docker volumes).
 
-**Lesson:** decide the external storage paths before the first scan; changing them later means
-re-indexing and this cleanup.
+**Lesson:** decide the external storage paths before the first scan; changing them with `occ` means
+re-indexing and this cleanup. To change one later, rename the storage row ("Renaming a share later").
 
 ## History
 
 - AIO setup choices (user): Nextcloud Office **Collabora** (over Euro-Office), Fulltextsearch,
   Imaginary; Talk, ClamAV and Whiteboard off; Hub 26 Spring; timezone America/New_York.
-- 2026-10-06: first external mounts used `NEXTCLOUD_MOUNT=/tank1tb` (Photos, Documents). Media
+- 2026-10-06: first external mounts used `NEXTCLOUD_MOUNT=/tank1tb` (Pictures, Documents). Media
   (`/media`) and Other (`/other`) are outside `/tank1tb`, so the mount moved to `/srv/nas` with bind
   mounts, the two mounts were repointed and Music, Media, Other added.
 - The old `nextcloud/compose.yaml` (from the previous install) pointed at `/tank/Nextcloud` and had

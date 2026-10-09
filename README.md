@@ -90,7 +90,7 @@ The machine has previously experienced intermittent hardware/boot/sleep instabil
 Storage is three ZFS pools plus one ext4 filesystem (architecture fixed 2026-09-27):
 
 ```text
-/tank1tb     ZFS mirror   primary important data (Documents, Photos, Music, Backups, Nextcloud, Apps)
+/tank1tb     ZFS mirror   primary important data (Documents, Pictures, Music, Backups, Nextcloud, Apps)
 /tank500gb   ZFS mirror   backup / replication target
 /media       ZFS single   disposable media (Movies, TV, Music)
 /other       ext4         miscellaneous

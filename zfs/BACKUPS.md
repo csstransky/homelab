@@ -40,7 +40,7 @@ Each number is **how many to keep**.
 
 | Dataset | Hourly | Daily | Weekly | Monthly | Oldest snapshot |
 |---|---|---|---|---|---|
-| Documents, Photos, Nextcloud, Apps | 24 | 30 | 8 | 12 | ~1 year |
+| Documents, Pictures, Nextcloud, Apps | 24 | 30 | 8 | 12 | ~1 year |
 | Music | 0 | 30 | 4 | 6 | ~6 months |
 | Backups | 0 | 14 | 4 | 3 | ~3 months |
 | `media` pool | — | — | — | — | not snapshotted (disposable) |
@@ -59,7 +59,7 @@ name twice).
 
 | Item | Value |
 |---|---|
-| Datasets | `Documents`, `Photos`, `Music`, `Apps`, `Nextcloud`, `Backups` (Backups added 2026-10-06) |
+| Datasets | `Documents`, `Pictures`, `Music`, `Apps`, `Nextcloud`, `Backups` (Backups added 2026-10-06) |
 | Target | `tank500gb/<name>`, mounted read-only at `/tank500gb/<name>` |
 | When | 03:00 local, `syncoid-backup-tank1tb-to-tank500gb.timer` (`Persistent=true`: runs at boot if 03:00 was missed) |
 | Script | `/usr/local/sbin/syncoid-backup-tank1tb-to-tank500gb` (repo `scripts/backup/syncoid-backup-tank1tb-to-tank500gb.sh`) |
@@ -109,8 +109,8 @@ Details and SSD rebuild steps: `docs/recovery/SSD-BACKUP.md`.
 ### Missed copies after a crash
 
 The 21:08 boot on 2026-10-06 started a catch-up copy (`Persistent=true`, 03:00 was missed during
-memtest). The 21:12 panic killed it mid-Photos, and a timer counts a run as done when it **starts**,
-so nothing retried until the next 03:00. `tank500gb/Music` was still empty and Photos at 11.5 of
+memtest). The 21:12 panic killed it mid-Pictures, and a timer counts a run as done when it **starts**,
+so nothing retried until the next 03:00. `tank500gb/Music` was still empty and Pictures at 11.5 of
 40 GB. After any crash, start a copy by hand: `sudo systemctl start syncoid-backup-tank1tb-to-tank500gb`.
 syncoid resumes an interrupted receive.
 
@@ -120,7 +120,7 @@ The first run under the new name (13:30, started by hand to test the rename from
 `syncoid-tank500gb`) lost `Apps` at 13:40:25: `Terminated`, `cannot receive: failed to read from
 stream`. Cause: the RAM bait test (`scripts/diagnostics/bait-crash.sh`) reached its 8 h runtime at
 13:39:57 and its cleanup runs `pkill -f "zfs send .*@autosnap"` to stop its own test sends. That
-pattern also matches this backup's `zfs send ... tank1tb/Apps@autosnap_...`. Photos, Documents
+pattern also matches this backup's `zfs send ... tank1tb/Apps@autosnap_...`. Pictures, Documents
 and Music had already copied. A rerun at 13:43, after the bait test had finished, resumed Apps from
 where it stopped (51 MB of the 142 MB left) and exited 0. **Don't run a backup while a bait test is running or ending**, and
 narrow that `pkill` to the bait script's own processes before the next bait run (not done while

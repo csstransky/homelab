@@ -36,14 +36,14 @@ The WD 640 GB also holds `/other` on `-part2` (ext4, below). The OS SSD
 
 ```text
 tank1tb/Documents   /tank1tb/Documents
-tank1tb/Photos      /tank1tb/Photos
+tank1tb/Pictures      /tank1tb/Pictures
 tank1tb/Music       /tank1tb/Music      important music library
 tank1tb/Backups     /tank1tb/Backups
 tank1tb/Nextcloud   /tank1tb/Nextcloud  NOT a Samba share
 tank1tb/Apps        /tank1tb/Apps       persistent container data
 ```
 
-`media` has no child datasets. `tank500gb` holds read-only copies of Documents, Photos, Music,
+`media` has no child datasets. `tank500gb` holds read-only copies of Documents, Pictures, Music,
 Apps and Nextcloud, made nightly by syncoid (`zfs/BACKUPS.md`). `/media/Movies`, `/media/TV` and
 `/media/Music` are plain directories. `/media/ghost` is a leftover udisks automount
 directory from the old install.
@@ -62,7 +62,7 @@ Datasets inherit everything from their pool. `autotrim` is off (all spinning dis
 
 ## Ownership left over from the old install
 
-`/tank1tb/{Documents,Photos,Music}`, `/media` and its subdirectories, and `/other` are
+`/tank1tb/{Documents,Pictures,Music}`, `/media` and its subdirectories, and `/other` are
 `root:1001` mode `2775` (setgid). GID 1001 was the old `nas` group, which does not exist
 on this install yet. **Create `nas` with GID 1001 in Checkpoint 4** (`groupadd -g 1001 nas`)
 so these directories pick up the right group without a recursive `chgrp`.

@@ -40,7 +40,7 @@ WORK="$LOGDIR/bait-$STAMP.work"
 mkdir -p "$LOGDIR" "$WORK"
 chown -R ghost:ghost "$LOGDIR"
 
-SRC1=tank1tb/Photos      # sent to tank500gb/baittest/recv
+SRC1=tank1tb/Pictures    # sent to tank500gb/baittest/recv
 SRC2=tank500gb/Music     # sent to tank1tb/baittest/recv
 ARC_PARAM=/sys/module/zfs/parameters/zfs_arc_max
 ARC_ORIG=$(cat "$ARC_PARAM")
@@ -137,7 +137,7 @@ sendrecv() {
 sendnull() {
   local ds snap
   while true; do
-    for ds in tank1tb/Documents tank1tb/Music tank1tb/Apps tank500gb/Photos tank500gb/Documents; do
+    for ds in tank1tb/Documents tank1tb/Music tank1tb/Apps tank500gb/Pictures tank500gb/Documents; do
       snap=$(newest_daily "$ds")
       log "sendnull: $snap"
       zfs send -L "$snap" > /dev/null || log "sendnull: $snap FAILED"

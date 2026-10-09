@@ -7,7 +7,7 @@ changes this in Nextcloud 34. Fix: `nextcloud-fix-stale-previews`.
 
 ## Symptoms
 
-- Two photos in `Photos/1985 Corvette` were truncated by an interrupted copy (bottom of the
+- Two photos in `Pictures/1985 Corvette` were truncated by an interrupted copy (bottom of the
   picture a flat gray block, RGB 128,128,128). Around 12:03 they were replaced on disk with good
   copies from the Google Drive export.
 - At 12:41 the Nextcloud web viewer still showed the gray-block version of
@@ -50,7 +50,7 @@ the broken copies. Point 1 shows Nextcloud re-indexed them anyway.)
 ```bash
 OCC='docker exec --user www-data nextcloud-aio-nextcloud php occ'
 # 1. make sure Nextcloud has re-indexed the changed files (opening the folder in the web UI also does it)
-$OCC files:scan --path="/admin/files/Photos/1985 Corvette"
+$OCC files:scan --path="/admin/files/Pictures/1985 Corvette"
 # 2. list, then delete, every preview whose etag no longer matches its file
 nextcloud-fix-stale-previews --dry-run   # read-only
 nextcloud-fix-stale-previews             # deletes the rows in oc_previews + the files under appdata_*/preview

@@ -204,7 +204,7 @@ svg .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
 </section>
 
 <section aria-labelledby="h-ret">
-  <div class="eyebrow">How far back you can go · Documents, Photos, Nextcloud, Apps</div>
+  <div class="eyebrow">How far back you can go · Documents, Pictures, Nextcloud, Apps</div>
   <h2 id="h-ret">Lots of recent snapshots, fewer old ones</h2>
   <p>Each mark is one snapshot kept. Every row has its own time scale. Newer snapshots are close together, so you can undo this afternoon to the hour. Older ones thin out, so you can still go back a year. This is the classic grandfather-father-son rotation. The oldest of each kind is pruned when a new one is taken.</p>
   <div class="diagram" role="img" aria-label="Retention timeline: 24 hourly snapshots over the last day, 30 daily over the last month, 8 weekly over the last two months, 12 monthly over the last year.">
@@ -309,7 +309,7 @@ svg .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
     <table>
       <thead><tr><th>Dataset</th><th>Hourly</th><th>Daily</th><th>Weekly</th><th>Monthly</th><th>Reaches back</th></tr></thead>
       <tbody>
-        <tr><td><b>Documents · Photos · Nextcloud · Apps</b></td><td class="mono">24</td><td class="mono">30</td><td class="mono">8</td><td class="mono">12</td><td>1 year</td></tr>
+        <tr><td><b>Documents · Pictures · Nextcloud · Apps</b></td><td class="mono">24</td><td class="mono">30</td><td class="mono">8</td><td class="mono">12</td><td>1 year</td></tr>
         <tr><td><b>Music</b> (changes rarely)</td><td class="mono">0</td><td class="mono">30</td><td class="mono">4</td><td class="mono">6</td><td>6 months</td></tr>
         <tr><td><b>Backups</b> (already backups)</td><td class="mono">0</td><td class="mono">14</td><td class="mono">4</td><td class="mono">3</td><td>3 months</td></tr>
         <tr><td><b>media</b> pool (Movies, TV)</td><td colspan="4"><span class="chip no">none</span> disposable; snapshots would hold on to deleted movies</td><td>—</td></tr>
@@ -318,7 +318,7 @@ svg .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
     </table>
   </div>
   <div class="hostid">
-    <div class="card"><h3>What a snapshot costs</h3><p>Nothing when taken. It only keeps blocks that change <em>afterwards</em>. Photos and documents are mostly added to, rarely edited, so snapshots stay tiny. Today's 22 snapshots use 128 KB.</p></div>
+    <div class="card"><h3>What a snapshot costs</h3><p>Nothing when taken. It only keeps blocks that change <em>afterwards</em>. Pictures and documents are mostly added to, rarely edited, so snapshots stay tiny. Today's 22 snapshots use 128 KB.</p></div>
     <div class="card"><h3>The catch: deleted space comes back late</h3><p>Delete 50 GB of photos and the space returns only when the last snapshot holding them expires, up to 12 months later. To free it sooner, delete those snapshots by hand.</p></div>
     <div class="card"><h3>Why not keep everything forever?</h3><p>Unlimited snapshots grow without bound and make the list unusable. CISA asks for at least 7 days of rollback. A year covers "I noticed months later".</p></div>
   </div>
@@ -331,7 +331,7 @@ svg .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
     <svg viewBox="0 0 960 300" xmlns="http://www.w3.org/2000/svg">
       <rect class="b-mirror" x="14" y="20" width="300" height="260" rx="10"/>
       <text x="30" y="48"><tspan class="t-head t-nas">tank1tb</tspan><tspan class="t-small" dx="10">the live data</tspan></text>
-      <text class="t-mono" x="30" y="84">Documents</text><text class="t-mono" x="30" y="108">Photos</text><text class="t-mono" x="30" y="132">Music</text><text class="t-mono" x="30" y="156">Apps</text><text class="t-mono" x="30" y="180">Nextcloud</text>
+      <text class="t-mono" x="30" y="84">Documents</text><text class="t-mono" x="30" y="108">Pictures</text><text class="t-mono" x="30" y="132">Music</text><text class="t-mono" x="30" y="156">Apps</text><text class="t-mono" x="30" y="180">Nextcloud</text>
       <text class="t-small" x="30" y="204">Backups stays here only</text>
       <rect class="b-panel" x="160" y="70" width="140" height="116" rx="8"/>
       <text class="t-label" x="172" y="94">sanoid</text>
@@ -352,7 +352,7 @@ svg .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
 
       <rect class="b-mirror" x="646" y="20" width="300" height="260" rx="10"/>
       <text x="662" y="48"><tspan class="t-head t-nas">tank500gb</tspan><tspan class="t-small" dx="10">the copy</tspan></text>
-      <text class="t-mono" x="662" y="84">/tank500gb/Documents</text><text class="t-mono" x="662" y="108">/tank500gb/Photos</text><text class="t-mono" x="662" y="132">/tank500gb/Music</text><text class="t-mono" x="662" y="156">/tank500gb/Apps</text><text class="t-mono" x="662" y="180">/tank500gb/Nextcloud</text>
+      <text class="t-mono" x="662" y="84">/tank500gb/Documents</text><text class="t-mono" x="662" y="108">/tank500gb/Pictures</text><text class="t-mono" x="662" y="132">/tank500gb/Music</text><text class="t-mono" x="662" y="156">/tank500gb/Apps</text><text class="t-mono" x="662" y="180">/tank500gb/Nextcloud</text>
       <text class="t-small t-deny" x="662" y="206">read-only: "Read-only file system"</text>
       <text class="t-small" x="662" y="226">same snapshot history as the source;</text>
       <text class="t-small" x="662" y="242">sanoid prunes here but never snapshots</text>
@@ -392,7 +392,7 @@ svg .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
   <h2 id="h-sched">The schedule</h2>
   <div class="sched">
     <div class="item"><div class="when">every 15 min</div><div class="what">sanoid checks</div><p>Takes whatever snapshot is due, prunes extras.</p></div>
-    <div class="item"><div class="when">every hour, :00</div><div class="what">hourly snapshot</div><p>Documents, Photos, Nextcloud, Apps.</p></div>
+    <div class="item"><div class="when">every hour, :00</div><div class="what">hourly snapshot</div><p>Documents, Pictures, Nextcloud, Apps.</p></div>
     <div class="item"><div class="when">daily 19:59</div><div class="what">daily snapshot</div><p>23:59 UTC. Every snapshotted dataset.</p></div>
     <div class="item"><div class="when">daily 03:00</div><div class="what">nightly copy</div><p>tank1tb → tank500gb.</p></div>
     <div class="item"><div class="when">Mondays 19:30</div><div class="what">weekly snapshot</div><p>23:30 UTC.</p></div>
@@ -424,8 +424,8 @@ svg .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
 
 <section aria-labelledby="h-nc">
   <div class="eyebrow">Decision for Checkpoint 8</div>
-  <h2 id="h-nc">One Photos folder, not two</h2>
-  <div class="diagram" role="img" aria-label="Diagram: Windows P: drive and the phone's Nextcloud app both reach the single folder /tank1tb/Photos. Nextcloud attaches it via External Storage. /tank1tb/Nextcloud holds only Nextcloud's own data.">
+  <h2 id="h-nc">One Pictures folder, not two</h2>
+  <div class="diagram" role="img" aria-label="Diagram: Windows P: drive and the phone's Nextcloud app both reach the single folder /tank1tb/Pictures. Nextcloud attaches it via External Storage. /tank1tb/Nextcloud holds only Nextcloud's own data.">
     <svg viewBox="0 0 960 230" xmlns="http://www.w3.org/2000/svg">
       <rect class="b-win" x="14" y="24" width="210" height="64" rx="8"/>
       <text class="t-label t-win" x="28" y="50">ZEPHYR · P: drive</text>
@@ -437,8 +437,8 @@ svg .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
       <text class="t-label" x="284" y="156">Nextcloud</text>
       <text class="t-small" x="284" y="176">External Storage app, "Local"</text>
       <rect class="b-disk" x="560" y="60" width="380" height="80" rx="10"/>
-      <text class="t-head t-disk" x="578" y="92">/tank1tb/Photos</text>
-      <text class="t-small" x="578" y="116">the only photo folder · snapshotted · copied nightly</text>
+      <text class="t-head t-disk" x="578" y="92">/tank1tb/Pictures</text>
+      <text class="t-small" x="578" y="116">the only picture folder · snapshotted · copied nightly</text>
       <path class="wire-strong" d="M224 56 C 400 56, 420 90, 560 90"/>
       <path class="wire" d="M224 162 H 270"/>
       <path class="wire-strong" d="M500 162 C 530 162, 530 115, 560 115"/>

@@ -164,7 +164,7 @@ svg .wire-os { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasha
 <section aria-labelledby="h-map">
   <div class="eyebrow">Disk → pool → folder → Windows</div>
   <h2 id="h-map">Every disk in the box, and where it ends up</h2>
-  <div class="diagram tall" role="img" aria-label="Diagram: the Toshiba 1 TB and WD 1 TB form the tank1tb mirror, holding Documents, Photos, Music, Backups, Nextcloud and Apps. The Seagate 500 GB and the first partition of the WD 640 GB form the tank500gb mirror, the backup target. The second partition of the WD 640 GB is the ext4 /other filesystem. The Seagate 2 TB alone is the media pool. The Crucial SSD holds Debian and is not part of ZFS.">
+  <div class="diagram tall" role="img" aria-label="Diagram: the Toshiba 1 TB and WD 1 TB form the tank1tb mirror, holding Documents, Pictures, Music, Backups, Nextcloud and Apps. The Seagate 500 GB and the first partition of the WD 640 GB form the tank500gb mirror, the backup target. The second partition of the WD 640 GB is the ext4 /other filesystem. The Seagate 2 TB alone is the media pool. The Crucial SSD holds Debian and is not part of ZFS.">
     <svg viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg">
       <text class="t-small" x="14" y="18">PHYSICAL DISKS (by-id)</text>
       <text class="t-small" x="300" y="18">POOL / FILESYSTEM</text>
@@ -188,14 +188,14 @@ svg .wire-os { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasha
 
       <rect class="b-panel" x="550" y="34" width="260" height="168" rx="8"/>
       <text class="t-mono" x="564" y="58">/tank1tb/Documents</text>
-      <text class="t-mono" x="564" y="82">/tank1tb/Photos</text>
+      <text class="t-mono" x="564" y="82">/tank1tb/Pictures</text>
       <text class="t-mono" x="564" y="106">/tank1tb/Music</text>
       <text class="t-mono" x="564" y="130">/tank1tb/Backups</text>
       <text class="t-mono t-deny" x="564" y="154">/tank1tb/Nextcloud</text>
       <text class="t-mono" x="564" y="178">/tank1tb/Apps</text>
       <path class="wire" d="M510 97 H 550"/>
       <text class="t-mono t-win" x="828" y="58">Documents</text>
-      <text class="t-mono t-win" x="828" y="82">Photos</text>
+      <text class="t-mono t-win" x="828" y="82">Pictures</text>
       <text class="t-mono t-win" x="828" y="106">Music</text>
       <text class="t-small" x="828" y="130">(not shared)</text>
       <text class="t-small t-deny" x="828" y="154">never shared</text>
@@ -281,7 +281,7 @@ svg .wire-os { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasha
   <div class="gates">
     <div class="gate"><div class="n">Pool</div><h3>A bucket made of disks</h3><p>ZFS treats one or more disks as one storage space. You never format the disks yourself; the pool manages them. Each pool here is named after its size.</p></div>
     <div class="gate"><div class="n">Mirror</div><h3>Two disks, same data</h3><p>Every write goes to both. If one disk dies, the other has everything and the pool shows <code>DEGRADED</code> instead of failing. You lose half the raw space.</p></div>
-    <div class="gate"><div class="n">Dataset</div><h3>A folder with superpowers</h3><p><code>tank1tb/Photos</code> looks like a folder at <code>/tank1tb/Photos</code>, but it can have its own snapshots, compression and quotas. That is why each big category is its own dataset.</p></div>
+    <div class="gate"><div class="n">Dataset</div><h3>A folder with superpowers</h3><p><code>tank1tb/Pictures</code> looks like a folder at <code>/tank1tb/Pictures</code>, but it can have its own snapshots, compression and quotas. That is why each big category is its own dataset.</p></div>
     <div class="gate"><div class="n">Checksum + scrub</div><h3>ZFS notices bad data</h3><p>Every block is stored with a fingerprint. A <em>scrub</em> reads everything and compares. On a mirror, a bad copy is repaired from the good one automatically.</p></div>
   </div>
 </section>
@@ -299,8 +299,8 @@ svg .wire-os { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasha
 -O acltype=posixacl</code><div class="why">Store extra file attributes and Linux permission lists efficiently. Samba and Windows metadata use these.</div></div>
     <div class="conf-row"><code>-O dnodesize=auto</code><div class="why">Lets those attributes fit inside the file's own record, so reading them costs no extra disk seek.</div></div>
     <div class="conf-row"><code>-O relatime=on</code><div class="why">Update "last opened" times only occasionally, not on every read. Fewer pointless writes.</div></div>
-    <div class="conf-row"><code>-O mountpoint=/tank1tb</code><div class="why">Where the pool appears as a folder. Datasets appear underneath: <code>/tank1tb/Photos</code>.</div></div>
-    <div class="conf-row sect"><code>zfs create tank1tb/Documents</code> (×6)<div class="why">One dataset per category: Documents, Photos, Music, Backups, Nextcloud, Apps.</div></div>
+    <div class="conf-row"><code>-O mountpoint=/tank1tb</code><div class="why">Where the pool appears as a folder. Datasets appear underneath: <code>/tank1tb/Pictures</code>.</div></div>
+    <div class="conf-row sect"><code>zfs create tank1tb/Documents</code> (×6)<div class="why">One dataset per category: Documents, Pictures, Music, Backups, Nextcloud, Apps.</div></div>
   </div>
 </section>
 

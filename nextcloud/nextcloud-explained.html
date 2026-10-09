@@ -198,7 +198,7 @@ svg .arrow-win { fill: var(--win); } svg .arrow-nas { fill: var(--nas); } svg .a
 
 <section aria-labelledby="h-path">
   <div class="eyebrow">How a request gets in</div>
-  <h2 id="h-path">From your phone to your Photos folder</h2>
+  <h2 id="h-path">From your phone to your Pictures folder</h2>
   <p>Tailscale Funnel is the only door from the internet. It holds the HTTPS certificate and hands traffic to Nextcloud, which listens only on MOTHERLODE itself. At home, Windows goes straight to the same folders through Samba.</p>
   <div class="diagram tall">
     <svg viewBox="0 0 1000 560" role="img" aria-label="Request path: phone or laptop, through the internet and Tailscale Funnel, into MOTHERLODE: tailscaled, Apache, Nextcloud with its helper containers, /srv/nas bind mounts, and the five shares on disk. ZEPHYR reaches the same shares through Samba.">
@@ -276,7 +276,7 @@ svg .arrow-win { fill: var(--win); } svg .arrow-nas { fill: var(--nas); } svg .a
       <!-- shares -->
       <g>
         <rect x="595" y="370" width="68" height="56" rx="6" class="b-disk"/>
-        <text x="629" y="394" text-anchor="middle" class="t-label">Photos</text>
+        <text x="629" y="394" text-anchor="middle" class="t-label">Pictures</text>
         <text x="629" y="413" text-anchor="middle" class="t-small">tank1tb</text>
         <rect x="671" y="370" width="68" height="56" rx="6" class="b-disk"/>
         <text x="705" y="394" text-anchor="middle" class="t-label">Docs</text>
@@ -318,7 +318,7 @@ svg .arrow-win { fill: var(--win); } svg .arrow-nas { fill: var(--nas); } svg .a
     <tbody>
       <tr><td><b>Nextcloud</b></td><td><code>https://motherlode.tailb6c0f2.ts.net</code></td><td><span class="chip risk">whole internet</span> through Funnel, behind password and 2FA</td></tr>
       <tr><td>AIO admin page</td><td><code>https://192.168.1.59:8080</code></td><td><span class="chip safe">LAN + tailnet</span> not funneled</td></tr>
-      <tr><td>Samba shares</td><td><code>\\MOTHERLODE\Photos</code></td><td><span class="chip safe">LAN + tailnet</span></td></tr>
+      <tr><td>Samba shares</td><td><code>\\MOTHERLODE\Pictures</code></td><td><span class="chip safe">LAN + tailnet</span></td></tr>
       <tr><td>SSH</td><td><code>ghost@motherlode</code></td><td><span class="chip safe">LAN + tailnet</span> Funnel only carries port 443</td></tr>
       <tr><td>Nextcloud direct</td><td><code>127.0.0.1:11000</code></td><td><span class="chip no">MOTHERLODE only</span> Funnel's target</td></tr>
     </tbody>
@@ -362,7 +362,7 @@ svg .arrow-win { fill: var(--win); } svg .arrow-nas { fill: var(--nas); } svg .a
   <div class="tbl"><table>
     <thead><tr><th>In Nextcloud</th><th>Really is</th><th>Samba share</th><th>Snapshots + nightly copy</th></tr></thead>
     <tbody>
-      <tr><td>/Photos</td><td><code>/tank1tb/Photos</code></td><td>Photos</td><td><span class="chip safe">yes</span></td></tr>
+      <tr><td>/Pictures</td><td><code>/tank1tb/Pictures</code></td><td>Pictures</td><td><span class="chip safe">yes</span></td></tr>
       <tr><td>/Documents</td><td><code>/tank1tb/Documents</code></td><td>Documents</td><td><span class="chip safe">yes</span></td></tr>
       <tr><td>/Music</td><td><code>/tank1tb/Music</code></td><td>Music</td><td><span class="chip safe">yes</span></td></tr>
       <tr><td>/Media</td><td><code>/media</code></td><td>Media</td><td><span class="chip risk">no, disposable</span></td></tr>
@@ -388,7 +388,7 @@ default:group:nas:rwx</code><div class="why">New files inherit both. A phone upl
     <div class="item"><span class="when">always</span><span class="what">Docker volumes on ZFS</span><p>Database, AIO config, search index: <code>/tank1tb/Apps/docker-volumes</code>, mounted at <code>/var/lib/docker/volumes</code>. Docker refuses to start without it.</p></div>
     <div class="item"><span class="when">every hour</span><span class="what">Apps snapshot</span><p>sanoid freezes the volumes, Postgres included, at one instant.</p></div>
     <div class="item"><span class="when">02:30</span><span class="what">ssd-backup</span><p><code>/etc</code>, <code>/root</code>, <code>/home/ghost</code> (no caches) → <code>/tank1tb/Backups/motherlode-ssd</code>, root-only.</p></div>
-    <div class="item"><span class="when">03:00</span><span class="what">nightly copy</span><p>Documents, Photos, Music, Apps, Nextcloud and now <b>Backups</b> → tank500gb.</p></div>
+    <div class="item"><span class="when">03:00</span><span class="what">nightly copy</span><p>Documents, Pictures, Music, Apps, Nextcloud and now <b>Backups</b> → tank500gb.</p></div>
   </div>
   <p>Not copied, on purpose: Docker images, Debian packages and caches. They're all re-downloadable.</p>
 </section>
@@ -423,10 +423,10 @@ user  ghost</pre><p>Same thing from the phone, with the Tailscale app on.</p></d
   <div class="eyebrow">What was run</div>
   <h2 id="h-cmds">The commands, in order</h2>
   <div class="phase"><h3>Prepare the folders <span class="eyebrow">host</span></h3><div class="cmds">
-    <div class="cmd"><pre>zfs snapshot tank1tb/Photos@pre-nextcloud-acl-2 …</pre><div class="why">Safety snapshot before touching permissions on 100k files.</div></div>
-    <div class="cmd"><pre>setfacl -R -m u:33:rwX,g:nas:rwX /tank1tb/Photos
+    <div class="cmd"><pre>zfs snapshot tank1tb/Pictures@pre-nextcloud-acl-2 …</pre><div class="why">Safety snapshot before touching permissions on 100k files.</div></div>
+    <div class="cmd"><pre>setfacl -R -m u:33:rwX,g:nas:rwX /tank1tb/Pictures
 find … -type d -exec setfacl -m d:u:33:rwx,d:g:nas:rwx …</pre><div class="why">Give Nextcloud access now, and make new files inherit it.</div></div>
-    <div class="cmd"><pre>/tank1tb/Photos /srv/nas/Photos none bind,…   # /etc/fstab ×5</pre><div class="why">All five shares under one folder Nextcloud can be given.</div></div>
+    <div class="cmd"><pre>/tank1tb/Pictures /srv/nas/Pictures none bind,…   # /etc/fstab ×5</pre><div class="why">All five shares under one folder Nextcloud can be given.</div></div>
   </div></div>
   <div class="phase"><h3>Start Nextcloud <span class="eyebrow">host + you</span></h3><div class="cmds">
     <div class="cmd"><pre>docker compose up -d     # nextcloud/compose.yaml</pre><div class="why">Starts the AIO master container with the data dir, the <code>/srv/nas</code> mount and port 11000 bound to localhost.</div></div>
@@ -435,7 +435,7 @@ find … -type d -exec setfacl -m d:u:33:rwx,d:g:nas:rwx …</pre><div class="wh
   </div></div>
   <div class="phase"><h3>Wire it up <span class="eyebrow">occ inside the container</span></h3><div class="cmds">
     <div class="cmd"><pre>occ app:enable files_external
-occ files_external:create /Photos local null::null -c datadir=/srv/nas/Photos</pre><div class="why">Attach each share (×5), for user admin, sharing on, check for changes on access.</div></div>
+occ files_external:create /Pictures local null::null -c datadir=/srv/nas/Pictures</pre><div class="why">Attach each share (×5), for user admin, sharing on, check for changes on access.</div></div>
     <div class="cmd"><pre>occ files:scan admin</pre><div class="why">Index what's already there: 106,364 entries, 0 errors.</div></div>
     <div class="cmd"><pre>occ twofactorauth:enforce --on</pre><div class="why">No login without the second factor.</div></div>
     <div class="cmd"><pre>curl -u probe-user:wrong-pass …/remote.php/dav/</pre><div class="why">One deliberate failed login, to prove brute-force protection sees real IPs.</div></div>
@@ -454,7 +454,7 @@ RequiresMountsFor=/var/lib/docker/volumes</pre><div class="why">Mount them back 
   <h2 id="h-todo">Next</h2>
   <div class="layers">
     <div class="layer"><b>Hardware stability</b><p>72 hours on two RAM sticks without a panic. Keep Windows originals until then.</p><span class="chip risk">running</span></div>
-    <div class="layer"><b>Phone auto-upload</b><p>Point the Nextcloud app's auto-upload at <code>/Photos</code>, so pictures land in the one Photos folder.</p><span class="chip todo">you</span></div>
+    <div class="layer"><b>Phone auto-upload</b><p>Point the Nextcloud app's auto-upload at <code>/Pictures</code>, so pictures land in the one Pictures folder.</p><span class="chip todo">you</span></div>
     <div class="layer"><b>AIO Borg backup</b><p>Application-consistent Nextcloud backups, on top of the ZFS snapshots.</p><span class="chip todo">later</span></div>
     <div class="layer"><b>Ollama</b><p>Revisit models once the RAM is back to 16 GB.</p><span class="chip todo">later</span></div>
   </div>
