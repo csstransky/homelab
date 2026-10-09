@@ -36,9 +36,9 @@ Work one checkpoint at a time and update its status there.
 | OS              | Debian 13 (Trixie)              |
 | Architecture    | x86_64                          |
 | CPU             | Intel Core i7-6700              |
-| RAM             | 16 GiB (4 × 4 GB), all four back in since 2026-10-08 (crash investigation: `docs/recovery/2026-10-04-ZFS-PANIC.md`) |
-| GPU             | NVIDIA GeForce GTX 1050 Ti 4 GB — **removed 2026-10-04, untested** (`docs/hardware/GPU.md`) |
-| Display         | Intel HD Graphics 530 (iGPU, `i915`) |
+| RAM             | 8 GiB (2 × 4 GB in DIMM1+DIMM3) during the slot test from 2026-10-09; normally 16 GiB (crash investigation: `docs/recovery/2026-10-04-ZFS-PANIC.md`) |
+| GPU             | NVIDIA GeForce GTX 1050 Ti 4 GB — back in since 2026-10-07, working; load tests not run (`docs/hardware/GPU.md`) |
+| Display         | GTX 1050 Ti (the HD 530 iGPU is off while the card is installed) |
 | Primary user    | `ghost`                         |
 | Boot/storage OS | SSD                             |
 | Data storage    | ZFS `/tank1tb`, `/tank500gb`, `/media`; ext4 `/other` |
@@ -178,12 +178,11 @@ NVIDIA GeForce GTX 1050 Ti
 Pascal architecture
 ```
 
-**Status (2026-10-04): the card is physically removed and its hardware is untested.**
-The display runs on the Intel HD 530 iGPU and Ollama runs CPU-only. The NVIDIA packages
-stay installed, so `NVRM: No NVIDIA GPU found` at boot is expected. Do not "fix" it by
-removing packages. The card returns as **compute-only** (no display, `multi-user.target`)
-once MOTHERLODE is a strict NAS, after the test procedure in `docs/hardware/GPU.md` passes.
-Do not describe the GPU as working or verified until then.
+**Status (2026-10-09): the card is back in (since 2026-10-07) and working.** It drives the
+desktop, the driver loads with no `Xid` errors, the link is x16 and Ollama sees it (Vulkan).
+The VRAM and load tests in `docs/hardware/GPU.md` have not been run, so do not call it
+load-tested. The kernel panics happened both with and without the card, so do not blame it
+for them.
 
 The GTX 1050 Ti requires the proprietary NVIDIA kernel module.
 
@@ -236,7 +235,7 @@ Use when:
 * additional local reasoning capability is useful
 * slower inference is acceptable
 
-It is substantially slower on the GTX 1050 Ti than Qwen3 4B, and slower still while the GPU is out and Ollama is CPU-only.
+It is substantially slower on the GTX 1050 Ti than Qwen3 4B, and slower still when Ollama runs CPU-only.
 
 ### Cloud models
 
@@ -334,9 +333,11 @@ MOTHERLODE has previously exhibited intermittent:
 
 These issues are separate from the NVIDIA driver incident unless evidence establishes otherwise.
 
-**Kernel panics with single-bit memory corruption (2026-09-28 to 2026-10-06).** memtest86+ is clean
+**Kernel panics with single-bit memory corruption (2026-09-28 to 2026-10-09).** memtest86+ is clean
 (7 passes). 32 h of targeted bait (`scripts/diagnostics/bait-crash.sh`) on each pair and on all four
-sticks produced no panic: the crash does not reproduce on demand. Back on 16 GB, watching.
+sticks produced no panic: the crash does not reproduce on demand. Panic #4 (2026-10-09) came on 16 GB
+4 h after a clean bait run. Now testing the good pair in DIMM1+DIMM3. The CPU is a suspect too:
+it survived the PSU failure that killed the original board.
 Read `docs/recovery/2026-10-04-ZFS-PANIC.md` first. After any unexpected reboot run `sudo last-crash`;
 new folders in `/var/lib/systemd/pstore/` are crash dumps. Do not blame ZFS, Docker or Nextcloud for
 these without new evidence.

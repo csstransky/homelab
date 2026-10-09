@@ -1,13 +1,30 @@
 # GPU — GTX 1050 Ti status and return plan
 
-## Status (2026-10-04)
+## Status (2026-10-09): back in and working
+
+The user put the card back in. It has been in every boot since 2026-10-07 21:03 and works:
+
+| Check (2026-10-09) | Result |
+|---|---|
+| `lspci` / `nvidia-smi` | GP107 at `01:00.0`, driver 550.163.01, 34 °C idle |
+| PCIe link | x16 (max x16) |
+| Display | Xorg and the desktop run on the card. The HD 530 iGPU is off while it is installed. |
+| `Xid` / "fallen off the bus" in the kernel log | 0, in all 5 boots since 2026-10-07 |
+| Ollama | Sees it: `inference compute ... library=Vulkan ... NVIDIA GeForce GTX 1050 Ti ... total="4.2 GiB"` |
+| Hard freezes | None since it went back in. The kernel panics in `docs/recovery/2026-10-04-ZFS-PANIC.md` happened both with the card (09-28, 10-04, 10-09) and without it (10-06), so it is not their cause. |
+
+Steps 1–3 of the test procedure below (VRAM, gpu-burn, PSU under combined load) have not been
+run. Run them before calling the card load-tested. The sections below are the history and
+the plan written while the card was out.
+
+### Earlier status (2026-10-04, card out)
 
 | Item | State |
 |---|---|
-| GTX 1050 Ti 4 GB (GP107, `10de:1c82`) | **Removed from the machine. Hardware untested.** |
+| GTX 1050 Ti 4 GB (GP107, `10de:1c82`) | Removed from the machine. Hardware untested. |
 | Display | Intel HD Graphics 530 (CPU iGPU, `8086:1912`), in-kernel `i915`, monitor on the motherboard output |
-| NVIDIA packages | Still installed (driver 550.163.01, proprietary `nvidia-kernel-dkms`). Do not remove them; they are needed when the card returns. |
-| Ollama | Running **CPU-only**. It sees the HD 530 via Vulkan and correctly skips it (`dropping integrated GPU`). qwen3:14b is slow. |
+| NVIDIA packages | Still installed (driver 550.163.01, proprietary `nvidia-kernel-dkms`). Do not remove them. |
+| Ollama | Running CPU-only. It sees the HD 530 via Vulkan and correctly skips it (`dropping integrated GPU`). |
 
 Expected harmless boot errors while the card is out: `NVRM: No NVIDIA GPU found`,
 `Failed to insert module 'nvidia_drm'`, `nvidia-persistenced.service` failed.
