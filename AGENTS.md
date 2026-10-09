@@ -36,7 +36,7 @@ Work one checkpoint at a time and update its status there.
 | OS              | Debian 13 (Trixie)              |
 | Architecture    | x86_64                          |
 | CPU             | Intel Core i7-6700              |
-| RAM             | 16 GiB (4 × 4 GB). **Running on 8 GiB (DIMM2 + DIMM4) since 2026-10-06** during the crash investigation |
+| RAM             | 16 GiB (4 × 4 GB), all four back in since 2026-10-08 (crash investigation: `docs/recovery/2026-10-04-ZFS-PANIC.md`) |
 | GPU             | NVIDIA GeForce GTX 1050 Ti 4 GB — **removed 2026-10-04, untested** (`docs/hardware/GPU.md`) |
 | Display         | Intel HD Graphics 530 (iGPU, `i915`) |
 | Primary user    | `ghost`                         |
@@ -335,7 +335,8 @@ MOTHERLODE has previously exhibited intermittent:
 These issues are separate from the NVIDIA driver incident unless evidence establishes otherwise.
 
 **Kernel panics with single-bit memory corruption (2026-09-28 to 2026-10-06).** memtest86+ is clean
-(7 passes), but panics recur during kernel/ZFS memory activity. Running on two sticks for a 72 h test.
+(7 passes). 32 h of targeted bait (`scripts/diagnostics/bait-crash.sh`) on each pair and on all four
+sticks produced no panic: the crash does not reproduce on demand. Back on 16 GB, watching.
 Read `docs/recovery/2026-10-04-ZFS-PANIC.md` first. After any unexpected reboot run `sudo last-crash`;
 new folders in `/var/lib/systemd/pstore/` are crash dumps. Do not blame ZFS, Docker or Nextcloud for
 these without new evidence.

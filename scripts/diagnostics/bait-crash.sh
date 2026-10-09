@@ -15,12 +15,18 @@
 #   pulse     2 s CPU bursts with random idle gaps (C-state entry/exit, the 10-06 idle-path crash)
 #   compact   memory compaction + drop_caches every 2 min (moves/frees many kernel pages)
 #   scrub     one scrub of tank1tb and tank500gb (reads and checksums every block)
+#   sat       optional (SAT=1): Google stressapptest with all threads pausing every 60 s
+#             (power spikes, the idle/power-transition suspect) plus memory copy and cache tests
+#
+# ARC_MAX=<bytes> sets the high side of arcflap for this run only (default: the current limit).
+# On 16 GB use 8 GiB, the size the ARC had when 10-04 crashed; 3 GiB is restored on exit.
 #
 # Real datasets are only READ. Writes go to tank1tb/baittest and tank500gb/baittest, which
 # are created here and destroyed on exit. A data mismatch is logged as CORRUPTION: it means
 # a bit flipped without a panic.
 #
 # Start:  sudo systemd-run --unit=bait -p TimeoutStopSec=300 -E RUNTIME=28800 /home/ghost/homelab/scripts/diagnostics/bait-crash.sh
+# 16 GB:  sudo systemd-run --unit=bait -p TimeoutStopSec=300 -E RUNTIME=28800 -E ARC_MAX=8589934592 -E SAT=1 /home/ghost/homelab/scripts/diagnostics/bait-crash.sh
 # Stop:   sudo systemctl stop bait          (cleans up, restores zfs_arc_max)
 # Logs:   /home/ghost/bait-logs/  and  journalctl -t bait
 # After an unexpected reboot: sudo last-crash, then rerun this script (it removes leftovers).
@@ -38,6 +44,8 @@ SRC1=tank1tb/Photos      # sent to tank500gb/baittest/recv
 SRC2=tank500gb/Music     # sent to tank1tb/baittest/recv
 ARC_PARAM=/sys/module/zfs/parameters/zfs_arc_max
 ARC_ORIG=$(cat "$ARC_PARAM")
+ARC_MAX=${ARC_MAX:-$ARC_ORIG}
+SAT=${SAT:-0}
 SCRUBBED=""
 
 log() {
@@ -98,7 +106,7 @@ sample() {
 arcflap() {
   while true; do
     echo $((1 << 30)) > "$ARC_PARAM"; log "arcflap: arc_max 1 GiB"; sleep 600
-    echo "$ARC_ORIG" > "$ARC_PARAM"; log "arcflap: arc_max restored"; sleep 600
+    echo "$ARC_MAX" > "$ARC_PARAM"; log "arcflap: arc_max $((ARC_MAX >> 20)) MiB"; sleep 600
   done
 }
 
@@ -172,6 +180,15 @@ acl() {
   done
 }
 
+sat() {
+  # -M MiB of user-space memory; pauses make every core idle at once, then resume together
+  log "sat: stressapptest started"
+  stressapptest -s $((RUNTIME - 300)) -M 1536 -W --cc_test --pause_delay 60 --pause_duration 15 \
+    > "$WORK/stressapptest.txt" 2>&1
+  log "sat: $(grep -o 'Status: .*' "$WORK/stressapptest.txt" | tail -1) ($(grep -c 'Hardware Error' "$WORK/stressapptest.txt") hardware errors)"
+  grep -q 'Hardware Error' "$WORK/stressapptest.txt" && log "CORRUPTION sat: see $WORK/stressapptest.txt"
+}
+
 pulse() {
   while true; do
     setsid -w stress-ng --cpu 8 --timeout 2s --quiet >/dev/null 2>&1   # own session: stress-ng signals its process group
@@ -188,7 +205,7 @@ compact() {
 }
 
 # --- start ---
-log "START runtime=${RUNTIME}s kernel=$(uname -r) mem=$(awk '/MemTotal/{printf "%.1fG", $2/1048576}' /proc/meminfo)"
+log "START runtime=${RUNTIME}s arc_max=$((ARC_MAX >> 20))MiB sat=$SAT kernel=$(uname -r) mem=$(awk '/MemTotal/{printf "%.1fG", $2/1048576}' /proc/meminfo)"
 log "DIMMs: $(dmidecode -t memory | awk -F': ' '/^\tLocator/{l=$2} /^\tPart Number/{if ($2 !~ /Not Specified/) printf "%s=%s ", l, $2}')"
 log "pstore before: $(ls /var/lib/systemd/pstore | tr '\n' ' ')"
 destroy_scratch   # leftovers from a run that crashed
@@ -207,6 +224,7 @@ readall &
 acl &
 pulse &
 compact &
+[ "$SAT" = 1 ] && sat &
 
 end=$(( $(date +%s) + RUNTIME ))
 while [ "$(date +%s)" -lt "$end" ]; do
