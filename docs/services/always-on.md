@@ -113,7 +113,18 @@ xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/power-button-action 
 ```
 
 Then tap the button once: the machine shuts down within a few seconds, with no dialog.
-**Not yet tested with a real press** (both settings verified as above on 2026-10-09).
+
+**Tested 2026-10-09** with `ghost` logged into XFCE (`journalctl -b -1`):
+
+```text
+12:21:30 systemd-logind: Power key pressed short.     <- before the fix: XFCE "Ask" dialog, no shutdown
+12:22:30 systemd-logind: Config file reloaded.        <- fix applied
+12:23:43 systemd-logind: Power key pressed short.
+12:23:43 systemd-logind: The system will power off now!
+12:23:47 systemd-shutdown[1]: Syncing filesystems and block devices.
+```
+
+`last -x` records it as a clean `shutdown` (not `crash`), and the machine booted normally at 12:33.
 
 ## Still to do in BIOS (F10 at POST)
 
