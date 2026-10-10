@@ -11,7 +11,7 @@ The user put the card back in. It has been in every boot since 2026-10-07 21:03 
 | Display | Xorg and the desktop run on the card. The HD 530 iGPU is off while it is installed. |
 | `Xid` / "fallen off the bus" in the kernel log | 0, in all 5 boots since 2026-10-07 |
 | Ollama | Sees it: `inference compute ... library=Vulkan ... NVIDIA GeForce GTX 1050 Ti ... total="4.2 GiB"` |
-| Hard freezes | None since it went back in. The kernel panics in `docs/recovery/2026-10-04-ZFS-PANIC.md` happened both with the card (09-28, 10-04, 10-09) and without it (10-06), so it is not their cause. |
+| Hard freezes | None since it went back in. The kernel panics in `docs/recovery/2026-10-04-ZFS-PANIC.md` happened both with the card (09-28, 10-09) and without it (10-04, 10-06; checked by `NVRM: loading` per boot), so it is not their cause. |
 
 Steps 1–3 of the test procedure below (VRAM, gpu-burn, PSU under combined load) have not been
 run. Run them before calling the card load-tested. The sections below are the history and
