@@ -87,17 +87,20 @@ the day does not start 2.5 h of rendering.
 Why not the Preview Generator app: it is not installed, and its `preview:pre-generate` only sees
 files written *through* Nextcloud, not Samba. The built-in `occ preview:generate` works per file.
 
-### Still to do (needs the user)
+### The `Media/ghost` warning (fixed 2026-10-20)
 
-The `Media/ghost` warning: hide the folder from Nextcloud, like `lost+found` on Other. The agent's
-attempt was blocked by its permission system. Nothing else on any share is named `ghost`
+Hidden from Nextcloud like `lost+found` on Other. Nothing else on any share is named `ghost`
 (checked `oc_filecache` and `find`). Side effect: nothing named `ghost` can be created through Nextcloud.
+(The agent's first attempt was blocked by its permission system; run after the user asked for it.)
 
 ```bash
 OCC='sudo docker exec --user www-data nextcloud-aio-nextcloud php occ'
 $OCC config:system:set forbidden_filenames 2 --value=ghost   # index 0 .htaccess, 1 lost+found
-$OCC files:scan --path="/admin/files/Media"
+$OCC files:scan --path="/admin/files/Media"                  # 4 folders, 1 updated, 1 removed, 0 errors
 ```
+
+Afterwards the Media root's size went from -1 to 0 and no log entries appeared in the next cron run
+(before: 2 warnings every 5 minutes).
 
 ### Considered: smaller previews (`preview_max_x/y` 2048 → 1024)
 
@@ -113,6 +116,7 @@ render time, at the cost of blurrier photos in the viewer on large screens. Not 
 | `occ preview:generate` on a missing file | exit code 1, so failures are detected |
 | `--dry-run` | 17,885 missing (table above), 0 known failures |
 | 60 s test run | `Made previews for 55 files, 0 failed, in 60 s` |
+| `Media/ghost` hidden | next cron run (18:40 UTC +5 min): 0 log entries; Media root size 0 (was -1) |
 | Timer | enabled, next run Wed 2026-10-21 04:00; first full run started by hand 2026-10-20 14:29 |
 
 ## Preventing it

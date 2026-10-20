@@ -95,7 +95,9 @@ attached to Nextcloud with the **External Storage** app ("Local" type):
   `nextcloud-generate-missing-previews --dry-run` counts them
   (`docs/recovery/2026-10-20-NEXTCLOUD-PICTURES-FREEZE.md`).
 - `/media/ghost` is where XFCE auto-mounts USB drives. It is left without Nextcloud permissions, so
-  USB drives don't appear in Nextcloud.
+  USB drives don't appear in Nextcloud. Since 2026-10-20 it is also hidden with
+  `forbidden_filenames 2 --value=ghost`; before, every background scan failed on it
+  (`opendir(/srv/nas/Media/ghost): Permission denied`, "unscanned files").
 
 ### Permissions (POSIX ACLs)
 
