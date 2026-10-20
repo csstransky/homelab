@@ -89,6 +89,11 @@ attached to Nextcloud with the **External Storage** app ("Local" type):
 - Check-on-access updates the file index, **not previews**: a file *replaced* over Samba keeps its
   old thumbnail in Nextcloud. `nextcloud-fix-stale-previews.timer` clears those every 15 minutes; run
   `nextcloud-fix-stale-previews` to do it now (`docs/recovery/2026-10-08-STALE-NEXTCLOUD-PREVIEWS.md`).
+- Nextcloud makes a thumbnail only when someone views the file, so files added over Samba have none
+  and the first visit to a big folder renders hundreds at once (Pictures froze, 2026-10-20).
+  `nextcloud-generate-missing-previews.timer` renders the missing ones nightly at 04:00 (2.5 h max);
+  `nextcloud-generate-missing-previews --dry-run` counts them
+  (`docs/recovery/2026-10-20-NEXTCLOUD-PICTURES-FREEZE.md`).
 - `/media/ghost` is where XFCE auto-mounts USB drives. It is left without Nextcloud permissions, so
   USB drives don't appear in Nextcloud.
 
@@ -213,6 +218,7 @@ $OCC status
 $OCC files_external:list
 $OCC files:scan admin                 # pick up changes made outside Nextcloud (normally automatic)
 nextcloud-fix-stale-previews          # old thumbnail after replacing a file outside Nextcloud (scripts/maintenance/nextcloud-fix-stale-previews.sh)
+nextcloud-generate-missing-previews --dry-run   # thumbnails not made yet, per share (nightly timer makes them)
 $OCC twofactorauth:state admin
 $OCC security:bruteforce:attempts <ip>
 $OCC security:bruteforce:reset <ip>

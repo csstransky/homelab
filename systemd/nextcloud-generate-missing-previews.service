@@ -1,0 +1,11 @@
+[Unit]
+Description=Make missing Nextcloud thumbnails so big folders open quickly
+Documentation=file:///home/ghost/homelab/docs/recovery/2026-10-20-NEXTCLOUD-PICTURES-FREEZE.md
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/nextcloud-generate-missing-previews
+Nice=10
+IOSchedulingClass=idle

@@ -1,0 +1,8 @@
+[Unit]
+Description=Make missing Nextcloud thumbnails nightly at 04:00 (after the SSD backup and the ZFS copy)
+
+[Timer]
+OnCalendar=*-*-* 04:00:00
+
+[Install]
+WantedBy=timers.target
