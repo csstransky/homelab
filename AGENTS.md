@@ -36,7 +36,7 @@ Work one checkpoint at a time and update its status there.
 | OS              | Debian 13 (Trixie)              |
 | Architecture    | x86_64                          |
 | CPU             | Intel Core i7-6700              |
-| RAM             | 8 GiB (2 × 4 GB in DIMM1+DIMM3) during the slot test from 2026-10-09; normally 16 GiB (crash investigation: `docs/recovery/2026-10-04-ZFS-PANIC.md`) |
+| RAM             | 8 GiB: pair B (s/n EC38390C + ED38390D) in DIMM2+DIMM4 since 2026-10-23 (test 6); normally 16 GiB (crash investigation: `docs/recovery/2026-10-04-ZFS-PANIC.md`) |
 | GPU             | NVIDIA GeForce GTX 1050 Ti 4 GB — back in since 2026-10-07, working; load tests not run (`docs/hardware/GPU.md`) |
 | Display         | GTX 1050 Ti (the HD 530 iGPU is off while the card is installed) |
 | Primary user    | `ghost`                         |
@@ -336,7 +336,7 @@ These issues are separate from the NVIDIA driver incident unless evidence establ
 **Kernel panics with single-bit memory corruption (2026-09-28 to 2026-10-09).** memtest86+ is clean
 (7 passes). 32 h of targeted bait (`scripts/diagnostics/bait-crash.sh`) on each pair and on all four
 sticks produced no panic: the crash does not reproduce on demand. Panic #4 (2026-10-09) came on 16 GB
-4 h after a clean bait run. Now testing the good pair in DIMM1+DIMM3. The CPU is a suspect too:
+4 h after a clean bait run. Pair A then ran 14 days clean in DIMM1+DIMM3; pair B in DIMM2+DIMM4 since 2026-10-23. The CPU is a suspect too:
 it survived the PSU failure that killed the original board.
 Read `docs/recovery/2026-10-04-ZFS-PANIC.md` first. After any unexpected reboot run `sudo last-crash`;
 new folders in `/var/lib/systemd/pstore/` are crash dumps. Do not blame ZFS, Docker or Nextcloud for
