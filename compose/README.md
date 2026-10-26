@@ -36,5 +36,5 @@ services:
 
 | App | Folder | Data | Ports | Checkpoint | Status |
 |---|---|---|---|---|---|
-| Jellyfin | `compose/jellyfin/` | `/tank1tb/Apps/jellyfin` | 8096 | 7 | planned |
+| Jellyfin | `compose/jellyfin/` | `/tank1tb/Apps/jellyfin` | 8096, 7359/udp (host network) | 7 | running 2026-10-25 |
 | Nextcloud AIO | `nextcloud/` | `/tank1tb/Nextcloud` + volumes in `/tank1tb/Apps/docker-volumes` | 8080 (LAN), 11000 (local, Funnel) | 8 | running 2026-10-06 |

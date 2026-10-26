@@ -1,0 +1,16 @@
+# Jellyfin: movies and TV for the LG TV (Checkpoint 7). Doc: docs/services/jellyfin.md
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:12.3.20261023-013714   # pinned; upgrade on purpose
+    container_name: jellyfin
+    restart: unless-stopped
+    user: "1000:1001"                     # ghost:nas, so it can read the nas-group media folders
+    network_mode: host                    # 8096 web/app; 7359/udp lets the TV app find the server
+    environment:
+      - JELLYFIN_PublishedServerUrl=http://192.168.1.59:8096
+    volumes:
+      - /tank1tb/Apps/jellyfin/config:/config
+      - /tank1tb/Apps/jellyfin/cache:/cache
+      - /media/Movies:/media/Movies:ro
+      - /media/TV:/media/TV:ro
+      - /media/Music:/media/Music:ro

@@ -79,24 +79,29 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 |---|---|---|---|---|
 | 0 | Source-of-truth reconciliation + this file | ✅ done | 2026-09-28 | this file |
 | 1 | Debian foundation | ✅ done (Windows SSH test pending) | 2026-09-28 | `docs/hardware/MOTHERLODE.md`, `docs/architecture/network.md` |
-| 2 | ZFS: install + import existing pools + `/other` | 🟨 imported, reboot check pending | | `zfs/README.md`, `zfs/zfs-explained.html` |
-| 3 | Storage protection: SMART, scrubs, snapshots, replication | 🟨 running and tested; first scheduled SMART test 2026-10-11 | | `zfs/BACKUPS.md`, `zfs/backups-explained.html` |
+| 2 | ZFS: install + import existing pools + `/other` | ✅ done (back after reboots 10-09, 10-23) | 2026-10-25 | `zfs/README.md`, `zfs/zfs-explained.html` |
+| 3 | Storage protection: SMART, scrubs, snapshots, replication | ✅ done (scheduled SMART tests passing) | 2026-10-25 | `zfs/BACKUPS.md`, `zfs/backups-explained.html` |
 | 4 | Samba (Windows LAN access) | ✅ done | 2026-10-04 | `samba/README.md`, `samba/samba-explained.html` |
 | 5 | Docker foundation | ✅ done (each app adds its own folder) | 2026-10-04 | `docs/services/docker.md`, `compose/README.md` |
 | 6 | Tailscale (remote access) | ✅ done; Funnel on for Nextcloud | 2026-10-04 | `docs/services/tailscale.md` |
-| 7 | Jellyfin (movies on the LG TV) | ⬜ | | `compose/jellyfin/` |
+| 7 | Jellyfin (movies on the LG TV) | 🟨 running; setup wizard + TV test pending | | `compose/jellyfin/`, `docs/services/jellyfin.md` |
+| 7b | Download automation ("pirate box"): request → download → Jellyfin | ⬜ | | `compose/downloads/` |
 | 8 | Nextcloud AIO on `/tank1tb/Nextcloud` | ✅ done, public via Funnel, 2FA | 2026-10-06 | `docs/services/nextcloud.md`, `nextcloud/nextcloud-explained.html` |
 | 9 | Music: NAS library → Music Assistant / Sonos, YouTube audio | ⬜ | | `docs/services/music.md` |
 | 10 | Reboot / autostart / recovery validation | ⬜ | | `docs/recovery/BOOT-RECOVERY.md` |
 | 11 | Backups off the NAS + restore test | ⬜ | | `docs/recovery/BACKUP-RESTORE.md` |
-| 12 | AdGuard Home DNS filtering | ⬜ | | `compose/adguard/` |
+| 12 | AdGuard Home DNS: network-wide ad blocking + LG TV tracking block | ⬜ | | `compose/adguard/` |
 | 13 | Monitoring + alerts | ⬜ | | `docs/services/monitoring.md` |
 | 14 | Ubiquiti VLAN segmentation (optional) | ⬜ | | `docs/architecture/network.md` |
 
 **Open items outside the checkpoints**
 - **Hardware stability (top priority):** kernel panics with single-bit corruption; memtest86+ clean.
-  Running on 2 of 4 sticks since 2026-10-06 21:15; bar is 72 h without a panic
-  (`docs/recovery/2026-10-04-ZFS-PANIC.md`). Keep Windows originals until then.
+  Pair A was clean 14 days (2026-10-09 → 10-23); test 6, pair B alone, running since 2026-10-23 18:18
+  (`docs/recovery/2026-10-04-ZFS-PANIC.md`). Keep Windows originals until the cause is found.
+- **Home Assistant remote access (research first):** the user's requirement (2026-10-25) is that the
+  phone app just works away from home **without turning Tailscale on**. That rules out Tailscale
+  Serve / the Tailscale add-on alone; candidates are Nabu Casa or a public Funnel, and the
+  Funnel-only-for-Nextcloud rule in `AGENTS.md` must be revisited deliberately, not bypassed.
 - **TODO when 16 GB is back:** revisit Ollama models (`qwen3:14b` does not fit in 8 GB) and raise the ZFS ARC cap from 3 GiB (`zfs/README.md`).
 - Toshiba DT01ACA100 in `tank1tb`: long SMART test fails; replace (`zfs/BACKUPS.md`).
 - Delete `/var/lib/docker/volumes.ssd-old-2026-10-06` after a few days of Docker on ZFS.
@@ -151,8 +156,11 @@ Steps:
 8. Write `zfs/README.md`: pools, by-id members, datasets, properties, import procedure.
 
 Done when:
-- [ ] All three pools ONLINE with zero errors after a reboot, mounted where expected.
-- [ ] `/other` mounted from fstab after reboot.
+- [x] All three pools ONLINE with zero errors after a reboot, mounted where expected.
+- [x] `/other` mounted from fstab after reboot.
+
+Closed 2026-10-25: after the reboots of 2026-10-09 and 2026-10-23, `zpool status -x` = all pools
+healthy, `/other` mounted from fstab, `eno1` back on 192.168.1.59.
 - [x] `zfs/README.md` committed with the exact by-id → pool mapping.
 
 Notes 2026-10-04:
@@ -189,7 +197,7 @@ Steps:
 6. Commit sanitized sanoid config and timer units under `zfs/` and `systemd/`.
 
 Done when:
-- [ ] `smartctl -l selftest` shows a completed test scheduled by smartd. (First one: Sunday 2026-10-11 02:00.)
+- [x] `smartctl -l selftest` shows a completed test scheduled by smartd. (2026-10-25: latest short test "Completed without error" on all five HDDs.)
 - [x] Scrub timers enabled and one manual scrub of each pool completes with 0 errors.
 - [x] Snapshots appear on schedule; a test file restored from a snapshot.
 - [x] A replicated dataset exists on `tank500gb` and a second syncoid run is incremental.
@@ -304,6 +312,44 @@ Done when:
 - A movie plays on the TV from `/media/Movies` without transcoding.
 - Compose file committed; Jellyfin restarts on reboot.
 
+Notes 2026-10-25:
+- `compose/jellyfin/compose.yaml`: `jellyfin/jellyfin:12.3.20261023-013714`, host networking (8096 +
+  7359/udp discovery), runs as `1000:1001` (ghost:nas), config/cache in `/tank1tb/Apps/jellyfin`,
+  `/media/{Movies,TV,Music}` read-only. CPU only for now: no `nvidia-container-toolkit` until a real
+  file shows the TV can't direct-play it.
+- Healthy on `127.0.0.1:8096` and on the tailnet (`100.111.72.91:8096`).
+- Test file: Big Buck Bunny (Blender Foundation, CC BY 3.0), 1080p H.264 MP4, in `/media/Movies/Big Buck Bunny (2008)/`.
+- Left for the user: setup wizard (admin password), add the libraries, LG TV app test.
+
+## Checkpoint 7b — Download automation ("pirate box")
+
+Added 2026-10-25 at the user's request. Goal: pick a movie or show from a phone/TV-friendly page,
+and it downloads by itself and shows up in Jellyfin.
+
+The usual community stack (all Docker, all free software):
+
+| Piece | Job |
+|---|---|
+| Jellyseerr | The "storefront": search and request movies/shows; Jellyfin login |
+| Radarr / Sonarr | Movies / TV: find releases, send to the downloader, rename into `/media/Movies`, `/media/TV` |
+| Prowlarr | One place to add indexers (the "links"); feeds Radarr and Sonarr |
+| qBittorrent | The downloader |
+| Gluetun | VPN container; qBittorrent's only network, so it cannot leak if the VPN drops |
+| Bazarr (optional) | Subtitles |
+
+Decisions for the user before building:
+1. VPN provider (one that allows torrenting and port forwarding). Without a VPN the ISP sees the
+   torrent traffic and may forward copyright notices; downloading copyrighted films you don't own
+   is infringement, and that risk is the user's call.
+2. Which indexers to add in Prowlarr (user's choice; not recorded in git).
+
+Design notes:
+- Downloads go to `/media/Downloads` on the **same `media` pool** as `/media/Movies` and `/media/TV`,
+  so Radarr/Sonarr hardlink instead of copying (no double disk use while seeding).
+- App configs in `/tank1tb/Apps/<app>`; VPN credentials only in `compose/downloads/.env`.
+- Web UIs on the LAN/tailnet only. Never Funnel.
+- RAM: about 1–1.5 GB for the whole stack; fine on 8 GB alongside Nextcloud, but watch it.
+
 ## Checkpoint 8 — Nextcloud AIO on `/tank1tb/Nextcloud`
 
 Build Plan phase 6; Rebuild Report sections 37–39; existing `nextcloud/compose.yaml`.
@@ -379,6 +425,17 @@ Steps:
 
 Build Plan phase 9. Static LAN address via Ubiquiti reservation; DHCP advertises AdGuard as DNS;
 conservative blocklists; verify a client resolves through it.
+
+User goals (2026-10-25): no ads on any device on the network, and the **LG TV must not phone home**
+to LG (ACR "Live Plus" viewing tracking, ads, telemetry). Plan:
+- Block LG's ad/telemetry domains (e.g. the `lgtvsdp.com`, `lgsmartad.com`, `lgappstv.com`
+  families; verify the current list before adding) while checking the TV still gets firmware
+  updates and the Jellyfin app keeps working.
+- Also turn off Live Plus / viewing information / ad tracking in the TV's own settings; DNS
+  blocking is the backup, not the only control.
+- Stop devices bypassing it: many TVs and phones use hard-coded DNS (8.8.8.8) or DNS-over-HTTPS.
+  A UniFi firewall rule redirecting/blocking outbound port 53 from the TV covers the first case.
+- A second resolver (or fallback) so the whole network doesn't lose DNS when MOTHERLODE reboots.
 
 ## Checkpoint 13 — Monitoring and alerts
 
