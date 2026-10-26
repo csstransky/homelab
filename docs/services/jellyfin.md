@@ -1,6 +1,6 @@
 # Jellyfin (Checkpoint 7)
 
-**Running since:** 2026-10-25. Setup wizard and TV test still to do.
+**Running since:** 2026-10-25. Wizard done and LG TV direct-play verified 2026-10-26.
 
 ## What is running
 
@@ -34,6 +34,14 @@ Test file: `/media/Movies/Big Buck Bunny (2008)/` (Blender Foundation, CC BY 3.0
 4. LG TV: Content Store → install **Jellyfin** → it should find MOTHERLODE, or enter `http://192.168.1.59:8096`.
 5. Play Big Buck Bunny. Dashboard → Activity should say **Direct Play**, not Transcode.
 
+## Watching away from home
+
+Tailscale on the device, then the Jellyfin app with server `http://motherlode.tailb6c0f2.ts.net:8096`.
+Works on phones, tablets, laptops and Android/Google TV sticks (they run Tailscale); a hotel TV
+cannot. Jellyfin is **not** on the Funnel and must not be (rule in `AGENTS.md`). Remote quality is
+capped by the home upload speed: set Dashboard → Playback → "Internet streaming bitrate limit"
+below it, and Jellyfin transcodes down to fit (which is where the GPU helps).
+
 ## Transcoding decision
 
 The LG TV direct-plays H.264/H.265 in MP4/MKV, so most files need no transcoding. If a real file
@@ -58,4 +66,5 @@ curl -s http://127.0.0.1:8096/health          # "Healthy"
 | `/health` on 127.0.0.1 | `Healthy` |
 | `/health` on the tailnet IP | HTTP 200 |
 | Discovery port | 7359/udp listening |
+| LG TV, Jellyfin app, Big Buck Bunny (2026-10-26) | plays; Direct Play (no ffmpeg transcode log) |
 | Startup log | only EF Core "rebuild pending" migration warnings on the fresh database; no errors |

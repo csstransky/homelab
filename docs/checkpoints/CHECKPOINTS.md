@@ -84,7 +84,7 @@ Current drive letters (they WILL change between boots; by-id is authoritative):
 | 4 | Samba (Windows LAN access) | ✅ done | 2026-10-04 | `samba/README.md`, `samba/samba-explained.html` |
 | 5 | Docker foundation | ✅ done (each app adds its own folder) | 2026-10-04 | `docs/services/docker.md`, `compose/README.md` |
 | 6 | Tailscale (remote access) | ✅ done; Funnel on for Nextcloud | 2026-10-04 | `docs/services/tailscale.md` |
-| 7 | Jellyfin (movies on the LG TV) | 🟨 running; setup wizard + TV test pending | | `compose/jellyfin/`, `docs/services/jellyfin.md` |
+| 7 | Jellyfin (movies on the LG TV) | ✅ done; TV direct-plays | 2026-10-26 | `compose/jellyfin/`, `docs/services/jellyfin.md` |
 | 7b | Download automation ("pirate box"): request → download → Jellyfin | ⬜ | | `compose/downloads/` |
 | 8 | Nextcloud AIO on `/tank1tb/Nextcloud` | ✅ done, public via Funnel, 2FA | 2026-10-06 | `docs/services/nextcloud.md`, `nextcloud/nextcloud-explained.html` |
 | 9 | Music: NAS library → Music Assistant / Sonos, YouTube audio | ⬜ | | `docs/services/music.md` |
@@ -319,7 +319,13 @@ Notes 2026-10-25:
   file shows the TV can't direct-play it.
 - Healthy on `127.0.0.1:8096` and on the tailnet (`100.111.72.91:8096`).
 - Test file: Big Buck Bunny (Blender Foundation, CC BY 3.0), 1080p H.264 MP4, in `/media/Movies/Big Buck Bunny (2008)/`.
-- Left for the user: setup wizard (admin password), add the libraries, LG TV app test.
+- 2026-10-26: user finished the wizard (admin `ghost`, libraries Movies and Shows) and played Big
+  Buck Bunny on the LG TV's Jellyfin app with no issues. Direct Play: the log shows no ffmpeg
+  transcode for the session.
+- Settings review (open): "save artwork into media folders" is on, but the media mounts are
+  read-only, so every save logs `Read-only file system` and falls back to `/config/metadata`. Turn it
+  off. Trickplay (seek-bar thumbnails) is off; the user wants it. NVENC/NVDEC would make it and
+  remote transcoding much faster (`docs/services/jellyfin.md`).
 
 ## Checkpoint 7b — Download automation ("pirate box")
 
