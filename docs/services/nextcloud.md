@@ -144,6 +144,8 @@ Nextcloud names a Local storage after its path (`local::/srv/nas/Old/`), so chan
 `occ` makes a new storage: everything is re-indexed and favourites are lost (see the cleanup below).
 Rename the storage row instead, and file ids, favourites and previews stay. Tested 2026-10-09:
 `files:scan` afterwards found 0 new, 0 removed, and the folder kept its file id and 11 favourites.
+The 2026-10-09 run missed `mount_point_hash`, which broke Pictures in the web UI for 18 days
+(`docs/recovery/2026-10-27-NEXTCLOUD-PICTURES-404.md`); the steps below now include it.
 
 ```bash
 # stop what touches it; snapshot the Nextcloud database (Docker volumes) for undo
@@ -168,8 +170,13 @@ update oc_mounts set mount_point = '/admin/files/New/' where mount_point = '/adm
 commit;
 SQL
 sudo docker start nextcloud-aio-nextcloud      # also makes the container see the new bind mount
+# Nextcloud 34 finds a mount by xxh128(mount_point): update the hash too, or the folder 404s (2026-10-27)
+NEW=$(sudo docker exec nextcloud-aio-nextcloud php -r "echo hash('xxh128', '/admin/files/New/');")
+sudo docker exec nextcloud-aio-database psql -U oc_nextcloud -d nextcloud_database -c \
+  "update oc_mounts set mount_point_hash = '$NEW' where mount_point = '/admin/files/New/';"
 sudo docker exec --user www-data nextcloud-aio-nextcloud php occ maintenance:mode --off
 sudo docker exec --user www-data nextcloud-aio-nextcloud php occ files:scan --path="/admin/files/New"   # expect 0 new, 0 removed
+nextcloud-check-mount-hashes                   # expect every row ok
 sudo systemctl start sanoid.timer syncoid-backup-tank1tb-to-tank500gb.timer nextcloud-fix-stale-previews.timer
 ```
 
@@ -221,6 +228,7 @@ $OCC files_external:list
 $OCC files:scan admin                 # pick up changes made outside Nextcloud (normally automatic)
 nextcloud-fix-stale-previews          # old thumbnail after replacing a file outside Nextcloud (scripts/maintenance/nextcloud-fix-stale-previews.sh)
 nextcloud-generate-missing-previews --dry-run   # thumbnails not made yet, per share (nightly timer makes them)
+nextcloud-check-mount-hashes          # a share 404s in the web UI but occ sees it (scripts/diagnostics/nextcloud-check-mount-hashes.sh)
 $OCC twofactorauth:state admin
 $OCC security:bruteforce:attempts <ip>
 $OCC security:bruteforce:reset <ip>

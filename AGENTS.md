@@ -360,6 +360,7 @@ docs/recovery/2026-10-04-ZFS-PANIC.md
 docs/recovery/SSD-BACKUP.md
 docs/recovery/2026-10-08-STALE-NEXTCLOUD-PREVIEWS.md
 docs/recovery/2026-10-20-NEXTCLOUD-PICTURES-FREEZE.md
+docs/recovery/2026-10-27-NEXTCLOUD-PICTURES-404.md
 ```
 
 Never add Tailscale Funnel to anything but Nextcloud, never port-forward on the router, and never

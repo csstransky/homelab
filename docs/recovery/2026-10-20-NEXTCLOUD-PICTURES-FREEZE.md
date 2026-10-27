@@ -4,7 +4,9 @@
 folder**, and only **821 of ~18,000** photos, videos and PDFs had a thumbnail. Opening Pictures made
 the server render hundreds of thumbnails on the spot, on 8 GB of RAM (slot test) already using swap.
 Fix: `nextcloud-generate-missing-previews.timer` renders the missing ones every night.
-Status: **probable cause, not yet proven** (the freeze itself was not reproduced; see Diagnosis 5).
+Status: **not the cause.** With every thumbnail made, Pictures still did not open. The real cause was a
+stale mount hash left by the Photos → Pictures rename: `2026-10-27-NEXTCLOUD-PICTURES-404.md`.
+The nightly thumbnail job is still worth keeping (big folders and the photo viewer open faster).
 
 ## Symptoms
 
