@@ -91,7 +91,8 @@ Compute hashes with PHP rather than typing them: the first attempt failed on a m
 
 ## Loose ends
 
-- The Android app requested `/Photos/` 2,311 times (audit log). Probably auto-upload or a saved
-  folder still pointing at the old name; check it in the app.
+- The Android app requested `/Photos/` 2,311 times (audit log), but the last one was 2026-10-09, the
+  day of the rename: history, not an ongoing problem. Auto-upload now goes into Pictures
+  (`docs/services/nextcloud.md`, "Phone auto-upload").
 - While investigating, the agent turned on debug logging for admin only
   (`log.condition users 0 admin`) and removed it the same day.

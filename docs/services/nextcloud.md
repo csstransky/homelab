@@ -184,6 +184,42 @@ Windows: `net use X: /delete`, then map the new share name. A mount hides whatev
 path in admin's own files (`/tank1tb/Nextcloud/admin/files/`, e.g. Nextcloud's sample folders), so
 after a rename those can appear next to the new name.
 
+## Phone auto-upload (OnePlus 13, set up 2026-10-27)
+
+The Nextcloud Android app backs up the phone's photo folders **into Pictures**, so they are on the
+Samba share, in the hourly snapshots and in the nightly copy like everything else. User decision:
+not the app's default `/InstantUpload` (Nextcloud-only, invisible to Windows), and not one flat folder.
+
+| Phone folder | Remote folder |
+|---|---|
+| An album that matches a Pictures folder (Netherlands 2026, Cape Cod 2026, car albums ...) | that folder, e.g. `/Pictures/Netherlands 2026`, `/Pictures/1967 Ford F250/TODO` |
+| Everything else (Camera, Screenshots, Download, WhatsApp, Telegram ...) | `/Pictures/OnePlus13 Backup Upload` (the app adds a subfolder per phone folder) |
+
+Settings per folder (app → Settings → Auto upload → ⋮ → Configure): original file **kept in original
+folder** ("move to app folder" only moves the photo on the phone, into the app's own storage);
+if the file exists: **skip** or keep both, never overwrite (Samba copies may be edited versions).
+
+First run, 2026-10-27/28: **15,360 files, ~79 GB**; Pictures went from 41 to 120 GB. The 114 files that
+already existed (copied over Samba before) kept their contents (compared with the 2026-10-27 daily
+snapshot); the app only flagged them as "conflict". The thumbnail job kept up (20 missing afterwards).
+The 108 files the app had put in `/InstantUpload` before this were moved to `OnePlus13 Backup Upload`
+(snapshots `tank1tb/{Nextcloud,Pictures}@pre-instantupload-move`).
+
+Things learned:
+
+- **Overlapping entries upload twice.** The app treats a phone folder and its subfolders as separate
+  entries. An entry for a parent folder (e.g. the phone's `Pictures`) also uploads its subfolders, so
+  `OnePlus13 Backup Upload/Screenshots` and `OnePlus13 Backup Upload/Pictures/Screenshots` hold the same
+  1,852 screenshots (same for Telegram, Messages, ChatGPT, Slack, WhatsApp, Messenger, Reolink). An entry
+  still pointing at `/InstantUpload` sent the Ford album there as well (24 files, identical to the copies in
+  `Pictures/1967 Ford F250/TODO`). Give each phone folder exactly one enabled entry.
+- **Big uploads on a corporate network fail** ("SSL initialization failed", "error while waiting for the
+  server"): the office Wi-Fi cut connections during a burst of hundreds of uploads; small batches went
+  through. Nextcloud logged nothing (the requests never reached it). Let them retry at home; the app keeps
+  failed ones in Uploads → "Failed/pending restart" (▷ retries).
+- Find where the phone uploaded what: the audit log records each `PUT`/`MKCOL` with its path
+  (`docker exec nextcloud-aio-nextcloud grep '"method":"PUT"' /var/www/html/data/audit.log`).
+
 ## Security (the login page is public)
 
 | Layer | Setting | Checked |
