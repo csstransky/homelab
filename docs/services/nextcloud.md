@@ -207,12 +207,18 @@ The 108 files the app had put in `/InstantUpload` before this were moved to `One
 
 Things learned:
 
-- **Overlapping entries upload twice.** The app treats a phone folder and its subfolders as separate
-  entries. An entry for a parent folder (e.g. the phone's `Pictures`) also uploads its subfolders, so
-  `OnePlus13 Backup Upload/Screenshots` and `OnePlus13 Backup Upload/Pictures/Screenshots` hold the same
-  1,852 screenshots (same for Telegram, Messages, ChatGPT, Slack, WhatsApp, Messenger, Reolink). An entry
-  still pointing at `/InstantUpload` sent the Ford album there as well (24 files, identical to the copies in
-  `Pictures/1967 Ford F250/TODO`). Give each phone folder exactly one enabled entry.
+- **A folder entry includes its subfolders, so overlapping entries upload twice.** The phone's
+  `/storage/emulated/0/Pictures` entry (→ `OnePlus13 Backup Upload/Pictures/`) also uploaded
+  `Pictures/Screenshots`, `Telegram`, `Messages`, ... which have their own entries (→
+  `OnePlus13 Backup Upload/Screenshots/` ...). Result: 2,427 identical copies (2.06 GB) in
+  `OnePlus13 Backup Upload/Pictures/<subfolder>/`, all verified byte for byte and deleted 2026-11-01
+  (snapshot `tank1tb/Pictures@pre-duplicate-cleanup`); the 467 loose files of phone `Pictures` stayed.
+  New screenshots etc. will be doubled again while both entries are on: turn off either the parent
+  `Pictures` entry or the subfolder entries.
+- **Uploads into `/InstantUpload` continued** for the Ford album (48 files, all identical to the copies in
+  `Pictures/1967 Ford F250`) although no entry pointed there; restarting the app is the suspected fix.
+  `/InstantUpload` was deleted 2026-11-01 (snapshot `tank1tb/Nextcloud@pre-instantupload-delete`). If it
+  comes back, an old entry is still active in the app.
 - **Big uploads on a corporate network fail** ("SSL initialization failed", "error while waiting for the
   server"): the office Wi-Fi cut connections during a burst of hundreds of uploads; small batches went
   through. Nextcloud logged nothing (the requests never reached it). Let them retry at home; the app keeps
